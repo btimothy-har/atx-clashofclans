@@ -718,9 +718,7 @@ class ClashOfClans(commands.Cog):
 
             for member in clan.members:
                 member = Member(ctx,member['tag'])
-                if member.atxWar['registrationStatus'] == 'Yes'
-                    and member.homeVillage['league']['leagueDetails'] != None
-                    and member.atxWar['missedAttacks'] < 6:
+                if member.atxWar['registrationStatus'] == 'Yes' and member.homeVillage['league']['leagueDetails'] != None and member.atxWar['missedAttacks'] < 6:
                     war_roster.append(member)
         
             #sort by war priority
