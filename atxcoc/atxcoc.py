@@ -54,8 +54,6 @@ war_description = {
     "classic":"<:ClanWars:825753092230086708>"
 }
 
-#rebase
-
 async def clash_embed(ctx, title=None, message=None, url=None, show_author=True, color=None):
     if not title:
         title = ""
@@ -720,7 +718,9 @@ class ClashOfClans(commands.Cog):
 
             for member in clan.members:
                 member = Member(ctx,member['tag'])
-                if member.atxWar['registrationStatus'] == 'Yes':
+                if member.atxWar['registrationStatus'] == 'Yes'
+                    and member.homeVillage['league']['leagueDetails'] != None
+                    and member.atxWar['missedAttacks'] < 6:
                     war_roster.append(member)
         
             #sort by war priority
