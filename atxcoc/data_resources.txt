@@ -1,0 +1,15 @@
+{
+  "dataFiles": {
+    "configdir":"*",
+    "seasons":"*",
+    "players":"*",
+    "warlog":"*",
+    "clangames":"*",
+    "cwlroster":"*",
+    "challengepass":"*"
+	},
+  "apiKeys": {
+    "Url": "https://api.clashofclans.com/v1",
+    "Key": "*"
+  }
+}
