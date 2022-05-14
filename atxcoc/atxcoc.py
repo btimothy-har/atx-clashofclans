@@ -487,9 +487,10 @@ class ClashOfClans(commands.Cog):
                                 lootDarkElixir = "max"                               
 
                         embed.add_field(
-                            name=f"**Current Season in {player.clan['clan_info']['name']}**",
+                            name=f"**Current Season with Ataraxy COC**",
                                 value=
-                                    f":stopwatch: Last updated: {lastseen_text}ago"+
+                                    f":stopwatch: Last updated: {lastseen_text}ago\n"+
+                                    f":calendar: Spent in ATX Clans: {int(player.atxLastSeen['timer']/86400)} days"+
                                     "\n**Donations**"+
                                     f"\n<:donated:825574412589858886> {player.atxDonations['sent']['season']}\u3000<:received:825574507045584916> {player.atxDonations['received']['season']}"+
                                     "\n**Loot**"+
@@ -506,16 +507,22 @@ class ClashOfClans(commands.Cog):
                         if len(player.atxWarLog)>0:
                             latest_wars = ''
 
-                            for war in player.atxWarLog[::-1][0:3]:
-                                war_header = f"**{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
-                                war_attacks = f"\n\u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
-                                war_defense = f"\n\u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%\n\u200b"
-                                latest_wars += war_header + war_attacks + war_defense
-
-                            embed.add_field(
-                                name=f"**Recent Wars in {player.clan['clan_info']['name']}**",
-                                value=latest_wars+"\u200b",
-                                inline=False)
+                            for clan in player.atxLastSeen['clans']:
+                                war_ct = 0
+                                for war in player.atxWarLog[::-1][0:3]:
+                                    if clan == war['clan']['tag']:
+                                        war_ct += 1
+                                        clan_name = war['clan']['name']                                        
+                                        war_header = f"**{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
+                                        war_attacks = f"\n\u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
+                                        war_defense = f"\n\u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%\n\u200b"
+                                        latest_wars += war_header + war_attacks + war_defense
+                                
+                                if war_ct > 0:
+                                    embed.add_field(
+                                        name=f"**Recent Wars in {clan_name}**",
+                                        value=latest_wars+"\u200b",
+                                        inline=False)
                 
                     embedpaged.append(embed)          
             
