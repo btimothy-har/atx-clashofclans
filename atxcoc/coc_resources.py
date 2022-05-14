@@ -523,6 +523,7 @@ class Member(Player):
             playerJsonExtract = playerJson['current'][self.tag]
         except:
             self.atxMemberStatus = "notFound"
+            self.atxRank = "none"
             self.atxLastUpdated = 0
             self.atxLastSeen = {
                 "clans": [],
@@ -572,6 +573,7 @@ class Member(Player):
             self.atxWarLog = []
         else:
             self.atxMemberStatus = playerJsonExtract.get('memberStatus','notFound')
+            self.atxRank = playerJsonExtract.get('rank','none')
             self.atxLastUpdated = playerJsonExtract.get('lastUpdated',0)
             self.atxLastSeen = playerJsonExtract.get('lastSeen',{"clans":[],"timer":0})
             self.atxDonations = playerJsonExtract.get('donations',{"received": {"season": 0,"lastUpdate": 0},"sent": {"season": 0,"lastUpdate": 0}})
@@ -585,6 +587,15 @@ class Member(Player):
         if self.atxMemberStatus=='member':
             if self.clan['clan_info']['tag'] not in self.atxLastSeen['clans']:
                 self.atxLastSeen["clans"].append(self.clan['clan_info']['tag'])
+            self.atxLastSeen['timer'] += (self.timestamp - self.atxLastUpdated)
+
+            if self.clan['role']=='Leader' or self.clan['role']=='Co-Leader':
+                self.atxRank = 'Leader'
+            elif self.atxRank=='Elder':
+                self.atxRank = 'Elder'
+            else:
+                self.atxRank = 'none'
+
             for achievement in self.homeVillage['achievements']:
                 if achievement['name'] == "Gold Grab":
                     gold_total = achievement['value']
@@ -754,9 +765,6 @@ class Member(Player):
     async def saveData(self,force=False):
         if not force and (self.atxLastUpdated + 180) > time.time(): #if save is called within 5mins after the last update, don't save
             return
-
-        self.atxLastSeen['timer'] += (self.timestamp - self.atxLastUpdated)
-
         async with clashJsonLock('member'):
             #if timestamp data is more than 3mins old. we call this within the lock so that refreshed data immediately gets pushed to json.
             if (self.timestamp + 180) < time.time(): 
@@ -768,6 +776,7 @@ class Member(Player):
                 "tag": self.tag,
                 "player": self.player,
                 "memberStatus": self.atxMemberStatus,
+                "rank": self.atxRank,
                 "lastUpdated": self.timestamp,
                 "lastSeen": self.atxLastSeen,
                 "donations": self.atxDonations,

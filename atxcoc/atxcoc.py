@@ -91,11 +91,11 @@ class ClashOfClans(commands.Cog):
         self.config.register_global(**defaults_global)
         self.config.register_user(**defaults_user)
 
-    @commands.group(name="cocset")
-    async def cocset(self,ctx):
-        """Admin Commands to manage the bot config."""
+    @commands.group(name="cocadmin")
+    async def cocadmin(self,ctx):
+        """Admin Commands to manage Clan administration."""
 
-    @cocset.command()
+    @cocadmin.command()
     @commands.is_owner()
     async def resetglobal(self,ctx):
         """Reset global variables to default. Does not remove clans."""
@@ -108,7 +108,7 @@ class ClashOfClans(commands.Cog):
         embed = await clash_embed(ctx=ctx,message=f"Global variables reset to default.")
         await ctx.send(embed=embed)
 
-    @cocset.command()
+    @cocadmin.command()
     @commands.is_owner()
     async def clans(self,ctx,clan_tag=None):
         """Set clans to be included as part of the Ataraxy family."""        
@@ -169,6 +169,97 @@ class ClashOfClans(commands.Cog):
                             f"\n```{clan.description}```",
                         inline=False)
                     return await ctx.send(embed=embed)
+    
+    @cocadmin.command()
+    @commands.is_owner()
+    async def updateelders(self,ctx):
+        """Updates Eldership status based on the last closed season."""
+        lastSeason = None
+        newelders = []
+        elders_gp = []
+        registered_accounts = await self.config.all_users()
+
+        try:
+            with open(getFile('seasons'),"r") as dataFile:
+                seasonJson = json.load(dataFile)
+                #lastSeason = seasonJson['seasons'][-1]
+                lastSeason = 'current'
+        except:
+            exc_embed = await clash_embed(ctx=ctx,message=f"Error retrieving season information.")
+            return await ctx.send(embed=exc_embed)
+
+        if not lastSeason:
+            exc_embed = await clash_embed(ctx=ctx,message=f"Last Season was not found.")
+            return await ctx.send(embed=exc_embed)
+
+        try:
+            with open(getFile('players'),"r") as dataFile:
+                playerJson = json.load(dataFile)
+                playerData = playerJson[lastSeason]
+        except:
+            exc_embed = await clash_embed(ctx=ctx,message=f"Error retrieving player data for {lastSeason} season.")
+            return await ctx.send(embed=exc_embed)
+
+        for playerLastSeason in playerData.values():
+            promoteElder = False
+
+            if playerLastSeason['memberStatus'] == 'member':
+                #if int(playerLastSeason['lastSeen']['timer']/86400) >= 20:
+                if True:
+                    if (playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']) >= 5:
+                        promoteElder = True
+                    if playerLastSeason['donations']['sent']['season'] >= 1000:
+                        promoteElder = True
+                    if playerLastSeason['clanCapital']['goldContributed']['season'] >= 20000:
+                        promoteElder = True
+
+                if promoteElder:
+                    try:                    
+                        playerCurrent = Member(ctx,playerLastSeason['tag'])
+                    except Clash_ClassError:
+                        embed = await clash_embed(ctx=ctx,
+                            message=f"Could not find this tag: {playerLastSeason['tag']}.")
+                        await ctx.send(embed=embed)
+                        raise Clash_ClassError
+
+                    if playerCurrent.atxMemberStatus=='member' and playerCurrent.atxRank!='Leader':
+                        playerCurrent.atxRank = "Elder"
+                        #playerCurrent.saveData()
+
+                        for user, account in registered_accounts.items():
+                            if playerCurrent.tag in list(account.values())[0] and user not in elders_gp:
+                                elders_gp.append(user)
+                        newelders.append(playerCurrent)
+
+        elder_announcement = f"Once again, a Clash season comes and goes. With that, we are pleased to announce our Ataraxy Elders for the new season! Congratulations to everyone for an amazing season.\n\u3000"
+
+        for e in newelders:
+            elder_announcement += f"\n\u3000{e.tag} **{e.player}**"
+
+        gp_announcement = f"The following members are also eligible to claim a Gold Pass for the upcoming Clash season! Instructions will be provided soon.\n\u3000"
+
+        for u in elders_gp:
+            gp_announcement += f"\n\u3000<@{u}>"
+
+        #discord_atxserver = getServerID(atxserver)
+        #announcement_server = ctx.bot.get_guild(discord_atxserver)
+        #announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
+        #announcement_ping = get(announcement_server.roles,name="COC-Clan Wars")
+
+        embed = await clash_embed(
+            ctx=ctx,
+            title=f"<:logo_ATX_circle:975063153798946917>\u3000**NEW ATARAXY ELDERS**\u3000<:logo_ATX_circle:975063153798946917>",
+            message=elder_announcement + "\n----------------------------------------",
+            show_author=False)
+
+        if len(elders_gp) > 0:
+            embed.add_field(
+                name=f"**<:GoldPass:834093287106674698> GOLD PASS REWARDS**",
+                value=gp_announcement,
+                inline=False)
+
+        return await ctx.send(embed=embed)
+
 
     @commands.group(name="myprofile", autohelp=False)
     async def profile(self,ctx):
@@ -304,8 +395,8 @@ class ClashOfClans(commands.Cog):
             embedpaged = []
 
             embed = await clash_embed(ctx=ctx,
-                                    message=f"The Ataraxy Clash family is proud to feature the below clans in our family."+
-                                            f"\nJoin any of the below clans to be an Ataraxy member! Send us a request in-game with the password `i love atx`.")
+                                        message=f"The Ataraxy Clash family is proud to feature the below clans in our family."+
+                                                f"\nJoin any of the below clans to be an Ataraxy member! Send us a request in-game with the password `i love atx`.")
 
             for clan in registered_clans:
                 try:                    
@@ -379,9 +470,15 @@ class ClashOfClans(commands.Cog):
                     except:
                         clan_description = "No Clan"
 
+                    memberStatus = ''
+                    if player.atxMemberStatus == 'member':
+                        memberStatus = f"**Member of Ataraxy <:logo_ATX_circle:975063153798946917>**\n"
+                    if player.atxRank != 'none':
+                        memberStatus = f"\u3000**{player.atxRank} of Ataraxy <:logo_ATX_circle:975063153798946917>**\n"
+
                     embed = await clash_embed(ctx=ctx,
                         title=f"{player.player} ({player.tag})",
-                        message=f"**<:Exp:825654249475932170> {player.exp}**\u3000<:Clan:825654825509322752> {clan_description}",
+                        message=f"{memberStatus}<:Exp:825654249475932170> {player.exp}\u3000<:Clan:825654825509322752> {clan_description}",
                         url=f"https://www.clashofstats.com/players/{player.tag.replace('#','')}",
                         show_author=True)            
                     try:
@@ -487,7 +584,7 @@ class ClashOfClans(commands.Cog):
                                 lootDarkElixir = "max"                               
 
                         embed.add_field(
-                            name=f"**Current Season with Ataraxy COC**",
+                            name=f"**Current Season with Ataraxy**",
                                 value=
                                     f":stopwatch: Last updated: {lastseen_text}ago"+
                                     #f"\n:calendar: {int(player.atxLastSeen['timer']/86400)} days spent in Ataraxy Clans"+
@@ -796,8 +893,7 @@ class ClashOfClans(commands.Cog):
 
         registered_clans = await self.config.clans()
         cwlStatus = await self.config.CWLregistration()
-        discord_atxserver = getServerID(atxserver)
-
+        
         if ctx.guild.id != discord_atxserver:
             return await ctx.send(f"{ctx.author.mention} please use this command only in Ataraxy server.")
         if cwlStatus:
@@ -818,6 +914,7 @@ class ClashOfClans(commands.Cog):
         await self.config.CWLregistration.set(True)
         await ctx.send(f"{ctx.author.mention} CWL is now open.")
 
+        discord_atxserver = getServerID(atxserver)
         announcement_server = ctx.bot.get_guild(discord_atxserver)
         announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
         announcement_ping = get(announcement_server.roles,name="COC-Clan Wars")
