@@ -292,7 +292,7 @@ class ClashOfClans(commands.Cog):
     @commands.command(name="joinatx",aliases=["atxclans"])
     async def joining_info(self, ctx):
         """
-        Join an Ataraxy clan!
+        Find an Ataraxy clan!
         """
         registered_clans = await self.config.clans()
 
@@ -490,7 +490,7 @@ class ClashOfClans(commands.Cog):
                             name=f"**Current Season with Ataraxy COC**",
                                 value=
                                     f":stopwatch: Last updated: {lastseen_text}ago"+
-                                    f"\n:calendar: {int(player.atxLastSeen['timer']/86400)} days spent in Ataraxy Clans"+
+                                    #f"\n:calendar: {int(player.atxLastSeen['timer']/86400)} days spent in Ataraxy Clans"+
                                     "\n**Donations**"+
                                     f"\n<:donated:825574412589858886> {player.atxDonations['sent']['season']}\u3000<:received:825574507045584916> {player.atxDonations['received']['season']}"+
                                     "\n**Loot**"+
@@ -525,87 +525,6 @@ class ClashOfClans(commands.Cog):
                                         inline=False)
                 
                     embedpaged.append(embed)          
-            
-            if len(embedpaged)>1:
-                paginator = BotEmbedPaginator(ctx,embedpaged)
-                await paginator.run()
-            elif len(embedpaged)==1:
-                await ctx.send(embed=embed)
-
-    @commands.command(name="mywarlog")
-    async def player_warlog(self, ctx):
-        """[Members-only] Displays your Ataraxy War Log for your accounts."""
-        action_tags = []
-        for account in await self.config.user(ctx.author).players():
-            action_tags.append(account)
-        
-        if len(action_tags) == 0:
-            embed = await clash_embed(ctx=ctx,
-                message=f"You need to link a Clash of Clans account to your Discord profile to use this command.\n\nRun `;profile link` to start the linking process.",
-                color="fail"
-                )
-            return await ctx.send(embed=embed)
-        else:
-            embedpaged = []
-            for action_tag in action_tags:                
-                try:                    
-                    player = Member(ctx,action_tag)
-                except Clash_ClassError:
-                    embed = await clash_embed(ctx=ctx,
-                        message=f"I couldn't find a player with this tag. Please check the tag is valid or try again later.\n\nYou provided: {action_tag}")
-                    await ctx.send(embed=embed)
-                    raise Clash_ClassError
-                else:                 
-                    if player.atxMemberStatus=="member":
-                        if len(player.atxWarLog)>0:
-
-                            embed = await clash_embed(ctx=ctx,
-                                title=f"{player.player} ({player.tag})",
-                                message=f"\n<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}",
-                                show_author=True)            
-                            try:
-                                embed.set_thumbnail(url=player.homeVillage['league']['leagueDetails']['iconUrls']['medium'])
-                            except:
-                                pass
-
-                            for clan in player.atxLastSeen['clans']:
-                                win_count = 0
-                                lost_count = 0
-                                draw_count = 0
-                                war_log = []                                
-                        
-                                for war in player.atxWarLog[::-1]:
-
-                                    if clan == war['clan']['tag']:
-                                        war_text = {}
-                                        clan_name = war['clan']['name']
-
-                                        if war['result']=="win":
-                                            win_count+=1
-                                        elif war['result']=="lose":
-                                            lost_count+=1
-                                        else:
-                                            draw_count+=1
-
-                                        war_text['title'] = f"**{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
-                                        war_attacks = f"> \u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
-                                        war_defense = f"\n> \u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
-                                        war_text['text'] = war_attacks + war_defense
-
-                                        war_log.append(war_text)
-
-                                embed.add_field(
-                                    name=f"**War Log in {clan_name}**",
-                                    value=f"Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}",
-                                        inline=False)
-
-                                for war in war_log:
-                                    embed.add_field(
-                                        name=war['title'],
-                                        value=war['text'],
-                                        inline=False)
-                                        
-                            embedpaged.append(embed)
             
             if len(embedpaged)>1:
                 paginator = BotEmbedPaginator(ctx,embedpaged)
@@ -723,6 +642,87 @@ class ClashOfClans(commands.Cog):
     #             await ctx.author.remove_roles(roster_role)
 
     #         return await war_registration.quit(f"{ctx.author.mention}, **{registered_account.tag} {registered_account.player}** has been removed from Clan Wars.")
+
+    @war.command(name="log")
+    async def player_warlog(self, ctx):
+        """[Members-only] Displays your Ataraxy War Log for your accounts."""
+        action_tags = []
+        for account in await self.config.user(ctx.author).players():
+            action_tags.append(account)
+        
+        if len(action_tags) == 0:
+            embed = await clash_embed(ctx=ctx,
+                message=f"You need to link a Clash of Clans account to your Discord profile to use this command.\n\nRun `;profile link` to start the linking process.",
+                color="fail"
+                )
+            return await ctx.send(embed=embed)
+        else:
+            embedpaged = []
+            for action_tag in action_tags:                
+                try:                    
+                    player = Member(ctx,action_tag)
+                except Clash_ClassError:
+                    embed = await clash_embed(ctx=ctx,
+                        message=f"I couldn't find a player with this tag. Please check the tag is valid or try again later.\n\nYou provided: {action_tag}")
+                    await ctx.send(embed=embed)
+                    raise Clash_ClassError
+                else:                 
+                    if player.atxMemberStatus=="member":
+                        if len(player.atxWarLog)>0:
+
+                            embed = await clash_embed(ctx=ctx,
+                                title=f"{player.player} ({player.tag})",
+                                message=f"\n<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}",
+                                show_author=True)            
+                            try:
+                                embed.set_thumbnail(url=player.homeVillage['league']['leagueDetails']['iconUrls']['medium'])
+                            except:
+                                pass
+
+                            for clan in player.atxLastSeen['clans']:
+                                win_count = 0
+                                lost_count = 0
+                                draw_count = 0
+                                war_log = []                                
+                        
+                                for war in player.atxWarLog[::-1]:
+
+                                    if clan == war['clan']['tag']:
+                                        war_text = {}
+                                        clan_name = war['clan']['name']
+
+                                        if war['result']=="win":
+                                            win_count+=1
+                                        elif war['result']=="lose":
+                                            lost_count+=1
+                                        else:
+                                            draw_count+=1
+
+                                        war_text['title'] = f"**{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
+                                        war_attacks = f"> \u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
+                                        war_defense = f"\n> \u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
+                                        war_text['text'] = war_attacks + war_defense
+
+                                        war_log.append(war_text)
+
+                                embed.add_field(
+                                    name=f"**War Log in {clan_name}**",
+                                    value=f"Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}",
+                                        inline=False)
+
+                                for war in war_log:
+                                    embed.add_field(
+                                        name=war['title'],
+                                        value=war['text'],
+                                        inline=False)
+                                        
+                            embedpaged.append(embed)
+            
+            if len(embedpaged)>1:
+                paginator = BotEmbedPaginator(ctx,embedpaged)
+                await paginator.run()
+            elif len(embedpaged)==1:
+                await ctx.send(embed=embed)
 
     @war.command()
     async def roster(self,ctx):
@@ -1120,7 +1120,7 @@ class ClashOfClans(commands.Cog):
         embed.add_field(name="<:WarPriority:828126720925499402> — **RULES & REGULATIONS**",
             value=f"\n> 1) Your Clash of Clans account has to be linked to our <@828462461169696778> bot to be eligible for Rewards. Refer to <#803655289034375178> for details."+
                 f"\n> \u200b\n> 2) In the event of ineligibility, Gold Pass rewards will be bumped to the next eligible winner. ATC rewards __will not__ be bumped."+
-                f"\n> \u200b\n> 3) Only players in our in-game clan __as of__ this announcement are eligible for Rewards. You will be __disqualified__ if you leave our clan at any point during the games."+
+                f"\n> \u200b\n> 3) Only players in our in-game clans __as of__ this announcement are eligible for Rewards. You will be __disqualified__ if you leave our clan at any point during the games."+
                 f"\n> \u200b\n> 4) ATC rewards can be won multiple times from multiple Clash accounts. All other rewards can only be won __once__ per Discord user."+
                 f"\n> \u200b\n> 5) For purposes of Gold Pass rewards, your Townhall level is taken __as of__ this announcement.",
                 inline=False
@@ -1129,7 +1129,7 @@ class ClashOfClans(commands.Cog):
             value=f"**All the best comrades!**\n\nFor any enquiries, refer them to any of the COC Leaders: <@624366408989540392>, <@350992430897692682>, or <@644530507505336330>.",
                 inline=False
                 )
-        await announcement_channel.send(content=f"{announcement_ping.mention}", embed=embed)
+        await announcement_channel.send(embed=embed)
 
     @cg.command(name="close")
     @commands.is_owner()
