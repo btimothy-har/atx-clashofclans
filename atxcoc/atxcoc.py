@@ -560,7 +560,8 @@ class ClashOfClans(commands.Cog):
                         if len(player.atxWarLog)>0:
 
                             embed = await clash_embed(ctx=ctx,
-                                title=f"{player.player} ({player.tag})",                              
+                                title=f"{player.player} ({player.tag})",
+                                message=f"\n<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}",
                                 show_author=True)            
                             try:
                                 embed.set_thumbnail(url=player.homeVillage['league']['leagueDetails']['iconUrls']['medium'])
@@ -571,26 +572,37 @@ class ClashOfClans(commands.Cog):
                                 win_count = 0
                                 lost_count = 0
                                 draw_count = 0
-                                latest_wars = ''
+                                war_log = []                                
                         
                                 for war in player.atxWarLog[::-1]:
+
                                     if clan == war['clan']['tag']:
+                                        war_text = {}
                                         clan_name = war['clan']['name']
+
                                         if war['result']=="win":
                                             win_count+=1
                                         elif war['result']=="lose":
                                             lost_count+=1
                                         else:
                                             draw_count+=1
-                                        war_header = f"**{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
-                                        war_attacks = f"\n\u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
-                                        war_defense = f"\n\u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%\n\u200b"
-                                        latest_wars += war_header + war_attacks + war_defense
+
+                                        war_text['title'] = f"**{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
+                                        war_attacks = f"> \u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
+                                        war_defense = f"\n> \u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
+                                        war_text['text'] = war_attacks + war_defense
+
+                                        war_log.append(war_text)
 
                                 embed.add_field(
                                     name=f"**War Log in {clan_name}**",
-                                    value=f"Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}\n\n\u200b"+
-                                        f"{latest_wars}",
+                                    value=f"Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}",
+                                        inline=False)
+
+                                for war in war_log:
+                                    embed.add_field(
+                                        name=war['title'],
+                                        value=war['text'],
                                         inline=False)
                                         
                             embedpaged.append(embed)
