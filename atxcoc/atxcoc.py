@@ -508,6 +508,12 @@ class ClashOfClans(commands.Cog):
                     except:
                         pass
 
+                    if base['Comments'] != "":
+                        embed.add_field(
+                            name="**Recommended Trophy Range**",
+                            value=f"{base['Comments']}",
+                            inline=False)
+
                     embed.add_field(
                         name="**Recommended Clan Castle**",
                         value=f"{base['CC']}",
