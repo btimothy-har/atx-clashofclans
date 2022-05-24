@@ -473,7 +473,7 @@ class ClashOfClans(commands.Cog):
             await baseSelect.quit()
             thBases = []
             if baseChoice == 'TH14 - CWL':
-                thBases = [b for b in warBases if b['Townhall']==14 and b['Type']=='CWL' and b['Creator']=='']
+                thBases = [b for b in warBases if b['Townhall']==14 and b['Type']=='CWL/ESL' and b['Creator']=='']
             if baseChoice == 'TH14 - War':
                 thBases = [b for b in warBases if b['Townhall']==14 and b['Type']=='War' and b['Creator']=='']
             if baseChoice == 'TH14 - Legends':
