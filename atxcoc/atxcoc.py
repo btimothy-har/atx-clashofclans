@@ -93,7 +93,7 @@ class ClashOfClans(commands.Cog):
 
     @commands.group(name="cocadmin")
     async def cocadmin(self,ctx):
-        """Admin Commands to manage Clan administration."""
+        """Admin settings """
 
     @cocadmin.command()
     @commands.is_owner()
@@ -436,6 +436,103 @@ class ClashOfClans(commands.Cog):
             
             await ctx.send(embed=embed)
 
+    @commands.command(name="getbase")
+    async def get_base(self, ctx):
+        """
+        Get a War Base. Only usable by Members.
+        """
+        embedpaged = []
+        is_member = False
+
+        for account in await self.config.user(ctx.author).players():
+            player = Member(ctx,account)
+            if player.atxMemberStatus == 'member':
+                is_member = True
+
+        if is_member:
+            try:
+                with open(getFile('warbases'),"r") as dataFile:
+                    warBases = json.load(dataFile)
+            except:
+                embed = await clash_embed(ctx=ctx,
+                    message=f"Couldn't find any bases. Please contact admin.",
+                    color="fail"
+                    )
+                return await ctx.send(embed=embed)
+
+            base_types = ['TH14 - CWL','TH14 - War','TH14 - Legends','TH13','TH12','TH11','TH10']
+
+            baseSelect = BotMultipleChoice(ctx,base_types,"Select a Base Type.")
+            await baseSelect.run()
+
+            if baseSelect.choice==None:
+                return await baseSelect.quit(f"{ctx.author.mention}, Selection Stopped.")
+            
+            #await ctx.send("test")
+            baseChoice = baseSelect.choice
+            await baseSelect.quit()
+            thBases = []
+            if baseChoice == 'TH14 - CWL':
+                thBases = [b for b in warBases if b['Townhall']==14 and b['Type']=='CWL' and b['Creator']=='']
+            if baseChoice == 'TH14 - War':
+                thBases = [b for b in warBases if b['Townhall']==14 and b['Type']=='War' and b['Creator']=='']
+            if baseChoice == 'TH14 - Legends':
+                thBases = [b for b in warBases if b['Townhall']==14 and b['Type']=='Legends' and b['Creator']=='']
+            if baseChoice == 'TH13':
+                thBases = [b for b in warBases if b['Townhall']==13 and b['Creator']=='']
+            if baseChoice == 'TH12':
+                thBases = [b for b in warBases if b['Townhall']==12 and b['Creator']=='']
+            if baseChoice == 'TH11':
+                thBases = [b for b in warBases if b['Townhall']==11 and b['Creator']=='']
+            if baseChoice == 'TH10':
+                thBases = [b for b in warBases if b['Townhall']==10 and b['Creator']=='']
+
+            if len(thBases) >= 3:
+                thBasesSample = random.sample(thBases, 3)
+
+                for base in thBasesSample:
+                    base_name = f"**TH{base['Townhall']}** {base['Type']} - {base['Month']}"
+                    base_description = ""
+                    
+                    if base['Creator'] != "":
+                        base_description += f"Base by {base['Source']} ({base['Creator']})"
+                    else:
+                        base_description += f"Base by {base['Source']}"
+
+                    embed = await clash_embed(ctx=ctx,
+                        title=base_name,
+                        message=base_description,
+                        show_author=True)
+                    try:
+                        embed.set_image(url=base['Image'])
+                    except:
+                        pass
+
+                    embed.add_field(
+                        name="**Recommended Clan Castle**",
+                        value=f"{base['CC']}",
+                        inline=False)
+
+                    embed.add_field(
+                        name="**Base Link**",
+                        value=f"{base['URL']}",
+                        inline=False)
+
+                    embedpaged.append(embed)
+
+                if len(embedpaged)>1:
+                    paginator = BotEmbedPaginator(ctx,embedpaged)
+                    return await paginator.run()
+                elif len(embedpaged)==1:
+                    return await ctx.send(embed=embed)
+
+        else:
+            embed = await clash_embed(ctx=ctx,
+                message=f"You must be an active Ataraxy Member to use this command.",
+                color="fail"
+                )
+            return await ctx.send(embed=embed)
+
     @commands.command(name="player")
     async def player_info(self, ctx, player_tag=None):
         """
@@ -621,7 +718,7 @@ class ClashOfClans(commands.Cog):
                                         value=latest_wars+"\u200b",
                                         inline=False)
                 
-                    embedpaged.append(embed)          
+                    embedpaged.append(embed)        
             
             if len(embedpaged)>1:
                 paginator = BotEmbedPaginator(ctx,embedpaged)
