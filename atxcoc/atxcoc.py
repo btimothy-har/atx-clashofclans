@@ -534,7 +534,7 @@ class ClashOfClans(commands.Cog):
 
         else:
             embed = await clash_embed(ctx=ctx,
-                message=f"You must be an active Ataraxy Member to use this command.",
+                message=f"You must be an active Ataraxy Member to use this command. If you are in our in-game clan(s), ensure that your Clash Account is registered with our Ataraxy bot.",
                 color="fail"
                 )
             return await ctx.send(embed=embed)
