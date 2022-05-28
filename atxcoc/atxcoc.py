@@ -1076,7 +1076,7 @@ class ClashOfClans(commands.Cog):
                 f"\n\u3000> #CRYPVGQ0 SoulTakers (Master League): TH13 - TH14"+
                 f"\n\u3000> #2PCRPUPCY Ataraxy (Crystal League): TH9 - TH12"+
                 f"\n\nIf there are insufficient participants for two rosters, we will ensure equal participation is made available in one roster."+
-                f"\nYou can check the current registration with the command `;war roster`. Your Townhall level will be taken as of your registration."+,
+                f"\nYou can check the current registration with the command `;war roster`. Your Townhall level will be taken as of your registration.",
                 inline=False
                 )
         embed.add_field(name=":crossed_swords: — **CWL PRIORITY SYSTEM**",
