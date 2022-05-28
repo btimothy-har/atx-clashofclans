@@ -1141,6 +1141,7 @@ class ClashOfClans(commands.Cog):
     async def cwl_register(self,ctx):
         """Register for CWL, during the respective registration window. You need to be at least TH10 to participate in CWL."""
 
+        clanServer_ID = await self.config.clanServerID()
         registered_clans = await self.config.clans()
         cwlStatus = await self.config.CWLregistration()
         linked_accounts = await self.config.user(ctx.author).players()
@@ -1214,7 +1215,7 @@ class ClashOfClans(commands.Cog):
             except:
                 return await ctx.send(f"{ctx.author.mention} an error occurred when saving your registration. Please try again later.")
 
-            if ctx.guild.id == discord_atxserver:
+            if ctx.guild.id == clanServer_ID:
                 roster_role = get(ctx.guild.roles,name="COC-CWL Roster")
                 await ctx.author.add_roles(roster_role)
             return await cwlRegistration.quit(f"{ctx.author.mention}, **{registered_account.tag} {registered_account.player}** has been registered for the upcoming CWL.")
