@@ -735,113 +735,6 @@ class ClashOfClans(commands.Cog):
     @commands.group(name="war")
     async def war(self,ctx):
         """Clan War/War League related commands."""
-    
-    # @war.command()
-    # async def register(self,ctx):
-    #     """Register for Classic Clan Wars."""
-    #     registered_clans = await self.config.clans()
-    #     linked_accounts = await self.config.user(ctx.author).players()
-    #     user_accounts = []
-    #     select_accounts = []
-
-    #     if len(linked_accounts)==0:
-    #         embed = await clash_embed(
-    #             ctx=ctx,
-    #             title="No accounts available.",
-    #             message="Link your Clash of Clans account using `;cocset player` to be able to register it for war.",
-    #             color="fail")
-    #         return await ctx.send(embed=embed)    
-    
-    #     for account in linked_accounts:
-    #         account = Member(ctx,account)
-    #         if account.atxMemberStatus == 'member':
-    #             user_accounts.append(account)
-
-    #     user_accounts.sort(key=lambda x:(x.atxWar['warPriority'],x.homeVillage['townHall']['thLevel']),reverse=True)
-
-    #     for account in user_accounts:
-    #         account_text = f"{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000**{account.player}** ({account.tag})\n<:Clan:825654825509322752> {account.clan['clan_info']['name']}\u3000<:Ataraxy:828126720925499402> Priority: {account.atxWar['warPriority']}"
-    #         select_accounts.append(account_text)
-
-    #     if len(select_accounts)==0:
-    #         embed = await clash_embed(
-    #             ctx=ctx,
-    #             title="No eligible war accounts.",
-    #             message="You have no accounts currently eligible for war. Please reach out to one of our clan leaders.",
-    #             color="fail")
-    #         return await ctx.send(embed=embed)
-
-    #     war_registration = BotMultipleChoice(ctx,select_accounts,"Select an account to register for war.")
-    #     await war_registration.run()
-
-    #     if war_registration.choice==None:
-    #         return await war_registration.quit(f"{ctx.author.mention}, registration has been cancelled.")
-    #     else:
-    #         account_index = select_accounts.index(war_registration.choice)
-    #         registered_account = user_accounts[account_index]
-
-    #         registered_account.atxWar['registrationStatus'] = 'Yes'
-    #         await registered_account.saveData(force=True)
-
-    #         if ctx.guild.id == discord_atxserver:
-    #             roster_role = get(ctx.guild.roles,name="COC-War Roster")
-    #             await ctx.author.add_roles(roster_role)
-    #         return await war_registration.quit(f"{ctx.author.mention}, **{registered_account.tag} {registered_account.player}** has been registered for Clan Wars.")
-        
-    # @war.command()
-    # async def remove(self,ctx):
-    #     """Remove your registration for Classic Clan Wars."""
-    #     registered_clans = await self.config.clans()
-    #     linked_accounts = await self.config.user(ctx.author).players()
-        
-    #     user_accounts = []
-    #     select_accounts = []
-
-    #     if len(linked_accounts)==0:
-    #         embed = await clash_embed(
-    #             ctx=ctx,
-    #             title="No accounts available.",
-    #             message="Link your Clash of Clans account using `;cocset player` to be able to register it for war.",
-    #             color="fail")
-    #         return await ctx.send(embed=embed)
-
-    #     for account in linked_accounts:
-    #         account = Member(ctx,account)
-    #         if account.atxMemberStatus == 'member' and account.atxWar['registrationStatus'] == 'Yes':
-    #             user_accounts.append(account)
-
-    #     user_accounts.sort(key=lambda x:(x.atxWar['warPriority'],x.homeVillage['townHall']['thLevel']),reverse=True)
-
-    #     for account in user_accounts:
-    #         account_text = f"{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000**{account.player}** ({account.tag})\n<:Clan:825654825509322752> {account.clan['clan_info']['name']}\u3000<:Ataraxy:828126720925499402> Priority: {account.atxWar['warPriority']}"
-    #         select_accounts.append(account_text)
-
-    #     if len(select_accounts)==0:
-    #         embed = await clash_embed(
-    #             ctx=ctx,
-    #             title="No active war accounts.",
-    #             message="You have no accounts currently registered for war. Register one for war using `;war register`.",
-    #             color="fail")
-    #         return await ctx.send(embed=embed)
-
-    #     war_registration = BotMultipleChoice(ctx,select_accounts,"Select an account to remove from war.")
-    #     await war_registration.run()
-
-    #     if war_registration.choice==None:
-    #         return await war_registration.quit(f"{ctx.author.mention}, registration has been cancelled.")
-    #     else:
-    #         account_index = select_accounts.index(war_registration.choice)
-    #         registered_account = user_accounts[account_index]
-    #         user_accounts.remove(registered_account)
-                
-    #         registered_account.atxWar['registrationStatus'] = 'No'
-    #         await registered_account.saveData(force=True)
-
-    #         if ctx.guild.id == discord_atxserver and len(user_accounts)==0:            
-    #             roster_role = get(ctx.guild.roles,name="COC-War Roster")
-    #             await ctx.author.remove_roles(roster_role)
-
-    #         return await war_registration.quit(f"{ctx.author.mention}, **{registered_account.tag} {registered_account.player}** has been removed from Clan Wars.")
 
     @war.command(name="log")
     async def player_warlog(self, ctx):
@@ -929,70 +822,200 @@ class ClashOfClans(commands.Cog):
         """View the current Clan War lineup for our Ataraxy clans."""
         
         #get watched clans
+        cwlStatus = await self.config.CWLregistration()
         registered_clans = await self.config.clans()
         embedpaged = []
+
+        warType = ["Clan War Leagues", "Clan Wars"]
+
+        if cwlStatus:
+            warTypeSelect = BotMultipleChoice(ctx,warType,"Select the War Type to retrieve the roster for.")
+            await warTypeSelect.run()
+
+            if warTypeSelect.choice==None:
+                return await warTypeSelect.quit()
+            else:
+                await warTypeSelect.quit()
+                warRosterType = warTypeSelect.choice
+        else:
+            warRosterType = "Clan Wars"
 
         embed = await clash_embed(
             ctx=ctx,
             message=f"Fetching data... please wait.")
-
         init_message = await ctx.send(embed=embed)
 
-        for clan in registered_clans:
-            war_roster = []
-            clan = Clan(ctx,clan)
+        if warRosterType == "Clan Wars":
+            for clan in registered_clans:
+                war_roster = []
+                clan = Clan(ctx,clan)
 
-            for member in clan.members:
-                member = Member(ctx,member['tag'])
-                if member.atxWar['registrationStatus'] == 'Yes' and member.homeVillage['league']['leagueDetails'] != None and member.atxWar['missedAttacks'] < 6:
-                    war_roster.append(member)
-        
-            #sort by war priority
-            war_roster.sort(key=lambda x:(x.atxWar['warPriority'],x.homeVillage['townHall']['thLevel'],(x.atxDonations['sent']['season']+x.atxDonations['received']['season'])),reverse=True)
+                for member in clan.members:
+                    member = Member(ctx,member['tag'])
+                    if member.atxWar['registrationStatus'] == 'Yes' and member.homeVillage['league']['leagueDetails'] != None and member.atxWar['missedAttacks'] < 6:
+                        war_roster.append(member)
+            
+                #sort by war priority
+                war_roster.sort(key=lambda x:(x.atxWar['warPriority'],x.homeVillage['townHall']['thLevel'],(x.atxDonations['sent']['season']+x.atxDonations['received']['season'])),reverse=True)
 
-            #determine eligible war size
-            war_size = len(war_roster) - (len(war_roster) % 5)
+                #determine eligible war size
+                war_size = len(war_roster) - (len(war_roster) % 5)
 
-            embed = await clash_embed(
-                ctx=ctx,
-                title=f"War Roster for {clan.clan} ({clan.tag})",
-                message=f"Current War Size: {war_size}\nCurrently registered: {len(war_roster)}")
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title=f"War Roster for {clan.clan} ({clan.tag})",
+                    message=f"Current War Size: {war_size}\nCurrently registered: {len(war_roster)}")
 
-            embed.set_thumbnail(url=clan.badges['medium'])
+                embed.set_thumbnail(url=clan.badges['medium'])
 
-            if war_size == 0:
-                embed.add_field(
-                    name=f"Insufficient participants!",
-                    value=f"We require a minimum of 5 participants to host a Clan War.",
-                    inline=False)
-            else:
-                roster_count = 0
-                for participant in war_roster:
-                    if roster_count < war_size:
-                        roster_count += 1
-                        embed.add_field(
-                            name=f"{roster_count}\u3000{participant.player} ({participant.tag})",
-                            value=f"{th_emotes[int(participant.homeVillage['townHall']['thLevel'])]} {participant.homeVillage['townHall']['thLevel']}\u3000<:Ataraxy:828126720925499402> Priority: {participant.atxWar['warPriority']}",
+                if war_size == 0:
+                    embed.add_field(
+                        name=f"Insufficient participants!",
+                        value=f"We require a minimum of 5 participants to host a Clan War.",
+                        inline=False)
+                else:
+                    roster_count = 0
+                    for participant in war_roster:
+                        if roster_count < war_size:
+                            roster_count += 1
+                            embed.add_field(
+                                name=f"{roster_count}\u3000{participant.player} ({participant.tag})",
+                                value=f"{th_emotes[int(participant.homeVillage['townHall']['thLevel'])]} {participant.homeVillage['townHall']['thLevel']}\u3000<:Ataraxy:828126720925499402> Priority: {participant.atxWar['warPriority']}",
+                                inline=False)
+                        else:
+                            break            
+                embedpaged.append(embed)
+
+        if warRosterType == "Clan War Leagues":
+            try:
+                with open(getFile('cwlroster'),"r") as dataFile:
+                    cwlData = json.load(dataFile)
+            except:
+                return await cwlRegistration.quit(f"{ctx.author.mention} an unknown error occurred, please try again later.")
+
+            rosterA = []
+            rosterB = []
+            rosteralt = []
+
+            for tag, data in cwlData.items():
+                member = Member(ctx,tag)
+                    if member.atxMemberStatus == 'member':
+                        if data['townHall'] == 14 or data['townHall'] == 13:
+                            rosterA.append(data)
+                            rosteralt.append(data)
+                        if data['townHall'] == 12 or data['townHall'] == 11 or data['townHall'] == 10 or data['townHall'] == 9:
+                            rosterB.append(data)
+                            rosteralt.append(data)
+
+            if len(rosterA) >= 15 and len(rosterB) >=15:
+                rosterA_count = 0
+                rosterA.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
+                rosterA_embed = await clash_embed(
+                    ctx=ctx,
+                    title=f"CWL Roster for Master League",
+                    message=f"Roster Size: {len(rosterA)}")
+                for participant in rosterA:
+                    rosterA_count += 1
+
+                    if rosterA_count <= 15:
+                        rosterA_embed.add_field(
+                            name=f"**{rosterA_count}**\u3000{participant['player']} ({participant['tag']})",
+                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
                             inline=False)
-                    else:
-                        break            
-            embedpaged.append(embed)
+                    if rosterA_count > 15:
+                        rosterA_embed.add_field(
+                            name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
+                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
+                            inline=False)
+
+                rosterB_count = 0
+                rosterB.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
+                rosterB_embed = await clash_embed(
+                    ctx=ctx,
+                    title=f"CWL Roster for Cystal League",
+                    message=f"Roster Size: {len(rosterB)}")
+                for participant in rosterB:
+                    rosterB_count += 1
+
+                    if rosterB_count <= 15:
+                        rosterB_embed.add_field(
+                            name=f"**{rosterA_count}**\u3000{participant['player']} ({participant['tag']})",
+                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
+                            inline=False)
+                    if rosterB_count > 15:
+                        rosterB_embed.add_field(
+                            name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
+                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
+                            inline=False)
+                embedpaged.append(rosterA_embed)
+                embedpaged.append(rosterB_embed)
+            
+            else:
+                rosteralt_count = 0
+                rosteralt_TH14 = 2
+                rosteralt_TH13 = 2 #4
+                rosteralt_TH12 = 3 #7
+                rosteralt_TH11 = 3 #10
+                rosteralt_TH10 = 3 #13
+                rosteralt_TH9 = 2 #15
+
+                rosteralt.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
+
+                rosteralt_embed = await clash_embed(
+                    ctx=ctx,
+                    title=f"Combined CWL Roster",
+                    message=f"Roster Size: {len(rosteralt)}")
+
+                for participant in rosteralt:
+                    include = False
+                    if rosteralt_TH14 > 0 and participant['townHall'] == 14:
+                        rosteralt_TH14 -= 1
+                        rosteralt_count += 1
+                        include = True
+                    if rosteralt_TH13 > 0 and participant['townHall'] == 13:
+                        rosteralt_TH13 -= 1
+                        rosteralt_count += 1
+                        include = True
+                    if rosteralt_TH12 > 0 and participant['townHall'] == 12:
+                        rosteralt_TH12 -= 1
+                        rosteralt_count += 1
+                        include = True
+                    if rosteralt_TH11 > 0 and participant['townHall'] == 11:
+                        rosteralt_TH11 -= 1
+                        rosteralt_count += 1
+                        include = True
+                    if rosteralt_TH10 > 0 and participant['townHall'] == 10:
+                        rosteralt_TH10 -= 1
+                        rosteralt_count += 1
+                        include = True
+                    if rosteralt_TH9 > 0 and participant['townHall'] == 9:
+                        rosteralt_TH9 -= 1
+                        rosteralt_count += 1
+                        include = True
+
+                    if include:
+                        rosteralt_embed.add_field(
+                            name=f"**{rosteralt_count}**\u3000{participant['player']} ({participant['tag']})",
+                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
+                            inline=False)
+                    if not include:
+                        rosteralt_embed.add_field(
+                            name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
+                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
+                            inline=False)
+                embedpaged.append(rosteralt_embed)
 
         await init_message.delete()
-
         if len(embedpaged)>1:
             paginator = BotEmbedPaginator(ctx,embedpaged)
             return await paginator.run()
         elif len(embedpaged)==1:
-            return await ctx.send(embed=embed)
+            return await ctx.send(embed=embedpaged[0])
 
-    @commands.group(name="cwl")
-    async def cwl(self,ctx):
-        """CWL commands. Only active during CWL period."""
-
-    @cwl.command(name="initiate")
+    @war.command(name="cwlopen")
     @commands.is_owner()
     async def cwl_initiate(self,ctx):
+        """Opens up CWL for registration."""
 
         registered_clans = await self.config.clans()
         cwlStatus = await self.config.CWLregistration()
@@ -1012,7 +1035,12 @@ class ClashOfClans(commands.Cog):
             for clan in registered_clans:
                 cwlData[clan] = {}
             with open(getFile('cwlroster'),"w") as dataFile:
-                json.dump(cwlData,dataFile,indent=2) 
+                json.dump(cwlData,dataFile,indent=2)
+
+        if ctx.guild.id == discord_atxserver:
+            roster_role = get(ctx.guild.roles,name="COC-CWL Roster")
+            for member in roster_role.members:
+                member.remove_roles(roster_role)
 
         await self.config.CWLregistration.set(True)
         await ctx.send(f"{ctx.author.mention} CWL is now open.")
@@ -1020,12 +1048,11 @@ class ClashOfClans(commands.Cog):
         discord_atxserver = getServerID(atxserver)
         announcement_server = ctx.bot.get_guild(discord_atxserver)
         announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
-        announcement_ping = get(announcement_server.roles,name="COC-Clan Wars")
 
         embed = await clash_embed(
             ctx=ctx,
             title=f":trophy: **CLAN WAR LEAGUES** :trophy:",
-            message=f"The next Clan War Leagues are starting soon! Registration is now open for the next **__2 DAYS__**.\n\n**Do be sure to pay attention to the below instructions.**\n\u200b",
+            message=f"The next Clan War Leagues are starting soon! Registration is now open for the next **__4 DAYS__**.\n\n**Do be sure to pay attention to the below instructions.**\n\u200b",
             show_author=False)
 
         embed.set_image(url="https://i.imgur.com/RpEB4I0.jpg")
@@ -1035,16 +1062,20 @@ class ClashOfClans(commands.Cog):
                 f"\n> - Be in our in-game clan. If you are not in the clan, please request to join."+
                 f"\n> - Linked to our <@828462461169696778> bot. Link your account by using `;help cocset player` in <#803655289034375178>."+
                 f"\n\nYou must also meet all of the below requirements:"+
-                "\n> 1) Be **Townhall 10** or higher.",
+                "\n> 1) Be **Townhall 9** or higher.",
                 inline=False
                 )
         embed.add_field(name=":black_nib: — **REGISTRATION**",
-            value=f"Use the command `;cwl register` in <#805105007120744469> to register for CWL. **Note that registrations cannot be cancelled.**"+
-                f"\n\nRegistration for CWL is capped at **15**, on a first-come-first-serve basis. Additional registrations will be rostered as substitutes.",
+            value=f"Use the command `;war cwlregister` in <#805105007120744469> to register for CWL. **Note that registrations cannot be cancelled.**"+
+                f"\n\nWe will aim to fill 2 CWL rosters this season:"+
+                f"\n\u3000> #CRYPVGQ0 SoulTakers (Master League): TH13 - TH14"+
+                f"\n\u3000> #2PCRPUPCY Ataraxy (Crystal League): TH9 - TH12"+
+                f"\n\nIf there are insufficient participants for two rosters, we will ensure equal participation is made available in one roster."+
+                f"\nYou can check the current registration with the command `;war roster`. Your Townhall level will be taken as of your registration."+,
                 inline=False
             )
         embed.add_field(name=":crossed_swords: — **CWL PRIORITY SYSTEM**",
-            value=f"Similar to regular wars, we will be using a priority system in CWL to determine bonuses and participation:"+
+            value=f"CWL Priority is separate from regular War priority. CWL Priority will be used to determine bonuses and participation:"+
                 f"\n\u200b- Participate in War: `-3`"+
                 f"\n\u200b- Use your Attack: `+1`"+
                 f"\n\u200b- Earn 2 Stars: `+1`"+
@@ -1059,9 +1090,9 @@ class ClashOfClans(commands.Cog):
             inline=False
             )        
 
-        return await announcement_channel.send(content=f"{announcement_ping.mention}", embed=embed)
+        return await announcement_channel.send(embed=embed)
 
-    @cwl.command(name="close")
+    @war.command(name="cwlend")
     @commands.is_owner()
     async def cwl_close(self,ctx):
 
@@ -1069,13 +1100,12 @@ class ClashOfClans(commands.Cog):
 
         announcement_server = ctx.bot.get_guild(discord_atxserver)
         announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
-        announcement_ping = get(announcement_server.roles,name="COC-Clan Wars")
 
         await self.config.CWLregistration.set(False)
         return await announcement_channel.send(content=f"CWL registration is now closed.")
 
-    @cwl.command(name='register')
-    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    @war.command(name='cwlregister')
+    #@commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
     async def cwl_register(self,ctx):
         """Register for CWL, during the respective registration window. You need to be at least TH10 to participate in CWL."""
 
@@ -1101,12 +1131,12 @@ class ClashOfClans(commands.Cog):
             with open(getFile('cwlroster'),"r") as dataFile:
                 cwlData = json.load(dataFile)
         except:
-            return await cwlRegistration.quit(f"{ctx.author.mention} an unknown error occurred, please try again later.")
+            cwlData = {}
     
         user_accounts = []
         for account in linked_accounts:
             account = Member(ctx,account)
-            if account.atxMemberStatus == 'member' and account.clan['clan_info']['tag'] in registered_clans and account.tag not in list(cwlData[account.clan['clan_info']['tag']].keys()) and account.homeVillage['townHall']['thLevel'] >=10:
+            if account.atxMemberStatus == 'member' and account.clan['clan_info']['tag'] in registered_clans and account.tag not in list(cwlData.keys()) and account.homeVillage['townHall']['thLevel'] >=9:
                 user_accounts.append(account)
 
         user_accounts.sort(key=lambda x:(x.homeVillage['townHall']['thLevel']),reverse=True)
@@ -1119,7 +1149,7 @@ class ClashOfClans(commands.Cog):
             embed = await clash_embed(
                 ctx=ctx,
                 title="No eligible CWL accounts.",
-                message="You have no accounts currently eligible for CWL. Note that you need to be at least TH10 to participate in CWL.",
+                message="You have no accounts currently eligible for CWL. Note that you need to be at least TH9 to participate in CWL.",
                 color="fail")
             return await ctx.send(embed=embed)
 
@@ -1133,21 +1163,17 @@ class ClashOfClans(commands.Cog):
             registered_account = user_accounts[account_index]
 
             try:
-                with open(getFile('cwlroster'),"r") as dataFile:
-                    cwlData = json.load(dataFile)
+                currentOrder = len(list(cwlData.keys()))
 
-                currentOrder = len(list(cwlData[registered_account.clan['clan_info']['tag']].keys()))
-
-                cwlData[registered_account.clan['clan_info']['tag']][registered_account.tag] = {
+                cwlData[registered_account.tag] = {
                     'tag': registered_account.tag,
                     'player': registered_account.player,
                     'regOrder':currentOrder+1,
+                    'townHall':registered_account.homeVillage['townHall']['thLevel'],
                     'priority':0,
                     'totalStars':0,
                     'warLog':[]
                     }
-            except KeyError:
-                return await cwlRegistration.quit(f"{ctx.author.mention} you don't seem to be in the right clan... please contact one of our Clan Leaders.")
             except:
                 return await cwlRegistration.quit(f"{ctx.author.mention} an unknown error occurred, please try again later.")
                 
@@ -1162,74 +1188,6 @@ class ClashOfClans(commands.Cog):
                 roster_role = get(ctx.guild.roles,name="COC-CWL Roster")
                 await ctx.author.add_roles(roster_role)
             return await cwlRegistration.quit(f"{ctx.author.mention}, **{registered_account.tag} {registered_account.player}** has been registered for the upcoming CWL.")
-
-    @cwl.command(name='roster')
-    async def cwl_roster(self,ctx):
-        """View the current CWL roster."""
-        registered_clans = await self.config.clans()
-        embedpaged = []
-
-        embed = await clash_embed(
-            ctx=ctx,
-            message=f"Fetching data... please wait.")
-
-        init_message = await ctx.send(embed=embed)
-
-        try:
-            with open(getFile('cwlroster'),"r") as dataFile:
-                cwlData = json.load(dataFile)
-        except:
-            return await cwlRegistration.quit(f"{ctx.author.mention} an unknown error occurred, please try again later.")
-
-        for clan in registered_clans:
-            war_roster = []
-            clan = Clan(ctx,clan)
-
-            for member in clan.members:
-                if member['tag'] in list(cwlData[clan.tag].keys()):
-                    member = Member(ctx,member['tag'])
-                    member = {
-                        'tag':member.tag,
-                        'player':member.player,
-                        'cwlpriority': cwlData[clan.tag][member.tag]['priority'],
-                        'townhall': member.homeVillage['townHall']['thLevel'],
-                        'totalStars': cwlData[clan.tag][member.tag]['totalStars']
-                        }
-                    war_roster.append(member)
-        
-            #sort by war priority
-            war_roster.sort(key=lambda x:(x['cwlpriority'],x['townhall']),reverse=True)
-
-            embed = await clash_embed(
-                ctx=ctx,
-                title=f"CWL Roster for {clan.clan} ({clan.tag})",
-                message=f"Currently registered: {len(war_roster)}")
-
-            embed.set_thumbnail(url=clan.badges['medium'])
-
-            roster_count = 0
-            for participant in war_roster:
-                roster_count += 1
-                if roster_count <= 15:                    
-                    embed.add_field(
-                        name=f"{roster_count}\u3000{participant['player']} ({participant['tag']})",
-                        value=f"{th_emotes[int(participant['townhall'])]} {participant['townhall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['cwlpriority']}",
-                        inline=False)
-                else:
-                    embed.add_field(
-                        name=f"**[SUB]**\u3000{participant['player']} ({participant['tag']})",
-                        value=f"{th_emotes[int(participant['townhall'])]} {participant['townhall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['cwlpriority']}",
-                        inline=False)
-
-            embedpaged.append(embed)
-
-        await init_message.delete()
-
-        if len(embedpaged)>1:
-            paginator = BotEmbedPaginator(ctx,embedpaged)
-            return await paginator.run()
-        elif len(embedpaged)==1:
-            return await ctx.send(embed=embed)
 
     @commands.group(name="cg")
     async def cg(self,ctx):
