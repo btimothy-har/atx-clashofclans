@@ -1055,7 +1055,7 @@ class ClashOfClans(commands.Cog):
         registered_clans = await self.config.clans()
         cwlStatus = await self.config.CWLregistration()
         
-        if ctx.guild.id != discord_atxserver:
+        if ctx.guild.id != clanServer.id:
             return await ctx.send(f"{ctx.author.mention} please use this command only in Ataraxy server.")
         if cwlStatus:
             return await ctx.send(f"{ctx.author.mention} CWL is already open. Use `cg close` to end the existing CWL registration.")
