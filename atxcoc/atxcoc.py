@@ -899,13 +899,13 @@ class ClashOfClans(commands.Cog):
 
             for tag, data in cwlData.items():
                 member = Member(ctx,tag)
-                    if member.atxMemberStatus == 'member':
-                        if data['townHall'] == 14 or data['townHall'] == 13:
-                            rosterA.append(data)
-                            rosteralt.append(data)
-                        if data['townHall'] == 12 or data['townHall'] == 11 or data['townHall'] == 10 or data['townHall'] == 9:
-                            rosterB.append(data)
-                            rosteralt.append(data)
+                if member.atxMemberStatus == 'member':
+                    if data['townHall'] == 14 or data['townHall'] == 13:
+                        rosterA.append(data)
+                        rosteralt.append(data)
+                    if data['townHall'] == 12 or data['townHall'] == 11 or data['townHall'] == 10 or data['townHall'] == 9:
+                        rosterB.append(data)
+                        rosteralt.append(data)
 
             if len(rosterA) >= 15 and len(rosterB) >=15:
                 rosterA_count = 0
