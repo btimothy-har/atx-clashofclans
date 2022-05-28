@@ -1066,9 +1066,7 @@ class ClashOfClans(commands.Cog):
         except FileNotFoundError:
             pass
         finally:
-            cwlData = {}
-            for clan in registered_clans:
-                cwlData[clan] = {}
+            cwlData = {}            
             with open(getFile('cwlroster'),"w") as dataFile:
                 json.dump(cwlData,dataFile,indent=2)
 
