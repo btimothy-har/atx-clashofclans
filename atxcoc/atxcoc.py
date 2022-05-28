@@ -79,6 +79,8 @@ class ClashOfClans(commands.Cog):
     def __init__(self):
         self.config = Config.get_conf(self, identifier=828462461169696778,force_registration=True)
         defaults_global = {
+            "clanServerID": 0,
+            "clanChannelID": 0,
             "clans": [],
             "CGstatus":False,
             "CGseries":"",
@@ -106,6 +108,28 @@ class ClashOfClans(commands.Cog):
         await self.config.CWLregistration.set(False)
 
         embed = await clash_embed(ctx=ctx,message=f"Global variables reset to default.")
+        await ctx.send(embed=embed)
+
+    @cocadmin.command()
+    @commands.is_owner()
+    async def setserver(self,ctx,serverID=0):
+        """Set the Clan Server ID"""
+
+        await self.config.clanServerID.set(serverID)
+
+        embed = await clash_embed(ctx=ctx,message=f"Server ID set to {serverID}")
+        await ctx.send(embed=embed)
+
+        
+
+    @cocadmin.command()
+    @commands.is_owner()
+    async def setannouncement(self,ctx,channelID=0):
+        """Set the Clan Server ID"""
+
+        await self.config.clanChannelID.set(channelID)
+
+        embed = await clash_embed(ctx=ctx,message=f"Announcement Channel ID set to {channelID}")
         await ctx.send(embed=embed)
 
     @cocadmin.command()
@@ -1022,7 +1046,12 @@ class ClashOfClans(commands.Cog):
     async def cwl_initiate(self,ctx):
         """Opens up CWL for registration."""
 
-        discord_atxserver = getServerID(atxserver)
+        clanServer_ID = await self.config.clanServerID()
+        clanServer = ctx.bot.get_guild(clanServer_ID)
+
+        clanChannel_ID = await self.config.clanChannelID()
+        clanAnnouncementChannel = discord.utils.get(clanServer.channels,id=clanChannel_ID)
+
         registered_clans = await self.config.clans()
         cwlStatus = await self.config.CWLregistration()
         
@@ -1043,16 +1072,13 @@ class ClashOfClans(commands.Cog):
             with open(getFile('cwlroster'),"w") as dataFile:
                 json.dump(cwlData,dataFile,indent=2)
 
-        if ctx.guild.id == discord_atxserver:
+        if ctx.guild.id == clanServer.id:
             roster_role = get(ctx.guild.roles,name="COC-CWL Roster")
             for member in roster_role.members:
                 member.remove_roles(roster_role)
 
         await self.config.CWLregistration.set(True)
-        await ctx.send(f"{ctx.author.mention} CWL is now open.")
-        
-        announcement_server = ctx.bot.get_guild(discord_atxserver)
-        announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
+        await ctx.send(f"{ctx.author.mention} CWL is now open.")       
 
         embed = await clash_embed(
             ctx=ctx,
@@ -1095,26 +1121,25 @@ class ClashOfClans(commands.Cog):
             inline=False
             )        
 
-        return await announcement_channel.send(embed=embed)
+        return await clanAnnouncementChannel.send(embed=embed)
 
     @war.command(name="cwlend")
     @commands.is_owner()
     async def cwl_close(self,ctx):
 
-        discord_atxserver = getServerID(atxserver)
+        clanServer_ID = await self.config.clanServerID()
+        clanServer = ctx.bot.get_guild(clanServer_ID)
 
-        announcement_server = ctx.bot.get_guild(discord_atxserver)
-        announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
+        clanChannel_ID = await self.config.clanChannelID()
+        clanAnnouncementChannel = discord.utils.get(clanServer.channels,id=clanChannel_ID)
 
         await self.config.CWLregistration.set(False)
-        return await announcement_channel.send(content=f"CWL registration is now closed.")
+        return await clanAnnouncementChannel.send(content=f"CWL registration is now closed.")
 
     @war.command(name='cwlregister')
     #@commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
     async def cwl_register(self,ctx):
         """Register for CWL, during the respective registration window. You need to be at least TH10 to participate in CWL."""
-
-        discord_atxserver = getServerID(atxserver)
 
         registered_clans = await self.config.clans()
         cwlStatus = await self.config.CWLregistration()
