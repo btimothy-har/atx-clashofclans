@@ -988,6 +988,8 @@ class ClashOfClans(commands.Cog):
                 rosteralt_TH10 = 3 #13
                 rosteralt_TH9 = 2 #15
 
+                sublist = []
+
                 rosteralt.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
 
                 rosteralt_embed = await clash_embed(
@@ -1028,10 +1030,15 @@ class ClashOfClans(commands.Cog):
                             value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
                             inline=False)
                     if not include:
+                        sublist.append(participant)
+
+                if len(sublist) > 0:
+                    for participant in sublist:
                         rosteralt_embed.add_field(
                             name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
                             value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
                             inline=False)
+
                 embedpaged.append(rosteralt_embed)
 
         await init_message.delete()
@@ -1088,19 +1095,19 @@ class ClashOfClans(commands.Cog):
 
         embed.add_field(name=":newspaper2: — **REQUIREMENTS**",
             value=f"Prior to registration, your village must:"+
-                f"\n> - Be in our in-game clan. If you are not in the clan, please request to join."+
-                f"\n> - Linked to our <@828462461169696778> bot. Link your account by using `;help cocset player` in <#803655289034375178>."+
+                f"\n> - Be in any of our in-game clans. If you are not in our clans, please request to join."+
+                f"\n> - Linked to our <@828462461169696778> bot. Link your account by using `;help myprofile link` in <#803655289034375178>."+
                 f"\n\nYou must also meet all of the below requirements:"+
-                "\n> 1) Be **Townhall 9** or higher.",
+                "\n> 1) Be <:TH9:825571026326781963> **Townhall 9** or higher.\n\u200b",
                 inline=False
                 )
         embed.add_field(name=":black_nib: — **REGISTRATION**",
             value=f"Use the command `;war cwlregister` in <#805105007120744469> to register for CWL. **Note that registrations cannot be cancelled.**"+
-                f"\n\nWe will aim to fill 2 CWL rosters this season:"+
-                f"\n\u3000> #CRYPVGQ0 SoulTakers (Master League): TH13 - TH14"+
-                f"\n\u3000> #2PCRPUPCY Ataraxy (Crystal League): TH9 - TH12"+
+                f"\n\nWe will aim to fill **2** CWL rosters this season:"+
+                f"\n\u3000:one: TH13 - TH14: #CRYPVGQ0 SoulTakers (Master League)"+
+                f"\n\u3000:two: TH9 - TH12: #2PCRPUPCY Ataraxy (Crystal League)"+
                 f"\n\nIf there are insufficient participants for two rosters, we will ensure equal participation is made available in one roster."+
-                f"\nYou can check the current registration with the command `;war roster`. Your Townhall level will be taken as of your registration.",
+                f"\n\nYou can check the current registration list with the command `;war roster`. Your Townhall level will be taken as of your registration.\n\u200b",
                 inline=False
                 )
         embed.add_field(name=":crossed_swords: — **CWL PRIORITY SYSTEM**",
