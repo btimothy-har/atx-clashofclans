@@ -1022,6 +1022,7 @@ class ClashOfClans(commands.Cog):
     async def cwl_initiate(self,ctx):
         """Opens up CWL for registration."""
 
+        discord_atxserver = getServerID(atxserver)
         registered_clans = await self.config.clans()
         cwlStatus = await self.config.CWLregistration()
         
@@ -1049,8 +1050,7 @@ class ClashOfClans(commands.Cog):
 
         await self.config.CWLregistration.set(True)
         await ctx.send(f"{ctx.author.mention} CWL is now open.")
-
-        discord_atxserver = getServerID(atxserver)
+        
         announcement_server = ctx.bot.get_guild(discord_atxserver)
         announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
 
