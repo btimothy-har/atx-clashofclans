@@ -928,21 +928,26 @@ class ClashOfClans(commands.Cog):
                             value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
                             inline=False)
 
-                rosterB_count = 0
+                rosterB_count = 1
                 rosterB.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
                 rosterB_embed = await clash_embed(
                     ctx=ctx,
                     title=f"CWL Roster for Cystal League",
                     message=f"Roster Size: {len(rosterB)}")
+
+                rosterB_embed.add_field(
+                    name=f"**1** Reserved",
+                    value=f"*Reserved for Clan Donation Account",
+                    inline=False)
+
                 for participant in rosterB:
                     rosterB_count += 1
-
-                    if rosterB_count <= 15:
+                    if rosterB_count <= 14:
                         rosterB_embed.add_field(
                             name=f"**{rosterA_count}**\u3000{participant['player']} ({participant['tag']})",
                             value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
                             inline=False)
-                    if rosterB_count > 15:
+                    if rosterB_count > 14:
                         rosterB_embed.add_field(
                             name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
                             value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
@@ -1073,7 +1078,7 @@ class ClashOfClans(commands.Cog):
                 f"\n\nIf there are insufficient participants for two rosters, we will ensure equal participation is made available in one roster."+
                 f"\nYou can check the current registration with the command `;war roster`. Your Townhall level will be taken as of your registration."+,
                 inline=False
-            )
+                )
         embed.add_field(name=":crossed_swords: — **CWL PRIORITY SYSTEM**",
             value=f"CWL Priority is separate from regular War priority. CWL Priority will be used to determine bonuses and participation:"+
                 f"\n\u200b- Participate in War: `-3`"+
@@ -1083,8 +1088,8 @@ class ClashOfClans(commands.Cog):
                 f"\n\u200b\n__An additional bonus/penalty will be applied for hits up and/or down, by Townhall Level:__"+
                 f"\n\u200bBonus/Penalty: `(opponent TH level) - (your TH level)` "+
                 f"\n\u200b*only applies for hits above 2 stars. ",
-            inline=False
-            )
+                inline=False
+                )
         embed.add_field(name="<:Gem:834064925243998279> — **REWARDS**",
             value=f"Bonus CWL Medals will be awarded in accordance to CWL priority.",
             inline=False
