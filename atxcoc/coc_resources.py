@@ -524,7 +524,7 @@ class Member(Player):
         except:
             self.atxMemberStatus = "notFound"
             self.atxRank = "none"
-            self.atxLastUpdated = 0
+            self.atxLastUpdated = time.time()
             self.atxLastSeen = {
                 "clans": [],
                 "timer": 0,
