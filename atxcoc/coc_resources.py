@@ -607,9 +607,22 @@ class Member(Player):
                     capitalgold_contributed_total = achievement['value']
                 if achievement['name'] == "Aggressive Capitalism":
                     capitalgold_looted_total = achievement['value']
-            self.atxDonations['received']['season'] += self.clan['donationsRcvd'] - self.atxDonations['received']['lastUpdate']
+
+            newDonations = self.clan['donationsRcvd'] - self.atxDonations['received']['lastUpdate']
+
+            if self.clan['donationsRcvd'] > self.atxDonations['received']['lastUpdate']:
+                newDonationsRcvd = self.clan['donationsRcvd'] - self.atxDonations['received']['lastUpdate']
+            else:
+                newDonationsRcvd = self.clan['donationsRcvd']
+
+            if self.clan['donations'] > self.atxDonations['sent']['lastUpdate']:
+                newDonationsSent = self.clan['donations'] - self.atxDonations['sent']['lastUpdate']
+            else:
+                newDonationsSent = self.clan['donations']
+
+            self.atxDonations['received']['season'] += newDonationsRcvd
             self.atxDonations['received']['lastUpdate'] = self.clan['donationsRcvd']
-            self.atxDonations['sent']['season'] += self.clan['donations'] - self.atxDonations['sent']['lastUpdate']
+            self.atxDonations['sent']['season'] += newDonationsSent
             self.atxDonations['sent']['lastUpdate'] = self.clan['donations']
 
             self.atxLoot['gold']['season'] += gold_total - self.atxLoot['gold']['lastUpdate']
