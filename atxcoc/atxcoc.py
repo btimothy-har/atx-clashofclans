@@ -714,7 +714,7 @@ class ClashOfClans(commands.Cog):
                             name=f"**Current Season with Ataraxy**",
                                 value=
                                     f":stopwatch: Last updated: {lastseen_text}ago"+
-                                    #f"\n:calendar: {int(player.atxLastSeen['timer']/86400)} days spent in Ataraxy Clans"+
+                                    f"\n:calendar: {int(player.atxLastSeen['timer']/86400)} days spent in Ataraxy Clans"+
                                     "\n**Donations**"+
                                     f"\n<:donated:825574412589858886> {player.atxDonations['sent']['season']}\u3000<:received:825574507045584916> {player.atxDonations['received']['season']}"+
                                     "\n**Loot**"+
