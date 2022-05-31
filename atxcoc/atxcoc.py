@@ -1172,7 +1172,7 @@ class ClashOfClans(commands.Cog):
         user_accounts = []
         for account in linked_accounts:
             account = Member(ctx,account)
-            if account.atxMemberStatus == 'member' and account.clan['clan_info']['tag'] in registered_clans and account.tag not in list(cwlData.keys()) and account.homeVillage['townHall']['thLevel'] >=9:
+            if account.atxMemberStatus == 'member' and account.clan['clan_info']['tag'] in registered_clans and account.tag not in list(cwlData.keys()) and account.homeVillage['townHall']['thLevel'] >=7:
                 user_accounts.append(account)
 
         user_accounts.sort(key=lambda x:(x.homeVillage['townHall']['thLevel']),reverse=True)
