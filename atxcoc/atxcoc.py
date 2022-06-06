@@ -593,7 +593,10 @@ class ClashOfClans(commands.Cog):
                     raise Clash_ClassError
                 else:
                     try:
-                        clan_description = f"{player.clan['role']} of **[{player.clan['clan_info']['name']}](https://www.clashofstats.com/clans/{player.clan['clan_info']['tag'].replace('#','')})**"
+                        if player.atxMemberStatus == 'member':
+                            clan_description = f"**[{player.clan['clan_info']['name']}](https://www.clashofstats.com/clans/{player.clan['clan_info']['tag'].replace('#','')})**"
+                        else:
+                            clan_description = f"{player.clan['role']} of **[{player.clan['clan_info']['name']}](https://www.clashofstats.com/clans/{player.clan['clan_info']['tag'].replace('#','')})**"
                     except:
                         clan_description = "No Clan"
 
@@ -701,6 +704,7 @@ class ClashOfClans(commands.Cog):
                         lootDarkElixir = numerize.numerize(player.atxLoot['darkElixir']['season'],1)
 
                         clanCapitalGold = numerize.numerize(player.atxClanCapital['goldContributed']['season'],1)
+                        capitalGoldLooted = numerize.numerize(player.atxClanCapital['goldLooted']['season'],1)
 
                         for achievement in player.homeVillage['achievements']:
                             if achievement['name'] == "Gold Grab" and achievement['value']>=2000000000:
@@ -720,9 +724,9 @@ class ClashOfClans(commands.Cog):
                                     "\n**Loot**"+
                                     f"\n<:gold:825613041198039130> {lootGold}\u3000<:elixir:825612858271596554> {lootElixir}\u3000<:darkelixir:825640568973033502> {lootDarkElixir}"+
                                     "\n**Clan Capital**"+
-                                    f"\n<:CC_CapitalGoldContributed:971012592057339954> {clanCapitalGold}"+                                    
+                                    f"\n<:CapitalGoldContributed:971012592057339954> {clanCapitalGold}\u3000<:CapitalGoldLooted:983374303552753664> {capitalGoldLooted}"+                                    
                                     "\n**War Registration**"+
-                                    f"\n<:ClanWars:825753092230086708> {player.atxWar['registrationStatus']}\u3000<:Ataraxy:828126720925499402> {player.atxWar['warPriority']}"+
+                                    f"\n<:ClanWars:825753092230086708> {player.atxWar['registrationStatus']}\u3000<:Ataraxy:828126720925499402> Priority: {player.atxWar['warPriority']}"+
                                     "\n**War Performance**"+
                                     f"\n<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}"+
                                     "\n\u200b",
