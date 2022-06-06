@@ -608,14 +608,12 @@ class Member(Player):
                 if achievement['name'] == "Aggressive Capitalism":
                     capitalgold_looted_total = achievement['value']
 
-            newDonations = self.clan['donationsRcvd'] - self.atxDonations['received']['lastUpdate']
-
-            if self.clan['donationsRcvd'] > self.atxDonations['received']['lastUpdate']:
+            if self.clan['donationsRcvd'] >= self.atxDonations['received']['lastUpdate']:
                 newDonationsRcvd = self.clan['donationsRcvd'] - self.atxDonations['received']['lastUpdate']
             else:
                 newDonationsRcvd = self.clan['donationsRcvd']
 
-            if self.clan['donations'] > self.atxDonations['sent']['lastUpdate']:
+            if self.clan['donations'] >= self.atxDonations['sent']['lastUpdate']:
                 newDonationsSent = self.clan['donations'] - self.atxDonations['sent']['lastUpdate']
             else:
                 newDonationsSent = self.clan['donations']
