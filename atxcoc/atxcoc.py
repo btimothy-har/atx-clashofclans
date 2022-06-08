@@ -70,7 +70,7 @@ async def clash_embed(ctx, title=None, message=None, url=None, show_author=True,
     else:
         embed = discord.Embed(title=title,description=message,color=color)
     if show_author:
-        embed.set_author(name=f"{ctx.author.display_name}#{ctx.author.discriminator}",icon_url=ctx.author.avatar_url)    
+        embed.set_author(name=f"{ctx.author.display_name}#{ctx.author.discriminator}",icon_url=ctx.author.avatar_url)
     embed.set_footer(text="Ataraxy Clash of Clans",icon_url="https://i.imgur.com/xXjjWke.png")
     return embed
 
@@ -1320,7 +1320,7 @@ class ClashOfClans(commands.Cog):
 
         embed.add_field(name="<:Gem:834064925243998279> — **REWARDS**",
             value=f"In addition to the in-game rewards, Ataraxy members stand to win:"+
-                f"\n> - First **10** players who reach 4,000 points will receive **2000 <:logo_ATC:732967299853582366> each**."+
+                f"\n> - First **10** players who reach 4,000 points will receive **2000 <:logo_ATC:971050471110377472> each**."+
                 f"\n> \u200b\n> - First player from the below TH levels to reach 4,000 points will receive a **Gold Pass (USD5 Gift Card) each**.\n> \u3000\u3000**{th_reward_message}**\n\u200b",
                 inline=False
                 )
@@ -1424,9 +1424,9 @@ class ClashOfClans(commands.Cog):
             #    inline=False
             #    )
 
-            embed.add_field(name=f"<:logo_ATC:732967299853582366> — **ATC WINNERS** ({clangames_atc_reward} each)",
+            embed.add_field(name=f"<:logo_ATC:971050471110377472> — **ATC WINNERS** ({clangames_atc_reward} each)",
                 value=f"```{tabulate(atc_recipients,headers='keys')}```"+
-                    "\nAll <:logo_ATC:732967299853582366> rewards have been deposited to the respective Discord accounts. You can check your balances in <#654994554076004372>.\n\u200b",
+                    "\nAll <:logo_ATC:971050471110377472> rewards have been deposited to the respective Discord accounts. You can check your balances in <#654994554076004372>.\n\u200b",
                 inline=False
                 )
             embed.add_field(name="<:GoldPass:834093287106674698> — **GOLD PASS WINNERS**",
@@ -1443,7 +1443,7 @@ class ClashOfClans(commands.Cog):
         await self.config.CGstatus.set(False)
         return await announcement_channel.send(content=f"{announcement_ping.mention}",embed=embed)
 
-    @commands.group(name="challenge")
+    @commands.group(name="cp")
     async def challengepass(self,ctx):
         """Commands relating to the Ataraxy Challenge Pass."""
 
@@ -1453,7 +1453,7 @@ class ClashOfClans(commands.Cog):
         """Check your Pass progress and Challenge details."""
         linked_accounts = await self.config.user(ctx.author).players()
         traDict = {'farm': 'The Farmer Track', 'war': 'The Warpath'}
-        rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:732967299853582366>'}
+        rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:971050471110377472>'}
 
         if len(linked_accounts)==0:
             embed = await clash_embed(
@@ -1502,7 +1502,7 @@ class ClashOfClans(commands.Cog):
 
         if not cPass.atxChaTrack:
             trackSelect = ['farm','war']
-            trackSelectText = ['**The Farmer Track**: The top 5 farmers get awarded a Gold Pass each.','**The Warpath**: Our battle-hardened warriors get accorded Eldership and have access to exclusive base builds for war.']
+            trackSelectText = ['**The Farmer Track**','**The Warpath**']
             trackSelection = BotMultipleChoice(ctx,trackSelectText,"You haven't chosen a Pass track on this account.\nPick one to start your challenge journey!")
             await trackSelection.run()
 
@@ -1557,7 +1557,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Current Progress: {numerize.numerize(newChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(newChallenge.challengeScore,1)}"
                         f"\n> Time Remaining: {timeRemaining_text}"+
                         f"\n> Rewards: {newChallenge.challengeReward['reward']} {rewDict[newChallenge.challengeReward['type']]}"+
-                        f"\n> Trash Cost: {trashCost} <:logo_ATC:732967299853582366>"+
+                        f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
                         f"\n\u200b\nRemember to run the `;challenge mypass` command to update your stats and to complete challenges!\n\u200b",                            
                         inline=False)                    
 
@@ -1620,7 +1620,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
                         f"\n> Time Remaining: {timeRemaining_text}"+
                         f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
-                        f"\n> Trash Cost: {trashCost} <:logo_ATC:732967299853582366>"+
+                        f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
                         f"\n\u200b\nRemember to run the `;challenge mypass` command to update your stats and to complete challenges!\n\u200b",
                     inline=False)
 
@@ -1632,7 +1632,7 @@ class ClashOfClans(commands.Cog):
         """Trash my current challenge. Only usable with an active pass."""
         linked_accounts = await self.config.user(ctx.author).players()
         traDict = {'farm': 'The Farmer Track', 'war': 'The Warpath'}
-        rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:732967299853582366>'}
+        rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:971050471110377472>'}
 
         if len(linked_accounts)==0:
             embed = await clash_embed(
@@ -1663,84 +1663,85 @@ class ClashOfClans(commands.Cog):
                 color="fail")
             return await ctx.send(embed=embed)
 
-        pass_selection = BotMultipleChoice(ctx,select_accounts,"Select an account you wish to trash a Challenge.")
-        await pass_selection.run()
+        if len(select_accounts) > 1:
+            pass_selection = BotMultipleChoice(ctx,select_accounts,"Select an account you wish to trash a Challenge.")
+            await pass_selection.run()
 
-        if pass_selection.choice==None:
-            return await pass_selection.quit(f"{ctx.author.mention}, request timed out.")
+            if pass_selection.choice==None:
+                return await pass_selection.quit(f"{ctx.author.mention}, request timed out.")
+            else:
+                account_index = select_accounts.index(pass_selection.choice)
+                selected_account = user_accounts[account_index]
+                await pass_selection.quit(f"{ctx.author.mention}, please wait...")
         else:
-            account_index = select_accounts.index(pass_selection.choice)
-            selected_account = user_accounts[account_index]
+            selected_account = user_accounts[0]
 
-            await pass_selection.quit(f"{ctx.author.mention}, please wait...")
+        cPass = challengePass(ctx,selected_account)
+        if not cPass.atxChaTrack:
+            embed = await clash_embed(
+                ctx=ctx,
+                title="No active Challenge Pass.",
+                message="This account doesn't have an active Challenge Pass. Run the command `;challenge mypass` to start one!",
+                color="fail")
+            return await ctx.send(embed=embed)
 
-            cPass = challengePass(ctx,selected_account)
-            if not cPass.atxChaTrack:
+        if cPass.atxChaTrack and not cPass.atxChaActiveChall:
+            embed = await clash_embed(
+                ctx=ctx,
+                title="No active Challenges.",
+                message="You aren't working on any Challenges! Run the command `;challenge mypass` to start one!",
+                color="fail")
+            return await ctx.send(embed=embed)
+
+        if cPass.atxChaTrack and cPass.atxChaActiveChall:
+            trashChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak)
+            timeRemaining = (trashChallenge.challengeProgress['startTime'] + (trashChallenge.challengeDuration*86400)) - time.time()
+            trashCost = round((timeRemaining / 3600)*30)
+            timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)
+            timeRemaining_hours,timeRemaining = divmod(timeRemaining,3600)
+            timeRemaining_minutes,timeRemaining = divmod(timeRemaining,60)
+
+            timeRemaining_text = ''
+            if timeRemaining_days > 0:
+                timeRemaining_text += f"{int(timeRemaining_days)} day(s) "
+            if timeRemaining_hours > 0:
+                timeRemaining_text += f"{int(timeRemaining_hours)} hour(s) "
+            if timeRemaining_minutes > 0:
+                timeRemaining_text += f"{int(timeRemaining_minutes)} min(s) "
+            if timeRemaining_text == '':
+                timeRemaining_text = "a few second(s) "
+
+            bankBalance = await bank.get_balance(ctx.author)
+            if trashCost > bankBalance:
                 embed = await clash_embed(
                     ctx=ctx,
-                    title="No active Challenge Pass.",
-                    message="This account doesn't have an active Challenge Pass. Run the command `;challenge mypass` to start one!",
+                    title="Not enough money!",
+                    message=f"You need {trashCost} <:logo_ATC:971050471110377472> to trash this challenge.",
                     color="fail")
                 return await ctx.send(embed=embed)
 
-            if cPass.atxChaTrack and not cPass.atxChaActiveChall:
-                embed = await clash_embed(
-                    ctx=ctx,
-                    title="No active Challenges.",
-                    message="You aren't working on any Challenges! Run the command `;challenge mypass` to start one!",
-                    color="fail")
-                return await ctx.send(embed=embed)
+            trashChallenge.updateChallenge(trash=True)
+            cPass.updatePass(trashChallenge.challengeToJson())
 
-            if cPass.atxChaTrack and cPass.atxChaActiveChall:
-                trashChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak)
+            await bank.withdraw_credits(ctx.author, trashCost)
 
-                timeRemaining = (trashChallenge.challengeProgress['startTime'] + (trashChallenge.challengeDuration*86400)) - time.time()
-                trashCost = round((timeRemaining / 3600)*30)
-                timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)
-                timeRemaining_hours,timeRemaining = divmod(timeRemaining,3600)
-                timeRemaining_minutes,timeRemaining = divmod(timeRemaining,60)
+            embed = await clash_embed(
+                ctx=ctx,
+                title=f"**Ataraxy Challenge Pass: {selected_account.player}** ({selected_account.tag})",
+                message=f"**Your Pass Track: `{traDict[cPass.atxChaTrack]}`**"+
+                        f"\n\nYou spent {trashCost} <:logo_ATC:971050471110377472> to trash the below challenge.",
+                color="fail")
 
-                timeRemaining_text = ''
-                if timeRemaining_days > 0:
-                    timeRemaining_text += f"{int(timeRemaining_days)} day(s) "
-                if timeRemaining_hours > 0:
-                    timeRemaining_text += f"{int(timeRemaining_hours)} hour(s) "
-                if timeRemaining_minutes > 0:
-                    timeRemaining_text += f"{int(timeRemaining_minutes)} min(s) "
-                if timeRemaining_text == '':
-                    timeRemaining_text = "a few second(s) "
+            embed.add_field(name=f"**>> CHALLENGE TRASHED! <<**",
+                value=f"```{trashChallenge.challengeDesc}```"+
+                    f"\n> Current Progress: {numerize.numerize(trashChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(trashChallenge.challengeScore,0)}"
+                    f"\n> Time Remaining: {timeRemaining_text}"+
+                    f"\n> Rewards: {trashChallenge.challengeReward['reward']} {rewDict[trashChallenge.challengeReward['type']]}"+
+                    f"\n\u200b\nThis challenge can no longer be continued. Run the `;challenge mypass` command to receive a new one!\n\u200b",
+                inline=False)
 
-                bankBalance = await bank.get_balance(ctx.author)
-                if trashCost > bankBalance:
-                    embed = await clash_embed(
-                        ctx=ctx,
-                        title="Not enough money!",
-                        message=f"You need {trashCost} <:logo_ATC:732967299853582366> to trash this challenge.",
-                        color="fail")
-                    return await ctx.send(embed=embed)
-
-                trashChallenge.updateChallenge(trash=True)
-                cPass.updatePass(trashChallenge.challengeToJson())
-
-                await bank.withdraw_credits(ctx.author, trashCost)
-
-                embed = await clash_embed(
-                    ctx=ctx,
-                    title=f"**Ataraxy Challenge Pass: {selected_account.player}** ({selected_account.tag})",
-                    message=f"**Your Pass Track: `{traDict[cPass.atxChaTrack]}`**"+
-                        f"\n\nYou spent {trashCost} <:logo_ATC:732967299853582366> to trash the below challenge.",
-                    color="fail")
-
-                embed.add_field(name=f"**>> CHALLENGE TRASHED! <<**",
-                    value=f"```{trashChallenge.challengeDesc}```"+
-                        f"\n> Current Progress: {numerize.numerize(trashChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(trashChallenge.challengeScore,0)}"
-                        f"\n> Time Remaining: {timeRemaining_text}"+
-                        f"\n> Rewards: {trashChallenge.challengeReward['reward']} {rewDict[trashChallenge.challengeReward['type']]}"+
-                        f"\n\u200b\nThis challenge can no longer be continued. Run the `;challenge mypass` command to receive a new one!\n\u200b",
-                    inline=False)
-
-                await ctx.send(embed = embed)
-                return await cPass.savePass()
+            await ctx.send(embed = embed)
+            return await cPass.savePass()
 
     @challengepass.command(name='leaderboard', aliases=['lb'])
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.guild)
@@ -1762,12 +1763,12 @@ class ClashOfClans(commands.Cog):
             return await ctx.send(f"{ctx.author.mention} an unknown error occurred, please try again later.")
 
         allPasses = []
-        for clan in registered_clans:            
+        for clan in registered_clans:
             clan = Clan(ctx,clan)
             for member in clan.members:
                 try:
                     member = Member(ctx,member['tag'])
-                    cPass = challengePass(ctx,member,season)
+                    cPass = challengePass(ctx,member)
                 except:
                     pass
                 else:
@@ -1803,16 +1804,30 @@ class ClashOfClans(commands.Cog):
         embed = await clash_embed(
             ctx=ctx,
             title=f"Ataraxy Challenge Pass Leaderboard",
-            message=f"Season: {season}\n*C: Completed / M: Missed / T: Trashed*")
+            message=f"*C: Completed / M: Missed / T: Trashed*")
 
-        embed.add_field(name=f"**THE WARPATH**",
-            value=f"```{tabulate(war_lb,headers='keys')}```",
-            inline=False
+        if len(war_lb) > 0:
+            embed.add_field(name=f"**THE WARPATH**",
+                value=f"```{tabulate(war_lb,headers='keys')}```",
+                inline=False
             )
-        embed.add_field(name="**THE FARMER LIFE**",
-            value=f"```{tabulate(farm_lb,headers='keys')}```",
-            inline=False
+        else:
+            embed.add_field(name=f"**THE WARPATH**",
+                value=f"```No players found...```",
+                inline=False
             )
+
+        if len(farm_lb) > 0:
+            embed.add_field(name="**THE FARMER LIFE**",
+                value=f"```{tabulate(farm_lb,headers='keys')}```",
+                inline=False
+            )
+        else:
+            embed.add_field(name="**THE FARMER LIFE**",
+                value=f"```No players found...```",
+                inline=False
+            )
+        
         await ctx.send(embed=embed)
         return await init_message.delete()
     
