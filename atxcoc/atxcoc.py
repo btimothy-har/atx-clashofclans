@@ -1558,7 +1558,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Time Remaining: {timeRemaining_text}"+
                         f"\n> Rewards: {newChallenge.challengeReward['reward']} {rewDict[newChallenge.challengeReward['type']]}"+
                         f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
-                        f"\n\u200b\nRemember to run the `;challenge mypass` command to update your stats and to complete challenges!\n\u200b",                            
+                        f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",                            
                         inline=False)                    
 
             if currentChallenge and currentChallenge.challengeProgress['status'] == 'completed':
@@ -1583,7 +1583,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
                         f"\n> Time Remaining: {timeRemaining_text}"+
                         f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
-                        f"\n\u200b\nRewards have been credited.\n*To start a new challenge, run the `;challenge mypass` command again.*\n\u200b",
+                        f"\n\u200b\nRewards have been credited.\n*To start a new challenge, run the `;cp mypass` command again.*\n\u200b",
                     inline=False)
 
                 if currentChallenge.challengeReward['type'] == 'atc':
@@ -1595,7 +1595,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
                         f"\n> Time Limit: {currentChallenge.challengeDuration}"+
                         f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
-                        f"\n\u200b\nThis challenge cannot be continued.\n*To start a new challenge, run the `;challenge mypass` command again.*\n\u200b",
+                        f"\n\u200b\nThis challenge cannot be continued.\n*To start a new challenge, run the `;cp mypass` command again.*\n\u200b",
                     inline=False)
 
             if currentChallenge and currentChallenge.challengeProgress['status'] == 'inProgress':
@@ -1621,7 +1621,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Time Remaining: {timeRemaining_text}"+
                         f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
                         f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
-                        f"\n\u200b\nRemember to run the `;challenge mypass` command to update your stats and to complete challenges!\n\u200b",
+                        f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",
                     inline=False)
 
             await ctx.send(embed = embed)
@@ -1682,7 +1682,7 @@ class ClashOfClans(commands.Cog):
             embed = await clash_embed(
                 ctx=ctx,
                 title="No active Challenge Pass.",
-                message="This account doesn't have an active Challenge Pass. Run the command `;challenge mypass` to start one!",
+                message="This account doesn't have an active Challenge Pass. Run the command `;cp mypass` to start one!",
                 color="fail")
             return await ctx.send(embed=embed)
 
@@ -1690,7 +1690,7 @@ class ClashOfClans(commands.Cog):
             embed = await clash_embed(
                 ctx=ctx,
                 title="No active Challenges.",
-                message="You aren't working on any Challenges! Run the command `;challenge mypass` to start one!",
+                message="You aren't working on any Challenges! Run the command `;cp mypass` to start one!",
                 color="fail")
             return await ctx.send(embed=embed)
 
@@ -1738,7 +1738,7 @@ class ClashOfClans(commands.Cog):
                     f"\n> Current Progress: {numerize.numerize(trashChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(trashChallenge.challengeScore,0)}"
                     f"\n> Time Remaining: {timeRemaining_text}"+
                     f"\n> Rewards: {trashChallenge.challengeReward['reward']} {rewDict[trashChallenge.challengeReward['type']]}"+
-                    f"\n\u200b\nThis challenge can no longer be continued. Run the `;challenge mypass` command to receive a new one!\n\u200b",
+                    f"\n\u200b\nThis challenge can no longer be continued. Run the `;cp mypass` command to receive a new one!\n\u200b",
                 inline=False)
 
             await ctx.send(embed = embed)
