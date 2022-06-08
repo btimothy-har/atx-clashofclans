@@ -1628,6 +1628,7 @@ class ClashOfClans(commands.Cog):
             return await cPass.savePass()     
 
     @challengepass.command()
+    @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def trash(self,ctx):
         """Trash my current challenge. Only usable with an active pass."""
         linked_accounts = await self.config.user(ctx.author).players()
