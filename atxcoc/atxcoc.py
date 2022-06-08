@@ -1451,6 +1451,7 @@ class ClashOfClans(commands.Cog):
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.user)
     async def mypass(self,ctx):
         """Check your Pass progress and Challenge details."""
+        wait_msg = None
         linked_accounts = await self.config.user(ctx.author).players()
         traDict = {'farm': 'The Farmer Track', 'war': 'The Warpath'}
         rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:971050471110377472>'}
@@ -1494,7 +1495,8 @@ class ClashOfClans(commands.Cog):
                 account_index = select_accounts.index(pass_selection.choice)
                 selected_account = user_accounts[account_index]
 
-                await pass_selection.quit(f"{ctx.author.mention}, please wait...")
+                await pass_selection.quit()
+                wait_msg = await ctx.send(f"{ctx.author.mention}, please wait...")
         else:
             selected_account = user_accounts[0]            
 
@@ -1624,6 +1626,8 @@ class ClashOfClans(commands.Cog):
                         f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",
                     inline=False)
 
+            if wait_msg:
+                await wait_msg.delete()
             await ctx.send(embed = embed)
             return await cPass.savePass()     
 
@@ -1631,6 +1635,7 @@ class ClashOfClans(commands.Cog):
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def trash(self,ctx):
         """Trash my current challenge. Only usable with an active pass."""
+        wait_msg = None
         linked_accounts = await self.config.user(ctx.author).players()
         traDict = {'farm': 'The Farmer Track', 'war': 'The Warpath'}
         rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:971050471110377472>'}
@@ -1673,7 +1678,8 @@ class ClashOfClans(commands.Cog):
             else:
                 account_index = select_accounts.index(pass_selection.choice)
                 selected_account = user_accounts[account_index]
-                await pass_selection.quit(f"{ctx.author.mention}, please wait...")
+                await pass_selection.quit()
+                wait_msg = await ctx.send(f"{ctx.author.mention}, please wait...")
         else:
             selected_account = user_accounts[0]
 
@@ -1741,6 +1747,8 @@ class ClashOfClans(commands.Cog):
                     f"\n\u200b\nThis challenge can no longer be continued. Run the `;cp mypass` command to receive a new one!\n\u200b",
                 inline=False)
 
+            if wait_msg:
+                await wait_msg.delete()
             await ctx.send(embed = embed)
             return await cPass.savePass()
 
