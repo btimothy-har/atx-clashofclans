@@ -1485,7 +1485,7 @@ class ClashOfClans(commands.Cog):
             return await ctx.send(embed=embed)
 
         if len(select_accounts) > 1:
-            pass_selection = BotMultipleChoice(ctx,select_accounts,"Select an account to view your Challenge Pass.")
+            pass_selection = BotMultipleChoice(ctx,select_accounts,f"{ctx.author.display_name}, select an account to view your Challenge Pass.")
             await pass_selection.run()
 
             if pass_selection.choice==None:
@@ -1503,7 +1503,7 @@ class ClashOfClans(commands.Cog):
         if not cPass.atxChaTrack:
             trackSelect = ['farm','war']
             trackSelectText = ['**The Farmer Track**','**The Warpath**']
-            trackSelection = BotMultipleChoice(ctx,trackSelectText,"You haven't chosen a Pass track on this account.\nPick one to start your challenge journey!")
+            trackSelection = BotMultipleChoice(ctx,trackSelectText,f"{ctx.author.display_name}, you haven't chosen a Pass track on this account.\nPick one to start your challenge journey!")
             await trackSelection.run()
 
             if trackSelection.choice==None:
