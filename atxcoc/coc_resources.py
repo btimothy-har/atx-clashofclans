@@ -953,8 +953,8 @@ class Challenge():
         player = self.member
         generateTime = time.time()
         trackWar = ['trophies','defenses','victories','troopBoost','warStars','warTreasury']
-        trackFarm = ['lootElixir', 'lootGold', 'lootDarkElixir','seasonChallenges','obstacles']
-        trackCommon = ['donations','request','destroyTarget','heroUpgrade','troopUpgrade','capitalGold']
+        trackFarm = ['lootElixir', 'lootGold', 'lootDarkElixir','seasonChallenges','obstacles','capitalGold']
+        trackCommon = ['donations','request','destroyTarget','heroUpgrade','troopUpgrade']
 
         challengePointReward = range(300,500)
 
