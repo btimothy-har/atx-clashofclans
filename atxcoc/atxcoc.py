@@ -1519,11 +1519,11 @@ class ClashOfClans(commands.Cog):
 
         if cPass.atxChaTrack == 'war' or cPass.atxChaTrack == 'farm':
             if not cPass.atxChaActiveChall:
-                newChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak)
+                newChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak,currPoints=cPass.atxChaPoints)
                 cPass.updatePass(newChallenge.challengeToJson())
 
             elif cPass.atxChaActiveChall:
-                currentChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak)
+                currentChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak,currPoints=cPass.atxChaPoints)
                 currentChallenge.updateChallenge()
                 cPass.updatePass(currentChallenge.challengeToJson())
 
@@ -1701,7 +1701,7 @@ class ClashOfClans(commands.Cog):
             return await ctx.send(embed=embed)
 
         if cPass.atxChaTrack and cPass.atxChaActiveChall:
-            trashChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak)
+            trashChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak,currPoints=cPass.atxChaPoints)
             timeRemaining = (trashChallenge.challengeProgress['startTime'] + (trashChallenge.challengeDuration*86400)) - time.time()
             trashCost = round((timeRemaining / 3600)*30)
             timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)

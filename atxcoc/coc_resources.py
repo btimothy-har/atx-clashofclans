@@ -933,7 +933,7 @@ class challengePass():
 
 class Challenge():
     #This represents a challenge for the Ataraxy Pass
-    def __init__(self,player,track,challDict=None,commonStreak=0):
+    def __init__(self,player,track,challDict=None,commonStreak=0,currPoints=0):
         self.member = player
         self.challengeTrack = track
 
@@ -972,7 +972,7 @@ class Challenge():
             }
 
         trackChance = random.choice(range(max(1,commonStreak2),10))
-        if trackChance > 6:
+        if trackChance > 6 or currPoints == 0:
             if self.challengeTrack == 'war':
                 random.shuffle(trackWar)
                 self.challengeTask = random.choice(trackWar)
@@ -1553,7 +1553,10 @@ class Challenge():
             newStat = totalLevel
 
         if self.challengeTask == 'capitalGold':
-            newStat = player.atxClanCapital['goldContributed']['season']            
+            newStat = player.atxClanCapital['goldContributed']['season']
+
+        if self.challengeTask == 'capitalRaid':
+            newStat = player.atxClanCapital['goldLooted']['season']
 
         self.challengeProgress['currentScore'] = newStat-self.challengeProgress['initStat']
 
