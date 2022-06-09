@@ -1451,6 +1451,10 @@ class ClashOfClans(commands.Cog):
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.user)
     async def mypass(self,ctx):
         """Check your Pass progress and Challenge details."""
+
+        completed = False
+        missed = False
+
         wait_msg = None
         linked_accounts = await self.config.user(ctx.author).players()
         traDict = {'farm': 'The Farmer Track', 'war': 'The Warpath'}
@@ -1608,9 +1612,9 @@ class ClashOfClans(commands.Cog):
 
                 if currentChallenge.challengeReward['type'] == 'atc':
                     await bank.deposit_credits(ctx.author,currentChallenge.challengeReward['reward'])
+                completed = True
 
             if currentChallenge and currentChallenge.challengeProgress['status'] == 'missed':
-
                 embed = await clash_embed(
                     ctx=ctx,
                     title=headerTitle,
@@ -1624,6 +1628,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
                         f"\n\u200b\nThis challenge cannot be continued.\n*To start a new challenge, run the `;cp mypass` command again.*\n\u200b",
                     inline=False)
+                missed = False                
 
             if currentChallenge and currentChallenge.challengeProgress['status'] == 'inProgress':
                 timeRemaining = (currentChallenge.challengeProgress['startTime'] + (currentChallenge.challengeDuration*86400)) - time.time()
@@ -1659,7 +1664,9 @@ class ClashOfClans(commands.Cog):
             if wait_msg:
                 await wait_msg.delete()
             await ctx.send(embed = embed)
-            return await cPass.savePass()     
+            if completed:
+                ctx.command.reset_cooldown(ctx)
+            return await cPass.savePass()
 
     @challengepass.command()
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
