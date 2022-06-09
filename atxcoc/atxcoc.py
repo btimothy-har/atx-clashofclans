@@ -1474,6 +1474,7 @@ class ClashOfClans(commands.Cog):
                     title="Error retrieving data.",
                     message="The Clash API seems to be busy right now... please try again in a few minutes.",
                     color="fail")
+                ctx.command.reset_cooldown(ctx)
                 return await ctx.send(embed=embed)
             if account.atxMemberStatus == 'member' and account.homeVillage['townHall']['thLevel'] >= 9:
                 user_accounts.append(account)
@@ -1679,7 +1680,16 @@ class ClashOfClans(commands.Cog):
     
         user_accounts = []
         for account in linked_accounts:
-            account = Member(ctx,account)
+            try:
+                account = Member(ctx,account)
+            except:
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title="Error retrieving data.",
+                    message="The Clash API seems to be busy right now... please try again in a few minutes.",
+                    color="fail")
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send(embed=embed)
             if account.atxMemberStatus == 'member' and account.homeVillage['townHall']['thLevel'] >= 9:
                 user_accounts.append(account)
 
