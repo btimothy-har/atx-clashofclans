@@ -955,6 +955,7 @@ class Challenge():
         trackWar = ['trophies','defenses','victories','troopBoost','warStars','warTreasury']
         trackFarm = ['lootElixir', 'lootGold', 'lootDarkElixir','seasonChallenges','obstacles','capitalGold']
         trackCommon = ['donations','request','destroyTarget','destroyTarget','destroyTarget','destroyTarget']
+        challengePool = trackWar + trackFarm + trackCommon
         #remove Hero/Troop Upgrades, increase probability of destroyTarget
         #trackCommon = ['donations','request','destroyTarget','heroUpgrade','troopUpgrade']
 
@@ -973,11 +974,24 @@ class Challenge():
         trackChance = random.choice(range(max(1,commonStreak2),10))
         if trackChance > 6:
             if self.challengeTrack == 'war':
+                random.shuffle(trackWar)
                 self.challengeTask = random.choice(trackWar)
             elif self.challengeTrack == 'farm':
+                random.shuffle(trackWar)
                 self.challengeTask = random.choice(trackFarm)
         else:
-            self.challengeTask = random.choice(trackCommon)
+            random.shuffle(challengePool)
+            self.challengeTask = random.choice(challengePool)
+
+        #determine rewards
+        if self.challengeTask in trackCommon:
+            rewardType = 'atc'
+        elif self.challengeTrack == 'war' and self.challengeTask in trackWar:
+            rewardType = 'challengePoints'
+        elif self.challengeTrack =='farm' and self.challengeTask in trackFarm:
+            rewardType = 'challengePoints'
+        else:
+            rewardType = 'atc'
 
         try:
             if self.challengeTask == 'trophies':
@@ -988,7 +1002,7 @@ class Challenge():
                 self.challengeDesc = f"Earn {self.challengeScore} trophies in Multiplayer Battles."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1006,7 +1020,7 @@ class Challenge():
                 self.challengeDesc = f"Win {self.challengeScore} defenses in Multiplayer Battles."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
                     if achievement['name'] == 'Unbreakable':
@@ -1030,7 +1044,7 @@ class Challenge():
                 self.challengeDesc = f"Destroy {self.challengeScore} enemy townhalls in Multiplayer Battles."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }            
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1048,7 +1062,7 @@ class Challenge():
                 self.challengeDesc = f"Win {self.challengeScore} attacks in Multiplayer Battles."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
                     if achievement['name'] == 'Conqueror':
@@ -1072,7 +1086,7 @@ class Challenge():
                 self.challengeDesc = f"Boost Troops to their Super version {self.challengeScore} times."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
                     if achievement['name'] == 'Superb Work':
@@ -1098,7 +1112,7 @@ class Challenge():
                 self.challengeDesc = f"Earn {self.challengeScore} stars in Clan Wars. Stars lost on defense count against your total."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1121,7 +1135,7 @@ class Challenge():
                 self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Elixir from your enemies! Don't forget to spend it..."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1144,7 +1158,7 @@ class Challenge():
                 self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Gold from your enemies! Don't forget to spend it..."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1162,7 +1176,7 @@ class Challenge():
                 self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Dark Elixir from your enemies! Don't forget to spend it..."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1180,7 +1194,7 @@ class Challenge():
                 self.challengeDesc = f"Complete {self.challengeScore} points worth of challenges in the Season Pass."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
                     if achievement['name'] == 'Well Seasoned':
@@ -1201,7 +1215,7 @@ class Challenge():
                 self.challengeDesc = f"Clear {self.challengeScore} obstacles from either your Home Village or Builder Base."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
                     if achievement['name'] == 'Nice and Tidy':
@@ -1222,7 +1236,7 @@ class Challenge():
                 self.challengeDesc = f"Collect {numerize.numerize(self.challengeScore,1)} Gold from your Treasury."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'challengePoints'
+                    'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
                     if achievement['name'] == 'Clan War Wealth':
@@ -1243,7 +1257,7 @@ class Challenge():
                 self.challengeDesc = f"Donate {self.challengeScore} troops/spells/siege machines to your clan mates."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'atc'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1261,7 +1275,7 @@ class Challenge():
                 self.challengeDesc = f"Receive {self.challengeScore} troops/spells/siege machines from your clan mates."
                 self.challengeReward = {
                     'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'atc'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1307,7 +1321,7 @@ class Challenge():
                 self.challengeDesc = f"Destroy {self.challengeScore} {self.challengeTarget} in Multiplayer Battles."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': 'atc'
+                    'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
                     if self.challengeTarget == 'Builder Huts' and achievement['name'] == 'Union Buster':
@@ -1351,7 +1365,7 @@ class Challenge():
                 self.challengeDesc = f"Upgrade your heroes by {self.challengeScore} level(s)."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type':'atc'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1376,7 +1390,7 @@ class Challenge():
                 self.challengeDesc = f"Upgrade your troops and/or spells by {self.challengeScore} level(s)."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type':'atc'
+                    'type': rewardType
                     }                
                 self.challengeProgress = {
                     'status': 'inProgress',
@@ -1405,7 +1419,7 @@ class Challenge():
                 self.challengeDesc = f"Contribute {numerize.numerize(self.challengeScore,1)} Capital Gold to our Ataraxy Capital Halls."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type':'challengePoints'
+                    'type': rewardType
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
