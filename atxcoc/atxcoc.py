@@ -1528,7 +1528,7 @@ class ClashOfClans(commands.Cog):
                 cPass.updatePass(currentChallenge.challengeToJson())
 
             headerTitle = f"**Ataraxy Challenge Pass: {selected_account.player}** ({selected_account.tag})"
-            headerMessage = _(f"**Your Pass Track: `{traDict[cPass.atxChaTrack]}`**"+
+            headerMessage = (f"**Your Pass Track: `{traDict[cPass.atxChaTrack]}`**"+
                             f"\n\u200b\n__Your Season Stats:__"+
                             f"\n> Pass Completion: {numerize.numerize(cPass.atxChaPoints,1)} / 10K"+
                             f"\n> Completed: {cPass.atxChaCompleted}"+
