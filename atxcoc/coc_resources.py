@@ -953,7 +953,7 @@ class Challenge():
         player = self.member
         generateTime = time.time()
         trackWar = ['trophies','defenses','victories','troopBoost','warStars','warTreasury']
-        trackFarm = ['lootElixir', 'lootGold', 'lootDarkElixir','seasonChallenges','obstacles','capitalGold']
+        trackFarm = ['lootElixir', 'lootGold', 'lootDarkElixir','seasonChallenges','obstacles','capitalGold','capitalRaid']
         trackCommon = ['donations','request','destroyTarget','destroyTarget','destroyTarget','destroyTarget']
         challengePool = trackWar + trackFarm + trackCommon
         #remove Hero/Troop Upgrades, increase probability of destroyTarget
@@ -1427,6 +1427,27 @@ class Challenge():
                     'completedTime': 0,
                     'currentScore': 0,
                     'initStat': player.atxClanCapital['goldContributed']['season']
+                    }
+
+            if self.challengeTask == 'capitalRaid':
+                daysAvail = [5,6,7]
+                if datetime.today().isoweekday() not in daysAvail:
+                    raise StatTooHigh   
+                baseScore = 3000
+                availableDurations = [1]
+                self.challengeDuration = random.choice(availableDurations)
+                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
+                self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Capital Gold during Capital Raids with our Clans."
+                self.challengeReward = {
+                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'type': rewardType
+                    }
+                self.challengeProgress = {
+                    'status': 'inProgress',
+                    'startTime': generateTime,
+                    'completedTime': 0,
+                    'currentScore': 0,
+                    'initStat': player.atxClanCapital['goldLooted']['season']
                     }
 
             if self.challengeTask != 'destroyTarget':
