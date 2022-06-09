@@ -954,7 +954,9 @@ class Challenge():
         generateTime = time.time()
         trackWar = ['trophies','defenses','victories','troopBoost','warStars','warTreasury']
         trackFarm = ['lootElixir', 'lootGold', 'lootDarkElixir','seasonChallenges','obstacles','capitalGold']
-        trackCommon = ['donations','request','destroyTarget','heroUpgrade','troopUpgrade']
+        trackCommon = ['donations','request','destroyTarget','destroyTarget','destroyTarget','destroyTarget']
+        #remove Hero/Troop Upgrades, increase probability of destroyTarget
+        #trackCommon = ['donations','request','destroyTarget','heroUpgrade','troopUpgrade']
 
         challengePointReward = range(300,500)
 
@@ -969,7 +971,6 @@ class Challenge():
             }
 
         trackChance = random.choice(range(max(1,commonStreak2),10))
-
         if trackChance > 6:
             if self.challengeTrack == 'war':
                 self.challengeTask = random.choice(trackWar)
@@ -1283,7 +1284,15 @@ class Challenge():
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeTarget = random.choice(availableTargets)
                 if self.challengeTarget == 'Walls':
-                    self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*50
+                    self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*100
+                elif self.challengeTarget == 'Builder Huts' or self.challengeTarget == 'Weaponized Builder Huts'
+                    self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*5
+                elif self.challengeTarget == 'Mortars':
+                    self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*4
+                elif self.challengeTarget == 'X-Bows':
+                    self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*4
+                elif self.challengeTarget == 'Inferno Towers':
+                    self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*2
                 else:
                     self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))
                 self.challengeDesc = f"Destroy {self.challengeScore} {self.challengeTarget} in Multiplayer Battles."
