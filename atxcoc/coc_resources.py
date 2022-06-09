@@ -1274,10 +1274,19 @@ class Challenge():
             if self.challengeTask == 'destroyTarget':
                 baseScore = 3
                 availableDurations = [1,2,3,4,5,6,7]
-                availableTargets = ['Walls','Builder Huts','Mortars','X-Bows','Inferno Towers','Eagle Artilleries','Scattershots','Townhalls']
 
+                availableTargets = ['Walls','Builder Huts','Mortars','Townhalls']
+
+                if player.homeVillage['townHall']['thLevel'] >= 9:
+                    available.Targets.append('X-Bows')
+                if player.homeVillage['townHall']['thLevel'] >= 10:
+                    available.Targets.append('Inferno Towers')
+                if player.homeVillage['townHall']['thLevel'] >= 11:
+                    available.Targets.append('Eagle Artilleries')
                 if player.homeVillage['townHall']['thLevel'] >= 12:
                     available.Targets.append('Weaponized Townhalls')
+                if player.homeVillage['townHall']['thLevel'] >= 13:
+                    available.Targets.append('Scattershots')
                 if player.homeVillage['townHall']['thLevel'] >= 14:
                     available.Targets.append('Weaponized Builder Huts')
 
