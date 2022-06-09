@@ -1285,7 +1285,7 @@ class Challenge():
                 self.challengeTarget = random.choice(availableTargets)
                 if self.challengeTarget == 'Walls':
                     self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*100
-                elif self.challengeTarget == 'Builder Huts' or self.challengeTarget == 'Weaponized Builder Huts'
+                elif self.challengeTarget == 'Builder Huts' or self.challengeTarget == 'Weaponized Builder Huts':
                     self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*5
                 elif self.challengeTarget == 'Mortars':
                     self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*4
