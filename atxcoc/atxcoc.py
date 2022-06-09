@@ -1527,15 +1527,13 @@ class ClashOfClans(commands.Cog):
                 currentChallenge.updateChallenge()
                 cPass.updatePass(currentChallenge.challengeToJson())
 
-            embed = await clash_embed(
-                ctx=ctx,
-                title=f"**Ataraxy Challenge Pass: {selected_account.player}** ({selected_account.tag})",
-                message=f"**Your Pass Track: `{traDict[cPass.atxChaTrack]}`**"+
-                        f"\n\u200b\n__Your Season Stats:__"+
-                        f"\n> Pass Completion: {numerize.numerize(cPass.atxChaPoints,1)} / 10K"+
-                        f"\n> Completed: {cPass.atxChaCompleted}"+
-                        f"\n> Missed: {cPass.atxChaMissed}"+
-                        f"\n> Trashed: {cPass.atxChaTrashed}\n\u200b")                
+            headerTitle = f"**Ataraxy Challenge Pass: {selected_account.player}** ({selected_account.tag})"
+            headerMessage = _(f"**Your Pass Track: `{traDict[cPass.atxChaTrack]}`**"+
+                            f"\n\u200b\n__Your Season Stats:__"+
+                            f"\n> Pass Completion: {numerize.numerize(cPass.atxChaPoints,1)} / 10K"+
+                            f"\n> Completed: {cPass.atxChaCompleted}"+
+                            f"\n> Missed: {cPass.atxChaMissed}"+
+                            f"\n> Trashed: {cPass.atxChaTrashed}\n\u200b")
 
             if newChallenge and newChallenge.challengeProgress['status'] == 'inProgress':
                 timeRemaining = (newChallenge.challengeProgress['startTime'] + (newChallenge.challengeDuration*86400)) - time.time()
@@ -1554,6 +1552,11 @@ class ClashOfClans(commands.Cog):
                 if timeRemaining_text == '':
                     timeRemaining_text = "a few seconds "
 
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title=headerTitle,
+                    message=headerMessage)
+
                 embed.add_field(name=f"**>> YOU RECEIVED A NEW CHALLENGE! <<**",
                     value=f"```{newChallenge.challengeDesc}```"+
                         f"\n> Current Progress: {numerize.numerize(newChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(newChallenge.challengeScore,1)}"
@@ -1561,7 +1564,7 @@ class ClashOfClans(commands.Cog):
                         f"\n> Rewards: {newChallenge.challengeReward['reward']} {rewDict[newChallenge.challengeReward['type']]}"+
                         f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
                         f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",                            
-                        inline=False)                    
+                        inline=False)                 
 
             if currentChallenge and currentChallenge.challengeProgress['status'] == 'completed':
                 timeRemaining = (currentChallenge.challengeProgress['startTime'] + (currentChallenge.challengeDuration*86400)) - time.time()
@@ -1580,6 +1583,12 @@ class ClashOfClans(commands.Cog):
                 if timeRemaining_text == '':
                     timeRemaining_text = "a few seconds "
 
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title=headerTitle,
+                    message=headerMessage,
+                    color="success")
+
                 embed.add_field(name=f"**>> CHALLENGE COMPLETED! <<**",
                     value=f"```{currentChallenge.challengeDesc}```"+
                         f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
@@ -1592,6 +1601,13 @@ class ClashOfClans(commands.Cog):
                     await bank.deposit_credits(ctx.author,currentChallenge.challengeReward['reward'])
 
             if currentChallenge and currentChallenge.challengeProgress['status'] == 'missed':
+
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title=headerTitle,
+                    message=headerMessage,
+                    color="fail")
+
                 embed.add_field(name=f"**>> YOU MISSED A CHALLENGE! <<**",
                     value=f"```{currentChallenge.challengeDesc}```"+
                         f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
@@ -1616,6 +1632,11 @@ class ClashOfClans(commands.Cog):
                     timeRemaining_text += f"{int(timeRemaining_minutes)} min(s) "
                 if timeRemaining_text == '':
                     timeRemaining_text = "a few seconds "
+
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title=headerTitle,
+                    message=headerMessage)
 
                 embed.add_field(name=f"**YOU'RE WORKING ON THIS CHALLENGE...**",
                     value=f"```{currentChallenge.challengeDesc}```"+
