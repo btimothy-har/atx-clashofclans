@@ -887,7 +887,7 @@ class ClashOfClans(commands.Cog):
                 war_roster.sort(key=lambda x:(x.atxWar['warPriority'],x.homeVillage['townHall']['thLevel'],(x.atxDonations['sent']['season']+x.atxDonations['received']['season'])),reverse=True)
 
                 #determine eligible war size
-                war_size = len(war_roster) - (len(war_roster) % 5)
+                war_size = min(len(war_roster) - (len(war_roster) % 5),15)
 
                 embed = await clash_embed(
                     ctx=ctx,
@@ -1172,7 +1172,7 @@ class ClashOfClans(commands.Cog):
             embed = await clash_embed(
                 ctx=ctx,
                 title="No accounts available.",
-                message="Link your Clash of Clans account using `;cocset player` to be able to register for CWL.",
+                message="Link your Clash of Clans account using `;myprofile link` to be able to register for CWL.",
                 color="fail")
             return await ctx.send(embed=embed)
 
@@ -1460,7 +1460,7 @@ class ClashOfClans(commands.Cog):
             embed = await clash_embed(
                 ctx=ctx,
                 title="No accounts available.",
-                message="Link your Clash of Clans account using `;cocset player` to be able to participate in the Ataraxy Challenge Pass.",
+                message="Link your Clash of Clans account using `;myprofile link` to be able to participate in the Ataraxy Challenge Pass.",
                 color="fail")
             return await ctx.send(embed=embed)    
     
@@ -1644,7 +1644,7 @@ class ClashOfClans(commands.Cog):
             embed = await clash_embed(
                 ctx=ctx,
                 title="No accounts available.",
-                message="Link your Clash of Clans account using `;cocset player` to be able to participate in the Ataraxy Challenge Pass.",
+                message="Link your Clash of Clans account using `;myprofile link` to be able to participate in the Ataraxy Challenge Pass.",
                 color="fail")
             return await ctx.send(embed=embed)    
     
