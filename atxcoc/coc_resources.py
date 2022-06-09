@@ -1387,14 +1387,25 @@ class Challenge():
                     }
 
             if self.challengeTask == 'capitalGold':
-                baseScore = 4000
-                availableDurations = [1,3,4]
+                capGoldBaseScore = {
+                    9: 1200,
+                    10: 1400,
+                    11: 1600,
+                    12: 2000,
+                    13: 2400,
+                    14: 3000
+                    }
+                try:
+                    baseScore = capGoldBaseScore[player.homeVillage['townHall']['thLevel']]
+                except:
+                    baseScore = 500
+                availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
                 self.challengeDesc = f"Contribute {numerize.numerize(self.challengeScore,1)} Capital Gold to our Ataraxy Capital Halls."
                 self.challengeReward = {
                     'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type':'atc'
+                    'type':'challengePoints'
                     }
                 self.challengeProgress = {
                     'status': 'inProgress',
