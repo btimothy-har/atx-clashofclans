@@ -1509,7 +1509,7 @@ class ClashOfClans(commands.Cog):
             await trackSelection.run()
 
             if trackSelection.choice==None:
-                return await pass_selection.quit(f"{ctx.author.mention}, request timed out.")
+                return await trackSelection.quit(f"{ctx.author.mention}, request timed out.")
             else:
                 cPass.atxChaTrack = trackSelect[trackSelectText.index(trackSelection.choice)]
                 await trackSelection.quit(f"{ctx.author.mention}, you've chosen the **{traDict[cPass.atxChaTrack]}**.")
