@@ -1291,17 +1291,17 @@ class Challenge():
 
                 availableTargets = ['Walls','Builder Huts','Mortars','Townhalls']
 
-                if player.homeVillage['townHall']['thLevel'] >= 9:
+                if player.homeVillage['townHall']['thLevel'] >= 8:
                     available.Targets.append('X-Bows')
-                if player.homeVillage['townHall']['thLevel'] >= 10:
+                if player.homeVillage['townHall']['thLevel'] >= 9:
                     available.Targets.append('Inferno Towers')
-                if player.homeVillage['townHall']['thLevel'] >= 11:
+                if player.homeVillage['townHall']['thLevel'] >= 10:
                     available.Targets.append('Eagle Artilleries')
-                if player.homeVillage['townHall']['thLevel'] >= 12:
+                if player.homeVillage['townHall']['thLevel'] >= 11:
                     available.Targets.append('Weaponized Townhalls')
-                if player.homeVillage['townHall']['thLevel'] >= 13:
+                if player.homeVillage['townHall']['thLevel'] >= 12:
                     available.Targets.append('Scattershots')
-                if player.homeVillage['townHall']['thLevel'] >= 14:
+                if player.homeVillage['townHall']['thLevel'] >= 13:
                     available.Targets.append('Weaponized Builder Huts')
 
                 self.challengeDuration = random.choice(availableDurations)
