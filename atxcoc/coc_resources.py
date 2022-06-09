@@ -936,6 +936,7 @@ class Challenge():
     def __init__(self,player,track,challDict=None,commonStreak=0,currPoints=0):
         self.member = player
         self.challengeTrack = track
+        self.challPoints = currPoints
 
         if challDict==None:
             self.generateChallenge(commonStreak)
@@ -972,7 +973,7 @@ class Challenge():
             }
 
         trackChance = random.choice(range(max(1,commonStreak2),10))
-        if trackChance > 6 or currPoints == 0:
+        if trackChance > 6 or self.challPoints == 0:
             if self.challengeTrack == 'war':
                 random.shuffle(trackWar)
                 self.challengeTask = random.choice(trackWar)
