@@ -715,15 +715,15 @@ class Member(Player):
 
         else:
             priorityChange = 0
-            #if self.clan['role']=='Elder' and stats['warResult']=='win':
-            #    priorityChange += 1
-            if stats['warResult']=='win':
+            if self.atxRank == 'Elder' and stats['warResult']=='win':
                 priorityChange += 1
+            if stats['warResult']=='win':
+                priorityChange += 0
             else:
                 priorityChange -= 1
-            if stats['attackStars'] >= 3:
+            if stats['attackStars']-stats['defenseStars'] >= 2:
                 priorityChange += 1
-            if stats['attackStars'] >= 6:
+            if stats['attackStars']-stats['defenseStars'] >= 4:
                 priorityChange += 1
             if stats['missedAttacks'] >= 1:
                 priorityChange -= 3
