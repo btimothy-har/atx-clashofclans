@@ -973,7 +973,7 @@ class Challenge():
             }
 
         trackChance = random.choice(range(max(1,commonStreak2),10))
-        if trackChance > 6 or self.challPoints >= 1000:
+        if trackChance > 6 or self.challPoints <= 1000:
             if self.challengeTrack == 'war':
                 random.shuffle(trackWar)
                 self.challengeTask = random.choice(trackWar)
