@@ -809,7 +809,7 @@ class ClashOfClans(commands.Cog):
                         
                                 for war in player.atxWarLog[::-1]:
 
-                                    if clan.clan == war['clan']['tag']:
+                                    if clan.tag == war['clan']['tag']:
                                         war_text = {}
 
                                         if war['result']=="win":
