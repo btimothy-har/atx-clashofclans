@@ -790,7 +790,6 @@ class ClashOfClans(commands.Cog):
                 else:                 
                     if player.atxMemberStatus=="member":
                         if len(player.atxWarLog)>0:
-
                             embed = await clash_embed(ctx=ctx,
                                 title=f"{player.player} ({player.tag})",
                                 message=f"\n<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}",
@@ -801,7 +800,6 @@ class ClashOfClans(commands.Cog):
                                 pass
 
                             for clan in player.atxLastSeen['clans']:
-
                                 clan = Clan(ctx,clan)
 
                                 win_count = 0
@@ -811,7 +809,7 @@ class ClashOfClans(commands.Cog):
                         
                                 for war in player.atxWarLog[::-1]:
 
-                                    if clan == war['clan']['tag']:
+                                    if clan.clan == war['clan']['tag']:
                                         war_text = {}
 
                                         if war['result']=="win":
@@ -836,7 +834,7 @@ class ClashOfClans(commands.Cog):
                                 for war in war_log:
                                     embed.add_field(
                                         name=war['title'],
-                                        value=war['text'],
+                                        value=war['text'],ok 1
                                         inline=False)
                                         
                             embedpaged.append(embed)
