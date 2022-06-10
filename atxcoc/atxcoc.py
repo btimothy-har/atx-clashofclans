@@ -834,7 +834,7 @@ class ClashOfClans(commands.Cog):
                                 for war in war_log:
                                     embed.add_field(
                                         name=war['title'],
-                                        value=war['text'],ok 1
+                                        value=war['text'],
                                         inline=False)
                                         
                             embedpaged.append(embed)
