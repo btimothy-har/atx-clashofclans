@@ -802,13 +802,13 @@ class ClashOfClans(commands.Cog):
                             for clan in player.atxLastSeen['clans']:
                                 clan = Clan(ctx,clan)
 
+                                war_count = 0
                                 win_count = 0
                                 lost_count = 0
                                 draw_count = 0
                                 war_log = []                                
                         
                                 for war in player.atxWarLog[::-1]:
-
                                     if clan.tag == war['clan']['tag']:
                                         war_text = {}
 
@@ -819,23 +819,26 @@ class ClashOfClans(commands.Cog):
                                         else:
                                             draw_count+=1
 
-                                        war_text['title'] = f"**{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
-                                        war_attacks = f"> \u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
-                                        war_defense = f"\n> \u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
+                                        war_text['title'] = f"> **{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
+                                        war_attacks = f"> \u200b\u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
+                                        war_defense = f"\n> \u200b\u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
                                         war_text['text'] = war_attacks + war_defense
 
                                         war_log.append(war_text)
 
-                                embed.add_field(
-                                    name=f"**War Log in {clan.clan}**",
-                                    value=f"Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}",
-                                        inline=False)
-
-                                for war in war_log:
+                                if (win_count + lost_count + draw_count) > 0:
                                     embed.add_field(
-                                        name=war['title'],
-                                        value=war['text'],
-                                        inline=False)
+                                        name=f"**{clan.clan}: War Log**",
+                                        value=f"```Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}```\n> \u200b**Last 5 Wars**",
+                                            inline=False)
+
+                                    for war in war_log:
+                                        war_count += 1
+                                        if war_count <= 5:
+                                            embed.add_field(
+                                                name=war['title'],
+                                                value=war['text'],
+                                                inline=False)
                                         
                             embedpaged.append(embed)
             
