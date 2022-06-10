@@ -801,6 +801,9 @@ class ClashOfClans(commands.Cog):
                                 pass
 
                             for clan in player.atxLastSeen['clans']:
+
+                                clan = Clan(ctx,clan)
+
                                 win_count = 0
                                 lost_count = 0
                                 draw_count = 0
@@ -810,7 +813,6 @@ class ClashOfClans(commands.Cog):
 
                                     if clan == war['clan']['tag']:
                                         war_text = {}
-                                        clan_name = war['clan']['name']
 
                                         if war['result']=="win":
                                             win_count+=1
@@ -827,7 +829,7 @@ class ClashOfClans(commands.Cog):
                                         war_log.append(war_text)
 
                                 embed.add_field(
-                                    name=f"**War Log in {clan_name}**",
+                                    name=f"**War Log in {clan.clan}**",
                                     value=f"Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}",
                                         inline=False)
 
