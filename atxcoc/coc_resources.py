@@ -8,6 +8,7 @@ import datetime
 import time
 import pytz
 import random
+import math
 
 cogdir = os.path.dirname(__file__)
 
@@ -941,7 +942,10 @@ class Challenge():
             self.challengeScore = challDict['targetScore']
             self.challengeDesc = challDict['desc']
             self.challengeReward = challDict['reward']
-            self.challengeProgress = challDict['progress']              
+            self.challengeProgress = challDict['progress']
+
+        self.rTime = self.challengeProgress['startTime'] + (self.challengeDuration*86400) - time.time()
+        self.trashCost = round(math.ceil(self.rTime/3600)*30)
 
     def generateChallenge(self,commonStreak):
         commonStreak2 = commonStreak

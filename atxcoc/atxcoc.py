@@ -13,6 +13,7 @@ import json
 import datetime
 import pytz
 import random
+import math
 
 #shop
 from shop.shop import Shop, ShopManager
@@ -681,7 +682,8 @@ class ClashOfClans(commands.Cog):
                                     f"\n\u3000*No data yet.*"+
                                     f"\n**{elder_status[elder_req3]} Clan Participation**"+
                                     f"\n\u3000- War Stars: **{player.atxWar['warStars']+player.atxWar['cwlStars']} / 45**"+
-                                    f"\n\u3000- Capital Gold: **{clanCapitalGold} / {numerize.numerize(capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],60000),1)}**",
+                                    f"\n\u3000- Capital Gold: **{clanCapitalGold} / {numerize.numerize(capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],60000),1)}**"+
+                                    f"\n\u3000- Donations: *coming soon*",
                                 inline=False)                
                     embedpaged.append(embed)        
             
@@ -704,7 +706,7 @@ class ClashOfClans(commands.Cog):
         
         if len(action_tags) == 0:
             embed = await clash_embed(ctx=ctx,
-                message=f"You need to link a Clash of Clans account to your Discord profile to use this command.\n\nRun `;profile link` to start the linking process.",
+                message=f"You need to link a Clash of Clans account to your Discord profile to use this command.\n\nRun `;myaccount link` to start the linking process.",
                 color="fail"
                 )
             return await ctx.send(embed=embed)
@@ -807,16 +809,20 @@ class ClashOfClans(commands.Cog):
                 try:
                     clan = Clan(ctx,clan)
                 except Clash_APIError as err:
+                    await init_message.delete()
                     return await clashapi_err(self,ctx,err,clan_tag)
                 except:
+                    await init_message.delete()
                     return await clashdata_err(self,ctx)
 
                 for member in clan.members:
                     try:
                         member = Member(ctx,member['tag'])
                     except Clash_APIError as err:
+                        await init_message.delete()
                         return await clashapi_err(self,ctx,err,clan_tag)
                     except:
+                        await init_message.delete()
                         return await clashdata_err(self,ctx)
                     if member.atxWar['registrationStatus'] == 'Yes' and member.homeVillage['league']['leagueDetails'] != None and member.atxWar['missedAttacks'] < 6:
                         war_roster.append(member)
@@ -1368,8 +1374,7 @@ class ClashOfClans(commands.Cog):
                                 f"\n> Trashed: {cPass.atxChaTrashed}\n\u200b")
 
                 if newChallenge and newChallenge.challengeProgress['status'] == 'inProgress':
-                    timeRemaining = (newChallenge.challengeProgress['startTime'] + (newChallenge.challengeDuration*86400)) - time.time()
-                    trashCost = round((timeRemaining / 3600)*30)
+                    timeRemaining = newChallenge.rTime
                     timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)
                     timeRemaining_hours,timeRemaining = divmod(timeRemaining,3600)
                     timeRemaining_minutes,timeRemaining = divmod(timeRemaining,60)
@@ -1394,17 +1399,16 @@ class ClashOfClans(commands.Cog):
                             f"\n> Current Progress: {numerize.numerize(newChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(newChallenge.challengeScore,1)}"
                             f"\n> Time Remaining: {timeRemaining_text}"+
                             f"\n> Rewards: {newChallenge.challengeReward['reward']} {rewDict[newChallenge.challengeReward['type']]}"+
-                            f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
+                            f"\n> Trash Cost: {newChallenge.trashCost} <:logo_ATC:971050471110377472>"+
                             f"\n\u200b\nTo trash this challenge, use the command `;cp trash`."+
                             f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",                            
                             inline=False)
 
                     new += 1
-                    new_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{newChallenge.challengeDesc}`\n"      
+                    new_summ += f"**{account.player}** ({account.tag})\u3000{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{newChallenge.challengeDesc}`\n"      
 
                 if currentChallenge and currentChallenge.challengeProgress['status'] == 'completed':
-                    timeRemaining = (currentChallenge.challengeProgress['startTime'] + (currentChallenge.challengeDuration*86400)) - time.time()
-                    trashCost = round((timeRemaining / 3600)*30)
+                    timeRemaining = currentChallenge.rTime
                     timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)
                     timeRemaining_hours,timeRemaining = divmod(timeRemaining,3600)
                     timeRemaining_minutes,timeRemaining = divmod(timeRemaining,60)
@@ -1437,7 +1441,7 @@ class ClashOfClans(commands.Cog):
                         await bank.deposit_credits(ctx.author,currentChallenge.challengeReward['reward'])
 
                     completed += 1
-                    completed_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"
+                    completed_summ += f"**{account.player}** ({account.tag})\u3000{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"
 
                 if currentChallenge and currentChallenge.challengeProgress['status'] == 'missed':
                     embed = await clash_embed(
@@ -1455,11 +1459,10 @@ class ClashOfClans(commands.Cog):
                         inline=False)
 
                     missed += 1
-                    missed_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"          
+                    missed_summ += f"**{account.player}** ({account.tag})\u3000{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"          
 
                 if currentChallenge and currentChallenge.challengeProgress['status'] == 'inProgress':
-                    timeRemaining = (currentChallenge.challengeProgress['startTime'] + (currentChallenge.challengeDuration*86400)) - time.time()
-                    trashCost = round((timeRemaining / 3600)*30)
+                    timeRemaining = currentChallenge.rTime
                     timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)
                     timeRemaining_hours,timeRemaining = divmod(timeRemaining,3600)
                     timeRemaining_minutes,timeRemaining = divmod(timeRemaining,60)
@@ -1484,13 +1487,13 @@ class ClashOfClans(commands.Cog):
                             f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
                             f"\n> Time Remaining: {timeRemaining_text}"+
                             f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
-                            f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
+                            f"\n> Trash Cost: {currentChallenge.trashCost} <:logo_ATC:971050471110377472>"+
                             f"\n\u200b\nTo trash this challenge, use the command `;cp trash`."+
                             f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",
                         inline=False)
 
                     inprogress += 1
-                    inprogress_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"          
+                    inprogress_summ += f"**{account.player}** ({account.tag})\u3000{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"          
 
             await cPass.savePass()
             embedpaged.append(embed)
@@ -1501,9 +1504,9 @@ class ClashOfClans(commands.Cog):
 
             embedpagedsumm = []
             summary_embed = await clash_embed(
-                                    ctx=ctx,
-                                    title=f"Your Challenge Pass Summary",
-                                    message=f"In Progress: {inprogress}\u3000New: {new}\u3000Completed: {completed}\u3000Missed: {missed}\n\u200b\n")
+                                ctx=ctx,
+                                title=f"Your Challenge Pass Summary",
+                                message=f"In Progress: {inprogress}\u3000New: {new}\u3000Completed: {completed}\u3000Missed: {missed}\n\u200b\n")
 
             if new > 0:
                 summary_embed.add_field(name=f"**NEW**",value=f"{new_summ}\u200b",inline=False)
@@ -1608,102 +1611,96 @@ class ClashOfClans(commands.Cog):
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def trash(self,ctx):
         """Trash your current challenge. Only usable with an active pass."""
+        
+        timestamp = time.time()
         wait_msg = None
 
-        pass_available = {}
-        pass_select = []
+        masterDict = {}
+        selectionPass = []
+        selectionIndex = []
         
         user_accounts = await cp_accountselect(self,ctx)
 
         if not user_accounts:
             return None
 
-        if len(user_accounts) > 1:
-            select_accounts = []            
-            for account in user_accounts:
-                account_text = f"**{account.player}** ({account.tag})\n{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}"
-                select_accounts.append(account_text)
+        for account in user_accounts:
+            cPass = challengePass(ctx,account)
+            if cPass.atxChaTrack and cPass.atxChaActiveChall:
+                activeChall = Challenge(player=account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak,currPoints=cPass.atxChaPoints)
+                masterDict[account.tag] = {
+                    'account':account,
+                    'pass':cPass,
+                    'challenge':activeChall,
+                    }
+                pass_text = f"**{account.player}** ({account.tag})\u3000{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> **Trash Cost: {activeChall.trashCost} <:logo_ATC:971050471110377472>**\n> `{activeChall.challengeDesc}`"
+                selectionPass.append(pass_text)
+                selectionIndex.append(account.tag)
             
-            pass_selection = BotMultipleChoice(ctx,select_accounts,"Select an account you wish to trash a Challenge.")
-            await pass_selection.run()
-            if pass_selection.choice==None:
-                return await pass_selection.quit(f"{ctx.author.mention}, request timed out.")
-            else:
-                account_index = select_accounts.index(pass_selection.choice)
-                selected_account = user_accounts[account_index]
-                await pass_selection.quit()
-                wait_msg = await ctx.send(f"{ctx.author.mention}, please wait...")
+        trash_selection = BotMultipleChoice(ctx,selectionPass,f"{ctx.author.display_name}, select the Challenge you'd like to trash.")
+        await trash_selection.run()
+
+        if trash_selection.choice==None:
+            ctx.command.reset_cooldown(ctx)
+            return await trash_selection.quit(f"{ctx.author.mention}, request cancelled.")
         else:
-            selected_account = user_accounts[0]
+            selectIndex = selectionPass.index(trash_selection.choice)
+            userSelection = masterDict[selectionIndex[selectIndex]]
+            await trash_selection.quit()
+            wait_msg = await ctx.send(f"{ctx.author.mention}, please wait...")
 
-        cPass = challengePass(ctx,selected_account)
-        if not cPass.atxChaTrack:
+        userAccount = userSelection['account']
+        userPass = userSelection['pass']
+        userChallenge = userSelection['challenge']
+
+        bankBalance = await bank.get_balance(ctx.author)
+        if userChallenge.trashCost > bankBalance:
             embed = await clash_embed(
                 ctx=ctx,
-                title="No active Challenge Pass.",
-                message="This account doesn't have an active Challenge Pass. Run the command `;cp mypass` to start one!",
+                title="Not enough money!",
+                message=f"You need {trashCost} <:logo_ATC:971050471110377472> to trash this challenge.",
                 color="fail")
             return await ctx.send(embed=embed)
 
-        if cPass.atxChaTrack and not cPass.atxChaActiveChall:
-            embed = await clash_embed(
-                ctx=ctx,
-                title="No active Challenges.",
-                message="You aren't working on any Challenges! Run the command `;cp mypass` to start one!",
-                color="fail")
-            return await ctx.send(embed=embed)
+        timeRemaining = userChallenge.rTime
+        timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)
+        timeRemaining_hours,timeRemaining = divmod(timeRemaining,3600)
+        timeRemaining_minutes,timeRemaining = divmod(timeRemaining,60)
 
-        if cPass.atxChaTrack and cPass.atxChaActiveChall:        
-            trashChallenge = Challenge(player=selected_account,track=cPass.atxChaTrack,challDict=cPass.atxChaActiveChall,commonStreak=cPass.atxChaCommonStreak,currPoints=cPass.atxChaPoints)
-            timeRemaining = (trashChallenge.challengeProgress['startTime'] + (trashChallenge.challengeDuration*86400)) - time.time()
-            trashCost = round((timeRemaining / 3600)*30)
-            timeRemaining_days,timeRemaining = divmod(timeRemaining,86400)
-            timeRemaining_hours,timeRemaining = divmod(timeRemaining,3600)
-            timeRemaining_minutes,timeRemaining = divmod(timeRemaining,60)
+        timeRemaining_text = ''
+        if timeRemaining_days > 0:
+            timeRemaining_text += f"{int(timeRemaining_days)} day(s) "
+        if timeRemaining_hours > 0:
+            timeRemaining_text += f"{int(timeRemaining_hours)} hour(s) "
+        if timeRemaining_minutes > 0:
+            timeRemaining_text += f"{int(timeRemaining_minutes)} min(s) "
+        if timeRemaining_text == '':
+            timeRemaining_text = "a few second(s)"
 
-            timeRemaining_text = ''
-            if timeRemaining_days > 0:
-                timeRemaining_text += f"{int(timeRemaining_days)} day(s) "
-            if timeRemaining_hours > 0:
-                timeRemaining_text += f"{int(timeRemaining_hours)} hour(s) "
-            if timeRemaining_minutes > 0:
-                timeRemaining_text += f"{int(timeRemaining_minutes)} min(s) "
-            if timeRemaining_text == '':
-                timeRemaining_text = "a few second(s) "
+        userChallenge.updateChallenge(trash=True)
+        userPass.updatePass(userChallenge.challengeToJson())
+        await bank.withdraw_credits(ctx.author, userChallenge.trashCost)
+        newBalance = await bank.get_balance(ctx.author)
 
-            bankBalance = await bank.get_balance(ctx.author)
-            if trashCost > bankBalance:
-                embed = await clash_embed(
-                    ctx=ctx,
-                    title="Not enough money!",
-                    message=f"You need {trashCost} <:logo_ATC:971050471110377472> to trash this challenge.",
-                    color="fail")
-                return await ctx.send(embed=embed)
+        embed = await clash_embed(
+            ctx=ctx,
+            title=f"**Ataraxy Challenge Pass: {userAccount.player}** ({userAccount.tag})",
+            message=f"**Your Pass Track: `{traDict[userPass.atxChaTrack]}`**"+
+                    f"\n\nYou spent `{userChallenge.trashCost}` <:logo_ATC:971050471110377472> to trash the below challenge.\nYou have `{newBalance:,}` <:logo_ATC:971050471110377472> left.",
+            color="fail")
 
-            trashChallenge.updateChallenge(trash=True)
-            cPass.updatePass(trashChallenge.challengeToJson())
+        embed.add_field(name=f"**>> CHALLENGE TRASHED! <<**",
+            value=f"```{userChallenge.challengeDesc}```"+
+                f"\n> Current Progress: {numerize.numerize(userChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(userChallenge.challengeScore,0)}"
+                f"\n> Time Remaining: {timeRemaining_text}"+
+                f"\n> Rewards: {userChallenge.challengeReward['reward']} {rewDict[userChallenge.challengeReward['type']]}"+
+                 f"\n\u200b\nThis challenge can no longer be continued. Run the `;cp mypass` command to receive a new one!\n\u200b",
+            inline=False)
 
-            await bank.withdraw_credits(ctx.author, trashCost)
-
-            embed = await clash_embed(
-                ctx=ctx,
-                title=f"**Ataraxy Challenge Pass: {selected_account.player}** ({selected_account.tag})",
-                message=f"**Your Pass Track: `{traDict[cPass.atxChaTrack]}`**"+
-                        f"\n\nYou spent {trashCost} <:logo_ATC:971050471110377472> to trash the below challenge.",
-                color="fail")
-
-            embed.add_field(name=f"**>> CHALLENGE TRASHED! <<**",
-                value=f"```{trashChallenge.challengeDesc}```"+
-                    f"\n> Current Progress: {numerize.numerize(trashChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(trashChallenge.challengeScore,0)}"
-                    f"\n> Time Remaining: {timeRemaining_text}"+
-                    f"\n> Rewards: {trashChallenge.challengeReward['reward']} {rewDict[trashChallenge.challengeReward['type']]}"+
-                    f"\n\u200b\nThis challenge can no longer be continued. Run the `;cp mypass` command to receive a new one!\n\u200b",
-                inline=False)
-
-            if wait_msg:
-                await wait_msg.delete()
-            await ctx.send(embed = embed)
-            return await cPass.savePass()
+        if wait_msg:
+            await wait_msg.delete()
+        await ctx.send(embed = embed)
+        return await userPass.savePass()
 
     @challengepass.command(name='leaderboard', aliases=['lb'])
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.guild)
