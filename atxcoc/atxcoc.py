@@ -316,9 +316,13 @@ class ClashOfClans(commands.Cog):
         try:
             player = PlayerVerify(ctx,player_tag,api_token)
         except Clash_APIError as err:
-            return await clashapi_err(self,ctx,err,player_tag)
+            err_msg = error.error_description
+            err_msg += f"\n\nTag provided: `{tag}`"
+            apierr_embed = await clash_embed(ctx=ctx,message=f"{err_msg}",color="fail")
+            return await ctx.author.send(embed=apierr_embed)
         except:
-            return await clashdata_err(self,ctx)
+            dataerr_embed = await clash_embed(ctx=ctx,message=f"Oops! My systems seem to be a little busy right now. Please try again in a few minutes.",color="fail")
+            return await ctx.author.send(embed=dataerr_embed)
         else:
             if player.verifyStatus != "ok":
                 embed = await clash_embed(
@@ -1718,6 +1722,7 @@ class ClashOfClans(commands.Cog):
             with open(getFile('challengepass'),"r") as dataFile:
                 cpData = json.load(dataFile)
         except:
+            await init_message.delete()
             return await clashdata_err(self,ctx)
 
         allPasses = []
