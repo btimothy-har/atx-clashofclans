@@ -1405,7 +1405,7 @@ class ClashOfClans(commands.Cog):
                             inline=False)
 
                     new += 1
-                    new_summ += f"**{account.player}** ({account.tag})\u3000{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{newChallenge.challengeDesc}`\n"      
+                    new_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{newChallenge.challengeDesc}`\n"      
 
                 if currentChallenge and currentChallenge.challengeProgress['status'] == 'completed':
                     timeRemaining = currentChallenge.rTime
@@ -1633,7 +1633,7 @@ class ClashOfClans(commands.Cog):
                     'pass':cPass,
                     'challenge':activeChall,
                     }
-                pass_text = f"**{account.player}** ({account.tag})\u3000{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> **Trash Cost: {activeChall.trashCost} <:logo_ATC:971050471110377472>**\n> `{activeChall.challengeDesc}`"
+                pass_text = f"**{account.player}** ({account.tag})> \n{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> **Trash Cost: {activeChall.trashCost} <:logo_ATC:971050471110377472>**\n> `{activeChall.challengeDesc}`"
                 selectionPass.append(pass_text)
                 selectionIndex.append(account.tag)
             
