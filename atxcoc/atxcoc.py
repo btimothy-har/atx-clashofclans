@@ -664,7 +664,7 @@ class ClashOfClans(commands.Cog):
                                     f"\n<:ClanWars:825753092230086708> {player.atxWar['registrationStatus']}\u3000<:Ataraxy:828126720925499402> Priority: {player.atxWar['warPriority']}"+
                                     "\n**War Performance**"+
                                     f"\n<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}"+
-                                    "\n*Use `;war log` to view your War Log.*"+
+                                    "\n*Use `;mywarlog` to view your War Log.*"+
                                     "\n\u200b",
                                 inline=False)
                         embed.add_field(
@@ -691,7 +691,7 @@ class ClashOfClans(commands.Cog):
     async def war(self,ctx):
         """Clan War/War League related commands."""
 
-    @war.command(name="mylog")
+    @war.command(name="log")
     async def player_warlog(self, ctx):
         """[Members-only] Displays your Ataraxy War Log for your accounts."""
         action_tags = []
@@ -789,8 +789,8 @@ class ClashOfClans(commands.Cog):
             if warTypeSelect.choice==None:
                 return await warTypeSelect.quit()
             else:
-                await warTypeSelect.quit()
                 warRosterType = warTypeSelect.choice
+                await warTypeSelect.quit()                
         else:
             warRosterType = "Clan Wars"
 
@@ -1557,7 +1557,7 @@ class ClashOfClans(commands.Cog):
                 title=f"**Ataraxy Challenge Pass: {start_account.player}** ({start_account.tag})",
                 message=f"You've chosen the **{traDict[start_pass.atxChaTrack]}**!\n\u200b\nRun `;cp mypass` to get your first challenge!")
 
-            await account_msg.edit(embed=embed)
+            return await account_msg.edit(embed=embed)
 
     @challengepass.command()
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
@@ -1742,8 +1742,7 @@ class ClashOfClans(commands.Cog):
                 inline=False
             )
         
-        await init_message.edit(embed=embed)
-        return await init_message.delete()
+        return await init_message.edit(embed=embed)
     
     #@commands.command(name="clan")
     #async def atxclans(self, ctx, arg):
