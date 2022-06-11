@@ -1398,8 +1398,8 @@ class ClashOfClans(commands.Cog):
                         value=f"```{newChallenge.challengeDesc}```"+
                             f"\n> Current Progress: {numerize.numerize(newChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(newChallenge.challengeScore,1)}"
                             f"\n> Time Remaining: {timeRemaining_text}"+
-                            f"\n> Rewards: {newChallenge.challengeReward['reward']} {rewDict[newChallenge.challengeReward['type']]}"+
-                            f"\n> Trash Cost: {newChallenge.trashCost} <:logo_ATC:971050471110377472>"+
+                            f"\n> Rewards: {newChallenge.challengeReward['reward']:,} {rewDict[newChallenge.challengeReward['type']]}"+
+                            f"\n> Trash Cost: {newChallenge.trashCost:,} <:logo_ATC:971050471110377472>"+
                             f"\n\u200b\nTo trash this challenge, use the command `;cp trash`."+
                             f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",                            
                             inline=False)
@@ -1433,7 +1433,7 @@ class ClashOfClans(commands.Cog):
                         value=f"```{currentChallenge.challengeDesc}```"+
                             f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
                             f"\n> Time Remaining: {timeRemaining_text}"+
-                            f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
+                            f"\n> Rewards: {currentChallenge.challengeReward['reward']:,} {rewDict[currentChallenge.challengeReward['type']]}"+
                             f"\n\u200b\nRewards have been credited.\n*To start a new challenge, run the `;cp mypass` command again.*\n\u200b",
                         inline=False)
 
@@ -1454,7 +1454,7 @@ class ClashOfClans(commands.Cog):
                         value=f"```{currentChallenge.challengeDesc}```"+
                             f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
                             f"\n> Time Limit: {currentChallenge.challengeDuration}"+
-                            f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
+                            f"\n> Rewards: {currentChallenge.challengeReward['reward']:,} {rewDict[currentChallenge.challengeReward['type']]}"+
                             f"\n\u200b\nThis challenge cannot be continued.\n*To start a new challenge, run the `;cp mypass` command again.*\n\u200b",
                         inline=False)
 
@@ -1486,8 +1486,8 @@ class ClashOfClans(commands.Cog):
                         value=f"```{currentChallenge.challengeDesc}```"+
                             f"\n> Current Progress: {numerize.numerize(currentChallenge.challengeProgress['currentScore'],1)} / {numerize.numerize(currentChallenge.challengeScore,1)}"
                             f"\n> Time Remaining: {timeRemaining_text}"+
-                            f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
-                            f"\n> Trash Cost: {currentChallenge.trashCost} <:logo_ATC:971050471110377472>"+
+                            f"\n> Rewards: {currentChallenge.challengeReward['reward']:,} {rewDict[currentChallenge.challengeReward['type']]}"+
+                            f"\n> Trash Cost: {currentChallenge.trashCost:,} <:logo_ATC:971050471110377472>"+
                             f"\n\u200b\nTo trash this challenge, use the command `;cp trash`."+
                             f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",
                         inline=False)
