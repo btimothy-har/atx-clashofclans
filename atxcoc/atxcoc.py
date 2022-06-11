@@ -735,14 +735,12 @@ class ClashOfClans(commands.Cog):
                                 for war in player.atxWarLog[::-1]:
                                     if clan.tag == war['clan']['tag']:
                                         war_text = {}
-
                                         if war['result']=="win":
                                             win_count+=1
                                         elif war['result']=="lose":
                                             lost_count+=1
                                         else:
                                             draw_count+=1
-
                                         war_text['title'] = f"> **{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
                                         war_attacks = f"> \u200b\u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
                                         war_defense = f"\n> \u200b\u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
@@ -1313,9 +1311,18 @@ class ClashOfClans(commands.Cog):
     async def mypass(self,ctx):
         """Check your Pass progress and Challenge details."""
         embedpaged = []
-        completed = False
-        missed = False
         wait_msg = None
+
+        inprogress = 0
+        inprogress_summ = "\u200b"
+        missed = 0
+        missed_summ = "\u200b"
+        completed = 0
+        completed_summ = "\u200b"
+        new = 0
+        new_summ = "\u200b"
+        notstarted = 0
+        notstarted_summ = "\u200b"
 
         user_accounts = await cp_accountselect(self,ctx)
         if not user_accounts:
@@ -1326,7 +1333,7 @@ class ClashOfClans(commands.Cog):
         for account in user_accounts:
             cPass = challengePass(ctx,account)
             newChallenge = None
-            currentChallenge = None
+            currentChallenge = None            
 
             headerTitle = f"**Ataraxy Challenge Pass: {account.player}** ({account.tag})"
 
@@ -1337,6 +1344,8 @@ class ClashOfClans(commands.Cog):
                     ctx=ctx,
                     title=headerTitle,
                     message=headerMessage)
+                notstarted += 1
+                notstarted_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n"
 
             if cPass.atxChaTrack == 'war' or cPass.atxChaTrack == 'farm':
                 if not cPass.atxChaActiveChall:
@@ -1384,7 +1393,10 @@ class ClashOfClans(commands.Cog):
                             f"\n> Trash Cost: {trashCost} <:logo_ATC:971050471110377472>"+
                             f"\n\u200b\nTo trash this challenge, use the command `;cp trash`."+
                             f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",                            
-                            inline=False)                 
+                            inline=False)
+
+                    new += 1
+                    new_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{newChallenge.challengeDesc}`\n"      
 
                 if currentChallenge and currentChallenge.challengeProgress['status'] == 'completed':
                     timeRemaining = (currentChallenge.challengeProgress['startTime'] + (currentChallenge.challengeDuration*86400)) - time.time()
@@ -1419,7 +1431,9 @@ class ClashOfClans(commands.Cog):
 
                     if currentChallenge.challengeReward['type'] == 'atc':
                         await bank.deposit_credits(ctx.author,currentChallenge.challengeReward['reward'])
-                    completed = True
+
+                    completed += 1
+                    completed_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"
 
                 if currentChallenge and currentChallenge.challengeProgress['status'] == 'missed':
                     embed = await clash_embed(
@@ -1435,7 +1449,9 @@ class ClashOfClans(commands.Cog):
                             f"\n> Rewards: {currentChallenge.challengeReward['reward']} {rewDict[currentChallenge.challengeReward['type']]}"+
                             f"\n\u200b\nThis challenge cannot be continued.\n*To start a new challenge, run the `;cp mypass` command again.*\n\u200b",
                         inline=False)
-                    missed = False                
+
+                    missed += 1
+                    missed_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"          
 
                 if currentChallenge and currentChallenge.challengeProgress['status'] == 'inProgress':
                     timeRemaining = (currentChallenge.challengeProgress['startTime'] + (currentChallenge.challengeDuration*86400)) - time.time()
@@ -1469,13 +1485,38 @@ class ClashOfClans(commands.Cog):
                             f"\n\u200b\nRemember to run the `;cp mypass` command to update your stats and to complete challenges!\n\u200b",
                         inline=False)
 
+                    inprogress += 1
+                    inprogress_summ += f"**{account.player}** ({account.tag})\n> {th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> `{currentChallenge.challengeDesc}`\n"          
+
             await cPass.savePass()
             embedpaged.append(embed)
 
         if wait_msg:
             await wait_msg.delete()
         if len(embedpaged)>1:
-            paginator = BotEmbedPaginator(ctx,embedpaged)
+
+            embedpagedsumm = []
+            summary_embed = await clash_embed(
+                                    ctx=ctx,
+                                    title=f"Your Challenge Pass Summary",
+                                    message=f"In Progress: {inprogress}\u3000New: {new}\u3000Completed: {completed}\u3000Missed: {missed}\n\u200b\n")
+
+            if new > 0:
+                summary_embed.add_field(name=f"**NEW**",value=f"{new_summ}\u200b",inline=False)
+            if completed > 0:
+                summary_embed.add_field(name=f"**COMPLETED**",value=f"{completed_summ}\u200b",inline=False)
+            if missed > 0:
+                summary_embed.add_field(name=f"**MISSED**",value=f"{missed_summ}\u200b",inline=False)
+            if inprogress > 0:
+                summary_embed.add_field(name=f"**IN PROGRESS**",value=f"{inprogress_summ}\u200b",inline=False)
+            if notstarted > 0:
+                summary_embed.add_field(name=f"**NOT STARTED**",value=f"{notstarted_summ}\u200b",inline=False)
+            
+
+            embedpagedsumm.append(summary_embed)
+            embedpagedsumm.extend(embedpaged)
+
+            paginator = BotEmbedPaginator(ctx,embedpagedsumm)
             return await paginator.run()
         elif len(embedpaged)==1:
             return await ctx.send(embed=embedpaged[0])
