@@ -65,13 +65,13 @@ api_key = apiKeys['Key']
 a_header = {'Accept':'application/json','authorization':'Bearer '+api_key}
 
 error_definitions = {
-    400:'Incorrect parameters were provided',
-    403:'Authentication error. Please verify the API Key being used.',
-    404:'Information was not found for this clan/player.',
-    429:'Request limits exceeded. Please try again later.',
-    500:'Unknown error occurred.',
-    503:'Clash of Clans API is currently under maintenance.',
-    504:'Request timed out.'
+    400:"Incorrect parameters were provided",
+    403:"Authentication error. Please verify the API Key being used.",
+    404:"I couldn't find this clan/player tag.",
+    429:"Request limits exceeded. Please try again later.",
+    500:"Unknown error occurred.",
+    503:"Clash of Clans API is currently under maintenance.",
+    504:"Request timed out.",
     } 
 
 class Clash_APIError(Exception):
@@ -82,6 +82,31 @@ class Clash_APIError(Exception):
         
     def __str__(self):
         return f"Clash API Error Code [{self.error_code}]: {self.error_description}. Attempted end point: {self.end_point}"
+
+class Clash_JsonError(Exception):
+    def __init__(self,filename):
+        self.filename = filename
+        
+    def __str__(self):
+        return f"Clash JSON Error."
+
+class Clash_ClassError(Exception):
+    def __init__(self):
+        self.message = "An API error ocurred when attempting to retrieve data from the Clash API."
+    def __str__(self):
+        return f"Clash API Error. Please refer to admin logs."
+
+class Clash_NotMember(Exception):
+    def __init__(self):
+        self.message = "This player is not a current member of Ataraxy."
+    def __str__(self):
+        return f"This player is not a current member of Ataraxy."
+
+class StatTooHigh(Exception):
+    def __init__(self):
+        self.message = "Achievement Stat in COC has hit maximum."
+    def __str__(self):
+        return f"Achievement Stat in COC has hit maximum."
 
 def getTroops(cat):
     if cat not in list(troops.keys()):
@@ -155,35 +180,13 @@ def clashapi_leagueinfo(league_id=29000022,req_id=0):
         }
     api_result = requests.get(api_request[req_id],headers=a_header)
     return api_return(api_request,api_result)
-    
-class Clash_ClassError(Exception):
-    def __init__(self):
-        self.message = "An API error ocurred when attempting to retrieve data from the Clash API."
-    def __str__(self):
-        return f"Clash API Error. Please refer to admin logs."
-
-class Clash_NotMember(Exception):
-    def __init__(self):
-        self.message = "This player is not a current member of Ataraxy."
-    def __str__(self):
-        return f"This player is not a current member of Ataraxy."
-
-class StatTooHigh(Exception):
-    def __init__(self):
-        self.message = "Achievement Stat in COC has hit maximum."
-    def __str__(self):
-        return f"Achievement Stat in COC has hit maximum."
 
 class Clan:
     def __init__(self,ctx,clan_tag):
         tag = clan_tag.upper().replace('#','').replace('O','0')
+        api_clan = clashapi_clan(tag,0)
         
-        #check if is valid playertag:
-        try:
-            api_clan = clashapi_clan(tag,0)
-        except:
-            raise Clash_ClassError
-        else:
+        if api_clan:
             self.tag = api_clan['tag']
             self.clan = api_clan['name']
             self.badges = api_clan.get('badgeUrls',None)
@@ -265,7 +268,6 @@ class Clan:
                         warUpdates.append(cwlWar)
         except:
             pass
-
         if len(warUpdates) >= 1:
             for war in warUpdates:
                 warContinue = True
@@ -275,25 +277,21 @@ class Clan:
                 else:                                
                     clanPos = 'clan'
                     oppoPos = 'opponent'
-
                 try:
                     with open(getFile('warlog'),"r") as dataFile:
                         warLog = json.load(dataFile)
-
                 except:
                     warLog = {
                         "current": {
                             self.tag: []
                             }
                         }
-
                 for season, clanLogs in list(warLog.items()):
                     for clanW, logs in list(clanLogs.items()):
                         if clanW == self.tag:
                             for warRecord in logs:
                                 if war[oppoPos]['tag'] == warRecord['opponent']['tag'] and war['endTime'] == warRecord['endTime']:
                                     warContinue = False
-
                 if warContinue:
                     warCount += 1
                     if war[clanPos]['stars'] > war[oppoPos]['stars']:
@@ -369,13 +367,11 @@ class Player():
     #class to gather and compile stats for players from API
     def __init__(self,ctx,player_tag):
         tag = player_tag.upper().replace('#','').replace('O','0')
-        self.ctx = ctx        
-        #check if is valid playertag:
-        try:
-            api_player = clashapi_player(tag)
-        except:
-            raise Clash_ClassError
-        else:
+        self.ctx = ctx
+        
+        api_player = clashapi_player(tag)
+        
+        if api_player:
             if api_player['townHallLevel'] >= 12:
                 townhall_text = f"**{api_player['townHallLevel']}**-{api_player['townHallWeaponLevel']}"
             else:
@@ -501,11 +497,9 @@ class PlayerVerify(Player):
         self.ctx = ctx
         Player.__init__(self,self.ctx,player_tag)
 
-        try:
-            api_verify = clashapi_pverify(self.tag,api_token)
-        except:
-            raise Clash_ClassError
-        else:
+        api_verify = clashapi_pverify(self.tag,api_token)
+
+        if api_verify:
             self.verifyTag = api_verify.get('tag',"")
             self.verifyToken = api_verify.get('token',"")
             self.verifyStatus = api_verify.get('status',"")
@@ -516,9 +510,11 @@ class Member(Player):
         self.ctx = ctx
         Player.__init__(self,self.ctx,player_tag)
         
-        with open(getFile('players'),"r") as dataFile:
-            playerJson = json.load(dataFile)
-        
+        try:
+            with open(getFile('players'),"r") as dataFile:
+                playerJson = json.load(dataFile)
+        except:
+            raise Clash_JsonError
         try:
             playerJsonExtract = playerJson['current'][self.tag]
         except:
@@ -824,12 +820,10 @@ class Member(Player):
                     cwlData = json.load(dataFile)
             except:
                 cwlData = {}
-
             try:
                 cwlClanData = cwlData[cwlClan]
             except KeyError:
                 cwlData = {cwlClan: {} }
-
             cwlData[cwlClan][self.tag] = {
                 'tag': self.tag,
                 'player': self.player,
