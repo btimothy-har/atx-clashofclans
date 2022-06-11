@@ -1754,14 +1754,14 @@ class ClashOfClans(commands.Cog):
                 lb_pass = {
                     'Pos': war_lb_position,
                     'Player': cPass.player,
-                    'Points': cPass.atxChaPoints,
+                    'Points': f"{cPass.atxChaPoints:,}",
                     'C/M/T': f"{cPass.atxChaCompleted}/{cPass.atxChaMissed}/{cPass.atxChaTrashed}"}
                 war_lb.append(lb_pass)
 
         embed = await clash_embed(
             ctx=ctx,
             title=f"Ataraxy Challenge Pass Leaderboard",
-            message=f"*{season.capitalize()} Season* \n*C: Completed / M: Missed / T: Trashed*")
+            message=f"*{season.capitalize()} Season* \n`C: Completed / M: Missed / T: Trashed`")
 
         if len(war_lb) > 0:
             embed.add_field(name=f"**THE WARPATH**",
