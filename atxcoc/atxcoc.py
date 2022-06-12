@@ -1998,7 +1998,7 @@ class ClashOfClans(commands.Cog):
                     'Baby Dragon': 1,
                     'Valkyrie': 1,
                     'Wizard': 1,
-                    'Archer': 2
+                    'Archer': 3
                     },
                     {
                     'Baby Dragon':1,
@@ -2050,16 +2050,17 @@ class ClashOfClans(commands.Cog):
                 warParticipants.sort(key=lambda x:(x['mapPosition']))
                 
                 for participant in warParticipants:
+
                     ccLevel = playerData[participant['tag']]['clanCastleLevel']
+                    await ctx.send(ccLevel)
 
                     if ccLevel > 1:
                         if ccLevel == 9:
                             ccLevel = 10
                         elif ccLevel == 6:
                             ccLevel = 7
-
                         ccSelect = random.choice(recommendClanCastle[ccLevel])
-                    
+
                         ccText = []
                         for troop, qty in ccSelect.items():
                             ccText.append(f"{troop} x{qty}")
@@ -2076,9 +2077,9 @@ class ClashOfClans(commands.Cog):
                             }
                         participantList.append(participantDict)
 
-                    for troop, qty in troopLibrary.items():
-                        if qty > 0:
-                            warCCsumm += f"> {troop}: {qty}\n"
+                for troop, qty in troopLibrary.items():
+                    if qty > 0:
+                        warCCsumm += f"> {troop}: {qty}\n"
                     
                 embed = await clash_embed(
                         ctx=ctx,
