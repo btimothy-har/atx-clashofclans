@@ -1,7 +1,8 @@
 from redbot.core import Config, commands, bank
+from redbot.core.utils.chat_formatting import box, humanize_list, humanize_number, humanize_timedelta, pagify
 from copy import deepcopy
 from numerize import numerize
-from .coc_resources import Clash_APIError, Clash_ClassError, Clash_NotMember, StatTooHigh, Clan, Player, PlayerVerify, Member, challengePass, Challenge, getTroops, getFile, getServerID, clashJsonLock, clashapi_player, clashapi_clan, clashapi_pverify, clashapi_leagueinfo, clashapi_cwl, getMaxTroops
+from .coc_resources import Clash_APIError, Clash_ClassError, Clash_NotMember, StatTooHigh, Clan, Player, PlayerVerify, Member, challengePass, Challenge, getTroops, getFile, getServerID, clashJsonLock, clashapi_player, clashapi_clan, clashapi_pverify, clashapi_leagueinfo, clashapi_cwl, getMaxTroops, troops
 from discord.utils import get
 from disputils import BotEmbedPaginator, BotConfirmation, BotMultipleChoice
 from tabulate import tabulate
@@ -806,6 +807,8 @@ class ClashOfClans(commands.Cog):
             ctx=ctx,
             message=f"Fetching data... please wait.")
         init_message = await ctx.send(embed=embed)
+
+
 
         if warRosterType == "Clan Wars":
             for clan in registered_clans:
@@ -1881,7 +1884,7 @@ class ClashOfClans(commands.Cog):
                         promoteElder = True
                     #if playerLastSeason['donations']['sent']['season'] >= 1000:
                     #    promoteElder = True
-                    if playerLastSeason['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq[playerLastSeason]:
+                    if playerLastSeason['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq[playerLastSeason['townHallLevel']]:
                         promoteElder = True
 
                 if promoteElder:
@@ -1895,7 +1898,7 @@ class ClashOfClans(commands.Cog):
 
                     if playerCurrent.atxMemberStatus=='member' and playerCurrent.atxRank!='Leader':
                         playerCurrent.atxRank = "Elder"
-                        #playerCurrent.saveData()
+                        playerCurrent.saveData()
 
                         for user, account in registered_accounts.items():
                             if playerCurrent.tag in list(account.values())[0] and user not in elders_gp:
@@ -1930,3 +1933,167 @@ class ClashOfClans(commands.Cog):
                 inline=False)
 
         return await ctx.send(embed=embed)
+    
+    @clan_admin.command(name="warcc")
+    @commands.is_owner()
+    async def generate_clancastle(self,ctx):
+        """Generate War Clan Castle suggestions. Does not suggest Super Troops."""
+
+        recommendClanCastle = {
+            14: [   {
+                    'Lava Hound': 1,
+                    'Headhunter': 1,
+                    'Archer': 9,
+                    },
+                    {
+                    'Lava Hound': 1,
+                    'Headhunter': 2,
+                    'Archer': 3,
+                    },
+                    {
+                    'Lava Hound': 1,
+                    'Ice Golem': 1,
+                    }   ],
+            13: [   {
+                    'Lava Hound': 1,
+                    'Headhunter': 1,
+                    'Archer': 9,
+                    },
+                    {
+                    'Lava Hound': 1,
+                    'Headhunter': 2,
+                    'Goblin': 3,
+                    },
+                    {
+                    'Dragon': 1,
+                    'Witch': 1,
+                    'Archer': 3,
+                    },
+                    {
+                    'Lava Hound': 1,
+                    'Ice Golem': 1,
+                    }   ],
+            12: [   {
+                    'Lava Hound': 1,
+                    'Headhunter': 1,
+                    'Archer': 4,
+                    },
+                    {
+                    'Dragon': 1,
+                    'Witch': 1,
+                    'Archer': 8
+                    }   ],
+            10: [   {
+                    'Baby Dragon': 1,
+                    'Witch': 2,
+                    'Archer': 1
+                    },
+                    {
+                    'Lava Hound': 1,
+                    'Archer': 5
+                    },
+                    {
+                    'Dragon': 1,
+                    'Witch': 1,
+                    'Archer': 3
+                    }   ],
+            9:  [   {  
+                    'Baby Dragon': 1,
+                    'Witch': 1,
+                    'Archer': 8
+                    },
+                    {
+                    'Dragon': 1,
+                    'Archer': 10
+                    },
+                    {
+                    'Lava Hound': 1
+                    }   ],
+            8:  [   {
+                    'Baby Dragon': 1,
+                    'Valkyrie': 1,
+                    'Wizard': 1,
+                    'Archer': 2
+                    },
+                    {
+                    'Baby Dragon':1,
+                    'Witch':1,
+                    'Archer':3
+                    },
+                    {
+                    'Dragon':1,
+                    'Wizard':1,
+                    'Archer':1
+                    }   ],
+            6:  [   {
+                    'Dragon':1,
+                    }   ],
+            4:  [   {
+                    'Ice Golem':1,
+                    }
+                ]
+            }         
+        embedpaged = []
+        registered_clans = await self.config.clans()
+
+        for clan in registered_clans:
+            all_troops = troops['elixir_troops'] + troops['dark_troops']
+            troopLibrary = {}
+            for troop in all_troops:
+                troopLibrary[troop] = 0
+            
+            currentWar = clashapi_clan(clan,3)
+            if currentWar['state'] == 'preparation':
+                participantList = []
+                warTitle = f"{currentWar['clan']['name']} vs {currentWar['opponent']['name']}"
+                warCCsumm = ""
+
+                warParticipants = currentWar['clan']['members']
+                warParticipants.sort(key=lambda x:(x['mapPosition']))
+                
+                for participant in warParticipants:
+                    if participant['townhallLevel'] == 11:
+                        thRef = 10
+                    elif participant['townhallLevel'] == 7:
+                        thRef = 6
+                    elif participant['townhallLevel'] == 5:
+                        thRef = 4
+                    else:
+                        thRef = participant['townhallLevel']
+                    ccSelect = random.choice(recommendClanCastle[thRef])
+                    
+                    ccText = []
+                    for troop, qty in ccSelect.items():
+                        ccText.append(f"{troop} x{qty}")
+                        troopLibrary[troop] += qty
+                    participantDict = {
+                        'title': f"{th_emotes[int(participant['townhallLevel'])]} **{participant['name']}** ({participant['tag']})",
+                        'desc': f"{humanize_list(ccText)}",
+                        }
+                    participantList.append(participantDict)
+
+                for troop, qty in troopLibrary.items():
+                    if qty > 0:
+                        warCCsumm += f"> {troop}: {qty}\n"
+
+                embed = await clash_embed(
+                        ctx=ctx,
+                        title=warTitle,
+                        show_author=True)
+                for participant in participantList:
+                    embed.add_field(
+                        name=participant['title'],
+                        value=participant['desc'],
+                        inline=False)
+                embed.add_field(
+                    name=f"__Troop Totals__",
+                    value=warCCsumm,
+                    inline=False)
+
+                embedpaged.append(embed)
+
+        if len(embedpaged)>1:
+            paginator = BotEmbedPaginator(ctx,embedpaged)
+            return await paginator.run()
+        elif len(embedpaged)==1:
+            return await ctx.send(embed=embedpaged[0])

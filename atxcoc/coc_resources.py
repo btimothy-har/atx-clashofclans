@@ -19,9 +19,9 @@ with open(os.path.join(cogdir,'data_resources.json'),'r') as dataResourceFile:
     serverIDs = dataResource['serverIDs']
 
 troops = {
-    'elixir_troops':["Barbarian","Archer","Giant","Goblin","Wall Breaker","Balloon","Wizard","Healer","Dragon","P.E.K.K.A","Baby Dragon","Miner","Electro Dragon","Yeti"],
+    'elixir_troops':["Barbarian","Archer","Giant","Goblin","Wall Breaker","Balloon","Wizard","Healer","Dragon","P.E.K.K.A","Baby Dragon","Miner","Electro Dragon","Yeti","Dragon Rider"],
     'dark_troops':["Minion","Hog Rider","Valkyrie","Golem","Witch","Lava Hound","Bowler","Ice Golem","Headhunter"],
-    'siege_machines':["Wall Wrecker", "Battle Blimp", "Stone Slammer", "Siege Barracks", "Log Launcher"],
+    'siege_machines':["Wall Wrecker", "Battle Blimp", "Stone Slammer", "Siege Barracks", "Log Launcher","Flame Flinger"],
     'hero_pets':["L.A.S.S.I", "Electro Owl", "Mighty Yak", "Unicorn"],
     'super_troops':["Super Barbarian","Super Archer","Super Giant","Sneaky Goblin","Super Wall Breaker","Rocket Balloon","Super Wizard","Super Dragon","Inferno Dragon","Super Minion","Super Valkyrie","Super Witch","Ice Hound","Super Bowler"],
     'elixir_spells':["Lightning Spell","Healing Spell","Rage Spell","Jump Spell","Freeze Spell","Clone Spell","Invisibility Spell"],
