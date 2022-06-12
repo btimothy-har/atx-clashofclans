@@ -791,7 +791,7 @@ class Member(Player):
                 "memberStatus": self.atxMemberStatus,
                 "rank": self.atxRank,
                 "lastUpdated": self.timestamp,
-                "townHallLevel": self.atxTownHallLevel
+                "townHallLevel": self.atxTownHallLevel,
                 "lastSeen": self.atxLastSeen,
                 "donations": self.atxDonations,
                 "loot": self.atxLoot,
