@@ -2052,8 +2052,6 @@ class ClashOfClans(commands.Cog):
                 for participant in warParticipants:
 
                     ccLevel = playerData[participant['tag']]['clanCastleLevel']
-                    await ctx.send(ccLevel)
-
                     if ccLevel > 1:
                         if ccLevel == 9:
                             ccLevel = 10
