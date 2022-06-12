@@ -586,8 +586,8 @@ class Member(Player):
         #only update stats for members
         if self.atxMemberStatus=='member':
             self.atxTownHallLevel = self.homeVillage['townHall']['thLevel']
+            self.atxLastSeen["currentClan"] = self.clan['clan_info']['tag']
             if self.clan['clan_info']['tag'] not in self.atxLastSeen['clans']:
-                self.atxLastSeen["currentClan"] = self.clan['clan_info']['tag']
                 self.atxLastSeen["clans"].append(self.clan['clan_info']['tag'])
             self.atxLastSeen['timer'] += (self.timestamp - self.atxLastUpdated)
 
