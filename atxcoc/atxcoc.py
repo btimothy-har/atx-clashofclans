@@ -697,10 +697,10 @@ class ClashOfClans(commands.Cog):
     async def war(self,ctx):
         """Clan War/War League related commands."""
 
-    @war.command(name="log")
+    @war.command(name="playerlog")
     async def player_warlog(self, ctx, player_tag=None):
         """[Members-only] Displays your Ataraxy War Log for your accounts."""
-        
+
         action_tags = []
         if player_tag==None:
             for account in await self.config.user(ctx.author).players():
@@ -728,7 +728,7 @@ class ClashOfClans(commands.Cog):
                         if len(player.atxWarLog)>0:
                             embed = await clash_embed(ctx=ctx,
                                 title=f"{player.player} ({player.tag})",
-                                message=f"\n\u200b\u3000<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}",
+                                message=f"\n\u200b\u3000<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}\n\u200b\u3000<:Ataraxy:828126720925499402> Priority: {player.atxWar['warPriority']}",
                                 show_author=True)            
                             try:
                                 embed.set_thumbnail(url=player.homeVillage['league']['leagueDetails']['iconUrls']['medium'])
