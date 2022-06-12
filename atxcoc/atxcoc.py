@@ -698,11 +698,15 @@ class ClashOfClans(commands.Cog):
         """Clan War/War League related commands."""
 
     @war.command(name="log")
-    async def player_warlog(self, ctx):
+    async def player_warlog(self, ctx, player_tag=None):
         """[Members-only] Displays your Ataraxy War Log for your accounts."""
+        
         action_tags = []
-        for account in await self.config.user(ctx.author).players():
-            action_tags.append(account)
+        if player_tag==None:
+            for account in await self.config.user(ctx.author).players():
+                action_tags.append(account)
+        else:
+            action_tags.append(player_tag)
         
         if len(action_tags) == 0:
             embed = await clash_embed(ctx=ctx,
@@ -1633,7 +1637,7 @@ class ClashOfClans(commands.Cog):
                     'pass':cPass,
                     'challenge':activeChall,
                     }
-                pass_text = f"**{account.player}** ({account.tag})\n{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> **Trash Cost: {activeChall.trashCost} <:logo_ATC:971050471110377472>**\n> `{activeChall.challengeDesc}`"
+                pass_text = f"**{account.player}** ({account.tag})\n{th_emotes[int(account.homeVillage['townHall']['thLevel'])]} {account.homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account.clan['clan_info']['name']}\n> **Trash Cost: {activeChall.trashCost:,} <:logo_ATC:971050471110377472>**\n> `{activeChall.challengeDesc}`"
                 selectionPass.append(pass_text)
                 selectionIndex.append(account.tag)
             
@@ -1686,7 +1690,7 @@ class ClashOfClans(commands.Cog):
             ctx=ctx,
             title=f"**Ataraxy Challenge Pass: {userAccount.player}** ({userAccount.tag})",
             message=f"**Your Pass Track: `{traDict[userPass.atxChaTrack]}`**"+
-                    f"\n\nYou spent `{userChallenge.trashCost}` <:logo_ATC:971050471110377472> to trash the below challenge.\nYou have `{newBalance:,}` <:logo_ATC:971050471110377472> left.",
+                    f"\n\nYou spent `{userChallenge.trashCost:,}` <:logo_ATC:971050471110377472> to trash the below challenge.\nYou have `{newBalance:,}` <:logo_ATC:971050471110377472> left.",
             color="fail")
 
         embed.add_field(name=f"**>> CHALLENGE TRASHED! <<**",
