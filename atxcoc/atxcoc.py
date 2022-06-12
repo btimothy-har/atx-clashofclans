@@ -1938,9 +1938,8 @@ class ClashOfClans(commands.Cog):
     @commands.is_owner()
     async def generate_clancastle(self,ctx):
         """Generate War Clan Castle suggestions. Does not suggest Super Troops."""
-
         recommendClanCastle = {
-            14: [   {
+            10: [   {
                     'Lava Hound': 1,
                     'Headhunter': 1,
                     'Archer': 9,
@@ -1953,27 +1952,13 @@ class ClashOfClans(commands.Cog):
                     {
                     'Lava Hound': 1,
                     'Ice Golem': 1,
-                    }   ],
-            13: [   {
-                    'Lava Hound': 1,
-                    'Headhunter': 1,
-                    'Archer': 9,
-                    },
-                    {
-                    'Lava Hound': 1,
-                    'Headhunter': 2,
-                    'Goblin': 3,
                     },
                     {
                     'Dragon': 1,
                     'Witch': 1,
                     'Archer': 3,
-                    },
-                    {
-                    'Lava Hound': 1,
-                    'Ice Golem': 1,
                     }   ],
-            12: [   {
+            8: [   {
                     'Lava Hound': 1,
                     'Headhunter': 1,
                     'Archer': 4,
@@ -1983,7 +1968,7 @@ class ClashOfClans(commands.Cog):
                     'Witch': 1,
                     'Archer': 8
                     }   ],
-            10: [   {
+            7: [   {
                     'Baby Dragon': 1,
                     'Witch': 2,
                     'Archer': 1
@@ -1997,7 +1982,7 @@ class ClashOfClans(commands.Cog):
                     'Witch': 1,
                     'Archer': 3
                     }   ],
-            9:  [   {  
+            5:  [   {  
                     'Baby Dragon': 1,
                     'Witch': 1,
                     'Archer': 8
@@ -2009,7 +1994,7 @@ class ClashOfClans(commands.Cog):
                     {
                     'Lava Hound': 1
                     }   ],
-            8:  [   {
+            4:  [   {
                     'Baby Dragon': 1,
                     'Valkyrie': 1,
                     'Wizard': 1,
@@ -2025,10 +2010,10 @@ class ClashOfClans(commands.Cog):
                     'Wizard':1,
                     'Archer':1
                     }   ],
-            6:  [   {
+            3:  [   {
                     'Dragon':1,
                     }   ],
-            4:  [   {
+            2:  [   {
                     'Ice Golem':1,
                     }
                 ]
@@ -2036,13 +2021,26 @@ class ClashOfClans(commands.Cog):
         embedpaged = []
         registered_clans = await self.config.clans()
 
+        try:
+            with open(getFile('players'),"r") as dataFile:
+                playerJson = json.load(dataFile)
+                playerData = playerJson['current']
+        except:
+            return await clashdata_err(self,ctx)
+
         for clan in registered_clans:
             all_troops = troops['elixir_troops'] + troops['dark_troops']
             troopLibrary = {}
             for troop in all_troops:
                 troopLibrary[troop] = 0
             
-            currentWar = clashapi_clan(clan,3)
+            try:
+                currentWar = clashapi_clan(clan,3)
+            except Clash_APIError as err:
+                return await clashapi_err(self,ctx,err,clan_tag)
+            except:
+                return await clashdata_err(self,ctx)
+
             if currentWar['state'] == 'preparation':
                 participantList = []
                 warTitle = f"{currentWar['clan']['name']} vs {currentWar['opponent']['name']}"
@@ -2052,30 +2050,36 @@ class ClashOfClans(commands.Cog):
                 warParticipants.sort(key=lambda x:(x['mapPosition']))
                 
                 for participant in warParticipants:
-                    if participant['townhallLevel'] == 11:
-                        thRef = 10
-                    elif participant['townhallLevel'] == 7:
-                        thRef = 6
-                    elif participant['townhallLevel'] == 5:
-                        thRef = 4
-                    else:
-                        thRef = participant['townhallLevel']
-                    ccSelect = random.choice(recommendClanCastle[thRef])
+                    ccLevel = playerData[participant['tag']]['clanCastleLevel']
+
+                    if ccLevel > 1:
+                        if ccLevel == 9:
+                            ccLevel = 10
+                        elif ccLevel == 6:
+                            ccLevel = 7
+
+                        ccSelect = random.choice(recommendClanCastle[ccLevel])
                     
-                    ccText = []
-                    for troop, qty in ccSelect.items():
-                        ccText.append(f"{troop} x{qty}")
-                        troopLibrary[troop] += qty
-                    participantDict = {
-                        'title': f"{th_emotes[int(participant['townhallLevel'])]} **{participant['name']}** ({participant['tag']})",
-                        'desc': f"{humanize_list(ccText)}",
-                        }
-                    participantList.append(participantDict)
+                        ccText = []
+                        for troop, qty in ccSelect.items():
+                            ccText.append(f"{troop} x{qty}")
+                            troopLibrary[troop] += qty
+                        participantDict = {
+                            'title': f"{th_emotes[int(participant['townhallLevel'])]} **{participant['name']}** ({participant['tag']})",
+                            'desc': f"{humanize_list(ccText)}",
+                            }
+                        participantList.append(participantDict)
+                    else:
+                        participantDict = {
+                            'title': f"{th_emotes[int(participant['townhallLevel'])]} **{participant['name']}** ({participant['tag']})",
+                            'desc': f"*No Clan Castle.*",
+                            }
+                        participantList.append(participantDict)
 
-                for troop, qty in troopLibrary.items():
-                    if qty > 0:
-                        warCCsumm += f"> {troop}: {qty}\n"
-
+                    for troop, qty in troopLibrary.items():
+                        if qty > 0:
+                            warCCsumm += f"> {troop}: {qty}\n"
+                    
                 embed = await clash_embed(
                         ctx=ctx,
                         title=warTitle,
@@ -2090,7 +2094,6 @@ class ClashOfClans(commands.Cog):
                     name=f"__Troop Totals__",
                     value=warCCsumm,
                     inline=False)
-
                 embedpaged.append(embed)
 
         if len(embedpaged)>1:

@@ -521,6 +521,7 @@ class Member(Player):
         except:
             self.atxMemberStatus = "notFound"
             self.atxTownHallLevel = 1
+            self.atxClanCastleLevel = 0
             self.atxRank = "none"
             self.atxLastUpdated = time.time()
             self.atxLastSeen = {
@@ -573,6 +574,7 @@ class Member(Player):
         else:
             self.atxMemberStatus = playerJsonExtract.get('memberStatus','notFound')
             self.atxTownHallLevel = playerJsonExtract.get('townHallLevel',1)
+            self.atxClanCastleLevel = playerJsonExtract.get('clanCastleLevel',0)
             self.atxRank = playerJsonExtract.get('rank','none')
             self.atxLastUpdated = playerJsonExtract.get('lastUpdated',0)
             self.atxLastSeen = playerJsonExtract.get('lastSeen',{"currentClan":"","clans":[],"timer":0})
@@ -599,6 +601,8 @@ class Member(Player):
                 self.atxRank = 'none'
 
             for achievement in self.homeVillage['achievements']:
+                if achievement['name'] == "Empire Builder":
+                    self.atxClanCastleLevel = achievement['value']
                 if achievement['name'] == "Gold Grab":
                     gold_total = achievement['value']
                 if achievement['name'] == "Elixir Escapade": 
@@ -792,6 +796,7 @@ class Member(Player):
                 "rank": self.atxRank,
                 "lastUpdated": self.timestamp,
                 "townHallLevel": self.atxTownHallLevel,
+                "clanCastleLevel": self.atxClanCastleLevel,
                 "lastSeen": self.atxLastSeen,
                 "donations": self.atxDonations,
                 "loot": self.atxLoot,
