@@ -520,9 +520,11 @@ class Member(Player):
             playerJsonExtract = playerJson['current'][self.tag]
         except:
             self.atxMemberStatus = "notFound"
+            self.atxTownHallLevel = 1
             self.atxRank = "none"
             self.atxLastUpdated = time.time()
             self.atxLastSeen = {
+                "currentClan": ""
                 "clans": [],
                 "timer": 0,
                 }
@@ -570,9 +572,10 @@ class Member(Player):
             self.atxWarLog = []
         else:
             self.atxMemberStatus = playerJsonExtract.get('memberStatus','notFound')
+            self.atxTownHallLevel = playerJsonExtract.get('townHallLevel',1)
             self.atxRank = playerJsonExtract.get('rank','none')
             self.atxLastUpdated = playerJsonExtract.get('lastUpdated',0)
-            self.atxLastSeen = playerJsonExtract.get('lastSeen',{"clans":[],"timer":0})
+            self.atxLastSeen = playerJsonExtract.get('lastSeen',{"currentClan":"","clans":[],"timer":0})
             self.atxDonations = playerJsonExtract.get('donations',{"received": {"season": 0,"lastUpdate": 0},"sent": {"season": 0,"lastUpdate": 0}})
             self.atxLoot = playerJsonExtract.get('loot',{"gold": {"season": 0,"lastUpdate": 0},"elixir": {"season": 0,"lastUpdate": 0},"darkElixir": {"season": 0,"lastUpdate": 0}})
             self.atxClanCapital = playerJsonExtract.get('clanCapital',{"goldContributed": {"season": 0,"lastUpdate": 0},"goldLooted": {"season": 0, "lastUpdate": 0}})
@@ -582,7 +585,9 @@ class Member(Player):
     def updateStats(self):
         #only update stats for members
         if self.atxMemberStatus=='member':
+            self.atxTownHallLevel = self.homeVillage['townHall']['thLevel']
             if self.clan['clan_info']['tag'] not in self.atxLastSeen['clans']:
+                self.atxLastSeen["currentClan"] = self.clan['clan_info']['tag']
                 self.atxLastSeen["clans"].append(self.clan['clan_info']['tag'])
             self.atxLastSeen['timer'] += (self.timestamp - self.atxLastUpdated)
 
@@ -786,6 +791,7 @@ class Member(Player):
                 "memberStatus": self.atxMemberStatus,
                 "rank": self.atxRank,
                 "lastUpdated": self.timestamp,
+                "townHallLevel": self.atxTownHallLevel
                 "lastSeen": self.atxLastSeen,
                 "donations": self.atxDonations,
                 "loot": self.atxLoot,
