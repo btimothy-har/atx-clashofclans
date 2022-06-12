@@ -2080,6 +2080,7 @@ class ClashOfClans(commands.Cog):
                         ctx=ctx,
                         title=warTitle,
                         show_author=True)
+                embed.set_thumbnail(url=currentWar['clan']['badgeUrls']['medium'])
                 for participant in participantList:
                     embed.add_field(
                         name=participant['title'],
