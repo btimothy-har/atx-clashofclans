@@ -1955,8 +1955,8 @@ class ClashOfClans(commands.Cog):
                     },
                     {
                     'Dragon': 1,
-                    'Witch': 1,
-                    'Archer': 3,
+                    'Witch': 2,
+                    'Archer': 1,
                     }   ],
             8: [   {
                     'Lava Hound': 1,
