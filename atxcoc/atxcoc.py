@@ -1116,7 +1116,7 @@ class ClashOfClans(commands.Cog):
         registered_clans = await self.config.clans()
         cg_status = await self.config.CGstatus()
 
-        if ctx.guild.id != clanserver_ID:
+        if ctx.guild.id != clanServer_ID:
             return await ctx.send(f"{ctx.author.mention} please use this command only in Ataraxy server.")
         if cg_status:
             return await ctx.send(f"{ctx.author.mention} Clan Games are already active. Use `cg close` to end the existing Clan Games.")
