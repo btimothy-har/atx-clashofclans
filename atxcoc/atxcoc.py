@@ -1319,6 +1319,38 @@ class ClashOfClans(commands.Cog):
         await self.config.CGstatus.set(False)
         return await clanAnnouncementChannel.send(embed=embed)
 
+    @cg.command(name="leaderboard", aliases=["lb"])
+    async def cg_leaderboard(self,ctx):
+        
+        clangames_data = json.load(open(getFile('clangames'),"r"))
+        clangames_series = await self.config.CGseries()
+        #clangames_series = "2022-06"
+        clangames_series_pt = datetime.datetime.strptime(f"{clangames_series}-01","%Y-%m-%d").strftime("%B %Y")
+
+        cg_participants = sorted(clangames_data[clangames_series],key=lambda p:((p['games_pos']*-1),p['townhall']),reverse=True)
+        outputTable = []
+        
+        table_ct = 0
+        for participant in cg_participants:
+            participant_table = {}
+            if participant['status'] == 'participant' and table_ct < 10:
+                participant_table['Pos'] = participant['games_pos']
+                participant_table['TH'] = participant['townhall']
+                participant_table['Player'] = participant['player']
+                participant_table['Points'] = participant['games_pts']
+                table_ct += 1
+                outputTable.append(participant_table)
+
+        embed = await clash_embed(
+            ctx=ctx,
+            title=f"<:ClanGames:834063648494190602> **ATARAXY CLAN GAMES LEADERBOARD** <:ClanGames:834063648494190602>",
+            show_author=True)
+
+        embed.add_field(name=f"{clangames_series_pt} Series",
+                    value=f"```{tabulate(outputTable,headers='keys')}```")
+
+        return await ctx.send(embed=embed)
+
     @commands.group(name="cp")
     async def challengepass(self,ctx):
         """Commands relating to the Ataraxy Challenge Pass."""
