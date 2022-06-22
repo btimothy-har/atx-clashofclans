@@ -22,7 +22,8 @@ async def dataRefresh():
     cg_status = configData['828462461169696778']['GLOBAL']['CGstatus']
     cg_series = configData['828462461169696778']['GLOBAL']['CGseries']
 
-    print(f"Clan Games: {cg_status}")
+    print(f"Clan Games Status: {cg_status}")
+    print(f"Clan Games Series: {cg_series}")
 
     #update new season
     new_season_id = []
@@ -113,12 +114,12 @@ async def dataRefresh():
                 player.inactivateMember()
                 await player.saveData(force=True)                    
                 if cg_status:
-                    await player.updateClanGames(clan,cg_series,"remove")
+                    await player.updateClanGames(cg_series,"remove")                    
             else:
                 player.updateStats()
                 await player.saveData()
                 if cg_status:
-                    await player.updateClanGames(clan,cg_series,"update")
+                    await player.updateClanGames(cg_series,"update")
 
         if player.atxMemberStatus == 'pastMember' and player.tag in clan_members:
             print(f"New Member: {player.tag} {player.player}")

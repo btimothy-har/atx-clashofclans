@@ -741,7 +741,7 @@ class Member(Player):
         self.atxWarLog.append(logData)     
         await self.saveData(force=True)
 
-    async def updateClanGames(self,clan,series,action):
+    async def updateClanGames(self,series,action):
         async with clashJsonLock('clangames'):
             with open(getFile('clangames'),"r") as dataFile:
                 jsonData = json.load(dataFile)
@@ -751,8 +751,6 @@ class Member(Player):
                 for participant in jsonData[series]:
                     if participant['tag'] == self.tag:
                         participant['status'] = "disqualified"
-                        return 1
-                return 0
 
             if action=="update":
                 leaderboard = []
@@ -773,8 +771,6 @@ class Member(Player):
                             last_rank += 1
                         else:
                             participant['games_pts'] = new_games_pts - participant['init_pts']
-                        return 1
-                return 0
 
             with open(getFile('clangames'),"w") as dataFile:
                 return json.dump(jsonData,dataFile,indent=2)
