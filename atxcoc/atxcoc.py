@@ -1322,12 +1322,16 @@ class ClashOfClans(commands.Cog):
     @cg.command(name="leaderboard", aliases=["lb"])
     async def cg_leaderboard(self,ctx):
         
-        clangames_data = json.load(open(getFile('clangames'),"r"))
+        with open(getFile('clangames'),"r") as dataFile:
+            clangames_data = json.load(dataFile)
+
         clangames_series = await self.config.CGseries()
         #clangames_series = "2022-06"
         clangames_series_pt = datetime.datetime.strptime(f"{clangames_series}-01","%Y-%m-%d").strftime("%B %Y")
 
-        cg_participants = sorted(clangames_data[clangames_series],key=lambda p:((p['games_pos']*-1),p['townhall']),reverse=True)
+        cg_participants = clangames_data[clangames_series]
+
+        cg_participants.sort(key=lambda p:(p['games_pts'],(p['games_pos']*-1),p['townhall']),reverse=True)
         outputTable = []
         
         table_ct = 0
