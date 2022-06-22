@@ -748,7 +748,7 @@ class Member(Player):
 
             if action=="remove":
             #if departing member, disqualify from clangames
-                for participant in jsonData[series][clan.tag]:
+                for participant in jsonData[series]:
                     if participant['tag'] == self.tag:
                         participant['status'] = "disqualified"
                         return 1
@@ -756,12 +756,12 @@ class Member(Player):
 
             if action=="update":
                 leaderboard = []
-                for participant in jsonData[series][clan.tag]:
+                for participant in jsonData[series]:
                     leaderboard.append(participant['games_pos'])
 
                 last_rank = max(leaderboard)
 
-                for participant in jsonData[series][clan.tag]:
+                for participant in jsonData[series]:
                     if participant['tag'] == self.tag and participant['games_pos'] == 0:
                         for achievement in self.homeVillage['achievements']:
                             if achievement['name'] == "Games Champion":
