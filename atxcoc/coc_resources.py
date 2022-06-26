@@ -1,10 +1,10 @@
 from numerize import numerize
+from datetime import datetime, timedelta
 import asyncio
 import requests
 import sys
 import os
 import json
-import datetime
 import time
 import pytz
 import random
@@ -26,6 +26,23 @@ troops = {
     'super_troops':["Super Barbarian","Super Archer","Super Giant","Sneaky Goblin","Super Wall Breaker","Rocket Balloon","Super Wizard","Super Dragon","Inferno Dragon","Super Minion","Super Valkyrie","Super Witch","Ice Hound","Super Bowler"],
     'elixir_spells':["Lightning Spell","Healing Spell","Rage Spell","Jump Spell","Freeze Spell","Clone Spell","Invisibility Spell"],
     'dark_spells':["Poison Spell","Earthquake Spell","Haste Spell","Skeleton Spell","Bat Spell"]
+    }
+
+superTroopVersions = {
+    "Barbarian": "Super Barbarian",
+    "Archer": "Super Archer",
+    "Giant": "Super Giant",
+    "Goblin": "Sneaky Goblin",
+    "Wall Breaker": "Super Wall Breaker",
+    "Balloon": "Rocket Ballon",
+    "Wizard": "Super Wizard",
+    "Dragon": "Super Dragon",
+    "Baby Dragon": "Inferno Dragon",
+    "Minion": "Super Minion",
+    "Valkyrie": "Super Valkyrie",
+    "Witch": "Super Witch",
+    "Lava Hound": "Ice Hound",
+    "Bowler": "Super Bowler"
     }
 
 maxHomeLevels = {
@@ -396,7 +413,7 @@ class Player():
                     if troop['name'] in getTroops('hero_pets'):
                         heroPets.append(troop)
                     if troop['name'] in getTroops('super_troops'):
-                        superTroops.append(troop)                  
+                        superTroops.append(troop)
                 if troop['village'] == 'builderBase':
                     builderTroops.append(troop)
 
@@ -950,34 +967,34 @@ class Challenge():
             self.challengeDesc = challDict['desc']
             self.challengeReward = challDict['reward']
             self.challengeProgress = challDict['progress']
-
+        
         self.rTime = self.challengeProgress['startTime'] + (self.challengeDuration*86400) - time.time()
         self.trashCost = round(math.ceil(self.rTime/3600)*30)
 
-    def generateChallenge(self,commonStreak):
+    def generateChallenge(self,commonStreak,trackChance=0):
         commonStreak2 = commonStreak
         player = self.member
         generateTime = time.time()
-        trackWar = ['trophies','defenses','victories','troopBoost','warStars','warTreasury']
-        trackFarm = ['lootElixir', 'lootGold', 'lootDarkElixir','seasonChallenges','obstacles','capitalGold','capitalRaid']
-        trackCommon = ['donations','request','destroyTarget','destroyTarget','destroyTarget','destroyTarget']
-        challengePool = trackWar + trackFarm + trackCommon
-        #remove Hero/Troop Upgrades, increase probability of destroyTarget
-        #trackCommon = ['donations','request','destroyTarget','heroUpgrade','troopUpgrade']
+        trackWar = ['trophies','troopBoost','warStars','warTreasury']
+        trackFarm = ['lootResources','seasonChallenges','capitalGold','heroUpgrade']
+        trackCommon = ['donations','destroyTarget','obstacles','winMultiplayer']
 
-        challengePointReward = range(300,500)
+        challengePointReward = range(100,300)
+        atcReward = range(400,600)
 
         durationMultiplier = {
             1: 1,
             2: 1.5,
             3: 2,
-            4: 3,
-            5: 4,
-            6: 7,
-            7: 10
+            4: 2.5,
+            5: 3,
+            6: 3.5,
+            7: 4
             }
 
-        trackChance = random.choice(range(max(1,commonStreak2),10))
+        if not trackChance:
+            trackChance = random.choice(range(max(1,commonStreak2),10))
+
         if trackChance > 6 or self.challPoints <= 1000:
             if self.challengeTrack == 'war':
                 random.shuffle(trackWar)
@@ -986,28 +1003,42 @@ class Challenge():
                 random.shuffle(trackWar)
                 self.challengeTask = random.choice(trackFarm)
         else:
+            challengePool = trackWar + trackFarm + (trackCommon*2)
             random.shuffle(challengePool)
             self.challengeTask = random.choice(challengePool)
+
+        if datetime.today().isoweekday() in [5,6]:
+            capitalRaidChance = random.choice(range(1,10))
+            if capitalRaidChance >= 8:
+                self.challengeTask = 'capitalRaid'
 
         #determine rewards
         if self.challengeTask in trackCommon:
             rewardType = 'atc'
+            rewardValue = random.choice(atcReward)
         elif self.challengeTrack == 'war' and self.challengeTask in trackWar:
             rewardType = 'challengePoints'
+            rewardValue = random.choice(challengePointReward)
         elif self.challengeTrack =='farm' and self.challengeTask in trackFarm:
             rewardType = 'challengePoints'
+            rewardValue = random.choice(challengePointReward)
         else:
             rewardType = 'atc'
+            rewardValue = random.choice(atcReward)
 
         try:
             if self.challengeTask == 'trophies':
-                baseScore = 150
-                availableDurations = [1,2,3,4,5,6,7]
+                baseScore = 80
+                if player.homeVillage['league']['trophies'] >= 5000:
+                    baseScore = 120
+                    availableDurations = [1]
+                else:
+                    availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
                 self.challengeDesc = f"Earn {self.challengeScore} trophies in Multiplayer Battles."
                 self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
                 self.challengeProgress = {
@@ -1018,170 +1049,182 @@ class Challenge():
                     'initStat': player.homeVillage['league']['trophies']
                     }
 
-            if self.challengeTask == 'defenses':
-                baseScore = 1
-                availableDurations = [1,2,3,4,5,6,7]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Win {self.challengeScore} defenses in Multiplayer Battles."
-                self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }
-                for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Unbreakable':
-                        initStat = achievement['value']
-                self.challengeProgress = {
-                    'status': 'inProgress',
-                    'startTime': generateTime,
-                    'completedTime': 0,
-                    'currentScore': 0,
-                    'initStat': initStat
-                    }
-
-            if self.challengeTask == 'townhall':
-                for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Humiliator':
-                        initStat = achievement['value']
-                baseScore = 3
-                availableDurations = [1,2,3,4,5,6,7]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Destroy {self.challengeScore} enemy townhalls in Multiplayer Battles."
-                self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }            
-                self.challengeProgress = {
-                    'status': 'inProgress',
-                    'startTime': generateTime,
-                    'completedTime': 0,
-                    'currentScore': 0,
-                    'initStat': initStat
-                    }
-
-            if self.challengeTask == 'victories':
-                baseScore = 5
-                availableDurations = [1,2,3,4,5,6,7]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Win {self.challengeScore} attacks in Multiplayer Battles."
-                self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }
-                for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Conqueror':
-                        initStat = achievement['value']
-                self.challengeProgress = {
-                    'status': 'inProgress',
-                    'startTime': generateTime,
-                    'completedTime': 0,
-                    'currentScore': 0,
-                    'initStat': initStat
-                    }
-
             if self.challengeTask == 'troopBoost':
-                baseScore = 1
-                availableDurations = [3,6]
-                self.challengeDuration = random.choice(availableDurations)
-                if round(durationMultiplier[self.challengeDuration]*baseScore) > 4:
-                    self.challengeScore = 4
-                else:
-                    self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Boost Troops to their Super version {self.challengeScore} times."
+                if player.homeVillage['townHall']['thLevel'] < 11:
+                    raise StatTooHigh
+                currentlyBoosted = []
+                eligibleTroops = []              
+
+                for troop in player.homeVillage['troops']['superTroops']:
+                    if troop['name'] == 'Super Barbarian' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Barbarian')
+                    if troop['name'] == 'Super Archer' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Archer')
+                    if troop['name'] == 'Super Giant' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Giant')
+                    if troop['name'] == 'Sneaky Goblin' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Goblin')
+                    if troop['name'] == 'Super Wall Breaker' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Wall Breaker')
+                    if troop['name'] == 'Rocket Balloon' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Ballon')
+                    if troop['name'] == 'Super Wizard' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Wizard')
+                    if troop['name'] == 'Super Dragon' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Dragon')
+                    if troop['name'] == 'Inferno Dragon' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Baby Dragon')
+                    if troop['name'] == 'Super Minion' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Minion')
+                    if troop['name'] == 'Super Valkyrie' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Valkyrie')
+                    if troop['name'] == 'Super Witch' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Witch')
+                    if troop['name'] == 'Ice Hound' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Lava Hound')
+                    if troop['name'] == 'Super Bowler' and troop.get('superTroopIsActive',False) == True:
+                        currentlyBoosted.append('Bowler')
+
+                for troop in player.homeVillage['troops']['elixirTroops']:
+                    if troop['name'] == 'Barbarian' and troop['level'] >= 8 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Archer' and troop['level'] >= 8 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Giant' and troop['level'] >= 9 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Goblin' and troop['level'] >= 7 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Wall Breaker' and troop['level'] >= 7 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Balloon' and troop['level'] >= 8 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Wizard' and troop['level'] >= 9 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Dragon' and troop['level'] >= 7 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Baby Dragon' and troop['level'] >= 6 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+
+                for troop in player.homeVillage['troops']['darkTroops']:
+                    if troop['name'] == 'Minion' and troop['level'] >= 8 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Valkyrie' and troop['level'] >= 7 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Witch' and troop['level'] >= 5 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Lava Hound' and troop['level'] >= 5 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+                    if troop['name'] == 'Bowler' and troop['level'] >= 4 and troop['name'] not in currentlyBoosted:
+                        eligibleTroops.append(troop['name'])
+
+                if len(eligibleTroops) == 0:
+                    raise StatTooHigh
+
+                self.challengeDuration = 3
+                self.challengeScore = 1
+                self.challengeTarget = random.choice(eligibleTroops)
+                self.challengeDesc = f"Boost {self.challengeTarget} to its Super version once."
                 self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
-                for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Superb Work':
-                        initStat = achievement['value']
                 self.challengeProgress = {
                     'status': 'inProgress',
                     'startTime': generateTime,
                     'completedTime': 0,
                     'currentScore': 0,
-                    'initStat': initStat
+                    'initStat': 0
                     }
 
             if self.challengeTask == 'warStars':
                 baseScore = 2
-                availableDurations = [2,4,6]
+                availableDurations = [2,4]
                 self.challengeDuration = random.choice(availableDurations)
                 if self.challengeDuration == 2:
                     self.challengeScore = 2
                 if self.challengeDuration == 4:
-                    self.challengeScore = 5
-                if self.challengeDuration == 6:
-                    self.challengeScore = 8            
-                self.challengeDesc = f"Earn {self.challengeScore} stars in Clan Wars. Stars lost on defense count against your total."
+                    self.challengeScore = 4
+                self.challengeDesc = f"Earn {self.challengeScore} stars in Clan Wars on offense."
                 self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
+                initStat = 0
+                for war in player.atxWarLog:
+                    initStat += war['attackStars']
                 self.challengeProgress = {
                     'status': 'inProgress',
                     'startTime': generateTime,
                     'completedTime': 0,
                     'currentScore': 0,
-                    'initStat': player.atxWar['warStars'] + player.atxWar['cwlStars']
-                    }              
+                    'initStat': initStat,
+                    }      
 
-            if self.challengeTask == 'lootElixir':
+            if self.challengeTask == 'warTreasury':
+                baseScore = 500000
+                availableDurations = [1,2,3]
+                self.challengeDuration = random.choice(availableDurations)
+                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
+                self.challengeDesc = f"Collect {numerize.numerize(self.challengeScore,1)} Gold from your Treasury."
+                self.challengeReward = {
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
+                    'type': rewardType
+                    }
                 for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Elixir Escapade':
+                    if achievement['name'] == 'Clan War Wealth':
                         initStat = achievement['value']
-                if initStat > (2000000000 - 50000000):
-                    raise StatTooHigh
-                baseScore = 1000000
-                availableDurations = [1,2,3,4,5]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Elixir from your enemies! Don't forget to spend it..."
-                self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }
                 self.challengeProgress = {
                     'status': 'inProgress',
                     'startTime': generateTime,
                     'completedTime': 0,
                     'currentScore': 0,
-                    'initStat': player.atxLoot['elixir']['season']
-                    }
+                    'initStat': initStat
+                    }       
 
-            if self.challengeTask == 'lootGold':
+            if self.challengeTask == 'lootResources':
+                maxStat = (2000000000 - 10000000)
+                eligibleResources = []
+
                 for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Gold Grab' and achievement['value'] < (2000000000 - 50000000):
-                        initStat = achievement['value']
-                if initStat > (2000000000 - 50000000):
+                    if achievement['name'] == 'Elixir Escapade' and achievement['value'] <= maxStat:
+                        eligibleResources.append('Elixir')
+                    if achievement['name'] == 'Gold Grab' and achievement['value'] <= maxStat:
+                        eligibleResources.append('Gold')
+                    if achievement['name'] == 'Heroic Heist' and achievement['value'] <= maxStat:
+                        eligibleResources.append('Dark Elixir')
+                if len(eligibleResources) == 0:
                     raise StatTooHigh
-                baseScore = 1000000
-                availableDurations = [1,2,3,4,5]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Gold from your enemies! Don't forget to spend it..."
-                self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }
-                self.challengeProgress = {
-                    'status': 'inProgress',
-                    'startTime': generateTime,
-                    'completedTime': 0,
-                    'currentScore': 0,
-                    'initStat': player.atxLoot['gold']['season']
-                    }
 
-            if self.challengeTask == 'lootDarkElixir':
-                baseScore = 20000
-                availableDurations = [1,2,3,4,5,6,7]
+                self.challengeTarget = random.choice(eligibleResources)
+
+                if player.homeVillage['townHall']['thLevel'] <= 10:
+                    if self.challengeTarget in ['Elixir']:
+                        baseScore = 1000000
+                        initStat = player.atxLoot['elixir']['season']
+                    if self.challengeTarget in ['Gold']:
+                        baseScore = 1000000
+                        initStat = player.atxLoot['gold']['season']
+                    if self.challengeTarget in ['Dark Elixir']:
+                        baseScore = 20000
+                        initStat = player.atxLoot['darkElixir']['season']
+
+                elif player.homeVillage['townHall']['thLevel'] > 10:
+                    if self.challengeTarget in ['Elixir']:
+                        baseScore = 3000000
+                        initStat = player.atxLoot['elixir']['season']
+                    if self.challengeTarget in ['Gold']:
+                        baseScore = 3000000
+                        initStat = player.atxLoot['gold']['season']
+                    if self.challengeTarget in ['Dark Elixir']:
+                        baseScore = 50000
+                        initStat = player.atxLoot['darkElixir']['season']                        
+                availableDurations = [1,2,3]
+
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Dark Elixir from your enemies! Don't forget to spend it..."
+                self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} {self.challengeTarget} from your enemies! Don't forget to spend it..."
                 self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
                 self.challengeProgress = {
@@ -1189,17 +1232,17 @@ class Challenge():
                     'startTime': generateTime,
                     'completedTime': 0,
                     'currentScore': 0,
-                    'initStat': player.atxLoot['darkElixir']['season']
-                    }            
+                    'initStat': initStat,
+                    }
 
             if self.challengeTask == 'seasonChallenges':
                 baseScore = 60
-                availableDurations = [1,2,3,4,5,6,7]
+                availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
                 self.challengeDesc = f"Complete {self.challengeScore} points worth of challenges in the Season Pass."
                 self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
                 for achievement in player.homeVillage['achievements']:
@@ -1212,57 +1255,131 @@ class Challenge():
                     'currentScore': 0,
                     'initStat': initStat
                     }
-            
-            if self.challengeTask == 'obstacles':
-                baseScore = 10
-                availableDurations = [1,2,3,4,5,6,7]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Clear {self.challengeScore} obstacles from either your Home Village or Builder Base."
-                self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }
-                for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Nice and Tidy':
-                        initStat = achievement['value']
-                self.challengeProgress = {
-                    'status': 'inProgress',
-                    'startTime': generateTime,
-                    'completedTime': 0,
-                    'currentScore': 0,
-                    'initStat': initStat
-                    }            
 
-            if self.challengeTask == 'warTreasury':
-                baseScore = 500000
-                availableDurations = [1,2,3,4,5,6,7]
+            if self.challengeTask == 'capitalGold':
+                capGoldBaseScore = {
+                    9: 800,
+                    10: 1000,
+                    11: 2500,
+                    12: 4000,
+                    13: 5000,
+                    14: 8000
+                    }
+                try:
+                    baseScore = capGoldBaseScore[player.homeVillage['townHall']['thLevel']]
+                except:
+                    baseScore = 500
+                availableDurations = [3]
                 self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Collect {numerize.numerize(self.challengeScore,1)} Gold from your Treasury."
+                self.challengeScore = baseScore
+                self.challengeDesc = f"Contribute {numerize.numerize(self.challengeScore,1)} Capital Gold to our Ataraxy Clan Capitals."
                 self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
-                for achievement in player.homeVillage['achievements']:
-                    if achievement['name'] == 'Clan War Wealth':
-                        initStat = achievement['value']
                 self.challengeProgress = {
                     'status': 'inProgress',
                     'startTime': generateTime,
                     'completedTime': 0,
                     'currentScore': 0,
+                    'initStat': player.atxClanCapital['goldContributed']['season'],
+                    }
+
+            if self.challengeTask == 'heroUpgrade':
+                eligibleHeroes = []
+
+                if player.homeVillage['townHall']['thLevel'] == 9:
+                    if player.homeVillage['heroes']['barbarianKing'] < 30:
+                        eligibleHeroes.append('Barbarian King')
+                    if player.homeVillage['heroes']['archerQueen'] < 30:
+                        eligibleHeroes.append('Archer Queen')
+
+                if player.homeVillage['townHall']['thLevel'] == 10:
+                    if player.homeVillage['heroes']['barbarianKing'] < 40:
+                        eligibleHeroes.append('Barbarian King')
+                    if player.homeVillage['heroes']['archerQueen'] < 40:
+                        eligibleHeroes.append('Archer Queen')
+
+                if player.homeVillage['townHall']['thLevel'] == 11:
+                    if player.homeVillage['heroes']['barbarianKing'] < 50:
+                        eligibleHeroes.append('Barbarian King')
+                    if player.homeVillage['heroes']['archerQueen'] < 50:
+                        eligibleHeroes.append('Archer Queen')
+                    if player.homeVillage['heroes']['grandWarden'] < 20:
+                        eligibleHeroes.append('Grand Warden')
+
+                if player.homeVillage['townHall']['thLevel'] == 12:
+                    if player.homeVillage['heroes']['barbarianKing'] < 65:
+                        eligibleHeroes.append('Barbarian King')
+                    if player.homeVillage['heroes']['archerQueen'] < 65:
+                        eligibleHeroes.append('Archer Queen')
+                    if player.homeVillage['heroes']['grandWarden'] < 40:
+                        eligibleHeroes.append('Grand Warden')
+
+                if player.homeVillage['townHall']['thLevel'] == 13:
+                    if player.homeVillage['heroes']['barbarianKing'] < 75:
+                        eligibleHeroes.append('Barbarian King')
+                    if player.homeVillage['heroes']['archerQueen'] < 75:
+                        eligibleHeroes.append('Archer Queen')
+                    if player.homeVillage['heroes']['grandWarden'] < 50:
+                        eligibleHeroes.append('Grand Warden')
+                    if player.homeVillage['heroes']['royalChampion'] < 25:
+                        eligibleHeroes.append('Royal Champion')
+
+                if player.homeVillage['townHall']['thLevel'] == 14:
+                    if player.homeVillage['heroes']['barbarianKing'] < 80:
+                        eligibleHeroes.append('Barbarian King')
+                    if player.homeVillage['heroes']['archerQueen'] < 80:
+                        eligibleHeroes.append('Archer Queen')
+                    if player.homeVillage['heroes']['grandWarden'] < 55:
+                        eligibleHeroes.append('Grand Warden')
+                    if player.homeVillage['heroes']['royalChampion'] < 30:
+                        eligibleHeroes.append('Royal Champion')
+
+                if len(eligibleHeroes) == 0:
+                    raise StatTooHigh
+
+                upgradeDuration = {
+                    9: 3,
+                    10: 5,
+                    11: 6,
+                    12: 7,
+                    13: 7,
+                    14: 7,
+                    }
+                self.challengeTarget = random.choice(eligibleHeroes)
+                self.challengeDuration = upgradeDuration[player.homeVillage['townHall']['thLevel']]
+                if self.challengeTarget == 'Barbarian King':
+                    initStat = player.homeVillage['heroes']['barbarianKing']
+                if self.challengeTarget == 'Archer Queen':
+                    initStat = player.homeVillage['heroes']['archerQueen']
+                if self.challengeTarget == 'Grand Warden':
+                    initStat = player.homeVillage['heroes']['grandWarden']
+                if self.challengeTarget == 'Royal Champion':
+                    initStat = player.homeVillage['heroes']['royalChampion']
+                
+                self.challengeScore = initStat + 1
+                self.challengeDesc = f"Upgrade your {self.challengeTarget} to Level {self.challengeScore}."
+                self.challengeReward = {
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
+                    'type': rewardType
+                    }
+                self.challengeProgress = {
+                    'status': 'inProgress',
+                    'startTime': generateTime,
+                    'completedTime': 0,
+                    'currentScore': initStat,
                     'initStat': initStat
                     }            
 
             if self.challengeTask == 'donations':
                 baseScore = 100
-                availableDurations = [1,2,3,4,5,6,7]
+                availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
                 self.challengeDesc = f"Donate {self.challengeScore} troops/spells/siege machines to your clan mates."
                 self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
                 self.challengeProgress = {
@@ -1273,45 +1390,27 @@ class Challenge():
                     'initStat': player.atxDonations['sent']['season']
                     }
 
-            if self.challengeTask == 'request':
-                baseScore = 100
-                availableDurations = [1,2,3,4,5,6,7]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Receive {self.challengeScore} troops/spells/siege machines from your clan mates."
-                self.challengeReward = {
-                    'reward': round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }
-                self.challengeProgress = {
-                    'status': 'inProgress',
-                    'startTime': generateTime,
-                    'completedTime': 0,
-                    'currentScore': 0,
-                    'initStat': player.atxDonations['received']['season']
-                    }
-
             if self.challengeTask == 'destroyTarget':
-                baseScore = 3
-                availableDurations = [1,2,3,4,5,6,7]
+                baseScore = 2
+                availableDurations = [1,2,3]
 
                 availableTargets = ['Walls','Builder Huts','Mortars','Townhalls']
 
                 if player.homeVillage['townHall']['thLevel'] >= 8:
-                    available.Targets.append('X-Bows')
+                    availableTargets.append('X-Bows')
                 if player.homeVillage['townHall']['thLevel'] >= 9:
-                    available.Targets.append('Inferno Towers')
+                    availableTargets.append('Inferno Towers')
                 if player.homeVillage['townHall']['thLevel'] >= 10:
-                    available.Targets.append('Eagle Artilleries')
+                    availableTargets.append('Eagle Artilleries')
                 if player.homeVillage['townHall']['thLevel'] >= 11:
-                    available.Targets.append('Weaponized Townhalls')
+                    availableTargets.append('Weaponized Townhalls')
                 if player.homeVillage['townHall']['thLevel'] >= 12:
-                    available.Targets.append('Scattershots')
+                    availableTargets.append('Scattershots')
                 if player.homeVillage['townHall']['thLevel'] >= 13:
-                    available.Targets.append('Weaponized Builder Huts')
+                    availableTargets.append('Weaponized Builder Huts')
 
-                self.challengeDuration = random.choice(availableDurations)
                 self.challengeTarget = random.choice(availableTargets)
+                self.challengeDuration = random.choice(availableDurations)                
                 if self.challengeTarget == 'Walls':
                     self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))*100
                 elif self.challengeTarget == 'Builder Huts' or self.challengeTarget == 'Weaponized Builder Huts':
@@ -1326,9 +1425,10 @@ class Challenge():
                     self.challengeScore = (round(durationMultiplier[self.challengeDuration]*baseScore))
                 self.challengeDesc = f"Destroy {self.challengeScore} {self.challengeTarget} in Multiplayer Battles."
                 self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
+
                 for achievement in player.homeVillage['achievements']:
                     if self.challengeTarget == 'Builder Huts' and achievement['name'] == 'Union Buster':
                         initStat = achievement['value']
@@ -1344,7 +1444,7 @@ class Challenge():
                         initStat = achievement['value']
                     if self.challengeTarget == 'Walls' and achievement['name'] == 'Wall Buster':
                         initStat = achievement['value']
-                    if self.challengeTarget == 'Townhall' and achievement['name'] == 'Humiliator':
+                    if self.challengeTarget == 'Townhalls' and achievement['name'] == 'Humiliator':
                         initStat = achievement['value']
                     if self.challengeTarget == 'Weaponized Builder Huts' and achievement['name'] == 'Bust This!':
                         initStat = achievement['value']
@@ -1356,96 +1456,58 @@ class Challenge():
                     'completedTime': 0,
                     'currentScore': 0,
                     'initStat': initStat
-                    }            
+                    }
 
-            if self.challengeTask == 'heroUpgrade':
-                totalHeroLevels = sum(player.homeVillage['heroes'].values())
-                maxHeroLevels = maxHomeLevels[player.homeVillage['townHall']['thLevel']][2]
-
-                if (totalHeroLevels + 4) > maxHeroLevels:
-                    raise StatTooHigh
-                baseScore = 1
-                availableDurations = [3,5]
+            if self.challengeTask == 'obstacles':
+                baseScore = 10
+                availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Upgrade your heroes by {self.challengeScore} level(s)."
+                self.challengeDesc = f"Clear {self.challengeScore} obstacles from either your Home Village or Builder Base."
                 self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
+                for achievement in player.homeVillage['achievements']:
+                    if achievement['name'] == 'Nice and Tidy':
+                        initStat = achievement['value']
                 self.challengeProgress = {
                     'status': 'inProgress',
                     'startTime': generateTime,
                     'completedTime': 0,
                     'currentScore': 0,
-                    'initStat': totalHeroLevels
-                    }  
+                    'initStat': initStat
+                    }          
 
-            if self.challengeTask == 'troopUpgrade':
-                totalLevel = 0
-                for labTroop in player.homeVillage['troops']['elixirTroops']+player.homeVillage['troops']['darkTroops']+player.homeVillage['troops']['siegeMachines']+player.homeVillage['troops']['pets']+player.homeVillage['spells']['elixirSpells']+player.homeVillage['spells']['darkSpells']:
-                    totalLevel += labTroop['level']
-                maxLabLevels = maxHomeLevels[player.homeVillage['townHall']['thLevel']][0] + maxHomeLevels[player.homeVillage['townHall']['thLevel']][1]
-
-                if (totalLevel + 2) > maxLabLevels:
-                    raise StatTooHigh                
-                baseScore = 1
-                availableDurations = [3]
-                self.challengeDuration = random.choice(availableDurations)
-                self.challengeScore = round(1*baseScore)
-                self.challengeDesc = f"Upgrade your troops and/or spells by {self.challengeScore} level(s)."
-                self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
-                    'type': rewardType
-                    }                
-                self.challengeProgress = {
-                    'status': 'inProgress',
-                    'startTime': generateTime,
-                    'completedTime': 0,
-                    'currentScore': 0,
-                    'initStat': totalLevel
-                    }
-
-            if self.challengeTask == 'capitalGold':
-                capGoldBaseScore = {
-                    9: 400,
-                    10: 450,
-                    11: 550,
-                    12: 670,
-                    13: 800,
-                    14: 1200
-                    }
-                try:
-                    baseScore = capGoldBaseScore[player.homeVillage['townHall']['thLevel']]
-                except:
-                    baseScore = 500
-                availableDurations = [3,6]
+            if self.challengeTask == 'winMultiplayer':
+                baseScore = 5
+                availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
-                self.challengeDesc = f"Contribute {numerize.numerize(self.challengeScore,1)} Capital Gold to our Ataraxy Capital Halls."
+                self.challengeDesc = f"Win {self.challengeScore} attacks in Multiplayer Battles."
                 self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
                     'type': rewardType
                     }
+                for achievement in player.homeVillage['achievements']:
+                    if achievement['name'] == 'Conqueror':
+                        initStat = achievement['value']
                 self.challengeProgress = {
                     'status': 'inProgress',
                     'startTime': generateTime,
                     'completedTime': 0,
                     'currentScore': 0,
-                    'initStat': player.atxClanCapital['goldContributed']['season']
-                    }
+                    'initStat': initStat,
+                    }    
 
             if self.challengeTask == 'capitalRaid':
-                daysAvail = [5,6,7]
-                if datetime.today().isoweekday() not in daysAvail:
-                    raise StatTooHigh   
                 baseScore = 3000
                 availableDurations = [1]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
                 self.challengeDesc = f"Loot {numerize.numerize(self.challengeScore,1)} Capital Gold during Capital Raids with our Clans."
                 self.challengeReward = {
-                    'reward':round(durationMultiplier[self.challengeDuration]*round(random.choice(challengePointReward)/10)*10),
+                    'reward': round((5*rewardValue)/10)*10,
                     'type': rewardType
                     }
                 self.challengeProgress = {
@@ -1456,10 +1518,10 @@ class Challenge():
                     'initStat': player.atxClanCapital['goldLooted']['season']
                     }
 
-            if self.challengeTask != 'destroyTarget':
+            if self.challengeTask not in ['destroyTarget','troopBoost','lootResources','heroUpgrade']:
                 self.challengeTarget = None
-        except:
-            self.generateChallenge(commonStreak2)
+        except StatTooHigh:
+            self.generateChallenge(commonStreak=commonStreak2,trackChance=trackChance)
 
     def updateChallenge(self,trash=False):
         updateTime = time.time()
@@ -1470,38 +1532,57 @@ class Challenge():
             self.challengeProgress['completedTime'] = updateTime
             return
 
-        if self.challengeTask == 'trophies':
+        if self.challengeTask == 'league' or self.challengeTask == 'trophies':
             newStat = player.homeVillage['league']['trophies']
 
+        #legacy
         if self.challengeTask == 'defenses':
             for achievement in player.homeVillage['achievements']:
                 if achievement['name'] == 'Unbreakable':
                     newStat = achievement['value']
 
+        #legacy
         if self.challengeTask == 'townhall':
             for achievement in player.homeVillage['achievements']:
                 if achievement['name'] == 'Humiliator':
-                    newStat = achievement['value']            
-
-        if self.challengeTask == 'victories':
-            for achievement in player.homeVillage['achievements']:
-                if achievement['name'] == 'Conqueror':
                     newStat = achievement['value']
 
         if self.challengeTask == 'troopBoost':
-            for achievement in player.homeVillage['achievements']:
-                if achievement['name'] == 'Superb Work':
-                    newStat = achievement['value']
+            newStat = 0
+            if self.challengeTarget:
+                for superTroop in player.homeVillage['troops']['superTroops']:
+                    if superTroop['name'] == superTroopVersions[self.challengeTarget] and superTroop.get('superTroopIsActive',False) == True:
+                        newStat = 1
+            else:
+                for achievement in player.homeVillage['achievements']:
+                    if achievement['name'] == 'Superb Work':
+                        newStat = achievement['value']
 
         if self.challengeTask == 'warStars':
-            newStat = player.atxWar['warStars'] + player.atxWar['cwlStars']
+            newStat = 0
+            for war in player.atxWarLog:
+                newStat += war['attackStars']
 
+        if self.challengeTask == 'warTreasury':
+            for achievement in player.homeVillage['achievements']:
+                if achievement['name'] == 'Clan War Wealth':
+                    newStat = achievement['value']
+
+        if self.challengeTask == 'lootResources':
+            if self.challengeTarget == 'Elixir':
+                newStat = player.atxLoot['elixir']['season']
+            if self.challengeTarget == 'Gold':
+                newStat = player.atxLoot['gold']['season']
+            if self.challengeTarget == 'Dark Elixir':
+                newStat = player.atxLoot['darkElixir']['season']
+
+        #legacy
         if self.challengeTask == 'lootElixir':
             newStat = player.atxLoot['elixir']['season']
-
+        #legacy
         if self.challengeTask == 'lootGold':
             newStat = player.atxLoot['gold']['season']
-
+        #legacy
         if self.challengeTask == 'lootDarkElixir':
             newStat = player.atxLoot['darkElixir']['season']
 
@@ -1509,20 +1590,34 @@ class Challenge():
             for achievement in player.homeVillage['achievements']:
                 if achievement['name'] == 'Well Seasoned':
                     newStat = achievement['value']
-        
-        if self.challengeTask == 'obstacles':
-            for achievement in player.homeVillage['achievements']:
-                if achievement['name'] == 'Nice and Tidy':
-                    newStat = achievement['value']
 
-        if self.challengeTask == 'warTreasury':
-            for achievement in player.homeVillage['achievements']:
-                if achievement['name'] == 'Clan War Wealth':
-                    newStat = achievement['value']            
+        if self.challengeTask == 'capitalGold':
+            newStat = player.atxClanCapital['goldContributed']['season']
+
+        if self.challengeTask == 'heroUpgrade':
+            if self.challengeTarget:
+                if self.challengeTarget == 'Barbarian King':
+                    newStat = player.homeVillage['heroes']['barbarianKing']
+                if self.challengeTarget == 'Archer Queen':
+                    newStat = player.homeVillage['heroes']['archerQueen']
+                if self.challengeTarget == 'Grand Warden':
+                    newStat = player.homeVillage['heroes']['grandWarden']
+                if self.challengeTarget == 'Royal Champion':
+                    newStat = player.homeVillage['heroes']['royalChampion']
+            else:
+                newStat = sum(player.homeVillage['heroes'].values())
+
+        #legacy
+        if self.challengeTask == 'troopUpgrade':
+            totalLevel = 0
+            for labTroop in player.homeVillage['troops']['elixirTroops']+player.homeVillage['troops']['darkTroops']+player.homeVillage['troops']['siegeMachines']+player.homeVillage['troops']['pets']+player.homeVillage['spells']['elixirSpells']+player.homeVillage['spells']['darkSpells']:
+                totalLevel += labTroop['level']
+            newStat = totalLevel
 
         if self.challengeTask == 'donations':
             newStat = player.atxDonations['sent']['season']
 
+        #legacy
         if self.challengeTask == 'request':
             newStat = player.atxDonations['received']['season']
 
@@ -1542,29 +1637,30 @@ class Challenge():
                     newStat = achievement['value']
                 if self.challengeTarget == 'Walls' and achievement['name'] == 'Wall Buster':
                     newStat = achievement['value']
-                if self.challengeTarget == 'Townhall' and achievement['name'] == 'Humiliator':
+                if self.challengeTarget == 'Townhalls' and achievement['name'] == 'Humiliator':
                     newStat = achievement['value']
                 if self.challengeTarget == 'Weaponized Builder Huts' and achievement['name'] == 'Bust This!':
                     newStat = achievement['value']
                 if self.challengeTarget == 'Weaponized Townhalls' and achievement['name'] == 'Not So Easy This Time':
                     newStat = achievement['value']
 
-        if self.challengeTask == 'heroUpgrade':
-            newStat = sum(player.homeVillage['heroes'].values())
+        if self.challengeTask == 'obstacles':
+            for achievement in player.homeVillage['achievements']:
+                if achievement['name'] == 'Nice and Tidy':
+                    newStat = achievement['value']
 
-        if self.challengeTask == 'troopUpgrade':
-            totalLevel = 0
-            for labTroop in player.homeVillage['troops']['elixirTroops']+player.homeVillage['troops']['darkTroops']+player.homeVillage['troops']['siegeMachines']+player.homeVillage['troops']['pets']+player.homeVillage['spells']['elixirSpells']+player.homeVillage['spells']['darkSpells']:
-                totalLevel += labTroop['level']
-            newStat = totalLevel
-
-        if self.challengeTask == 'capitalGold':
-            newStat = player.atxClanCapital['goldContributed']['season']
+        if self.challengeTask == 'winMultiplayer' or self.challengeTask == 'victories':
+            for achievement in player.homeVillage['achievements']:
+                if achievement['name'] == 'Conqueror':
+                    newStat = achievement['value']      
 
         if self.challengeTask == 'capitalRaid':
             newStat = player.atxClanCapital['goldLooted']['season']
 
-        self.challengeProgress['currentScore'] = newStat-self.challengeProgress['initStat']
+        if self.challengeTask == 'heroUpgrade':
+            self.challengeProgress['currentScore'] = newStat
+        else:
+            self.challengeProgress['currentScore'] = newStat-self.challengeProgress['initStat']
 
         if trash:
             self.challengeProgress['status'] = "trashed"
