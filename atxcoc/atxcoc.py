@@ -1701,7 +1701,7 @@ class ClashOfClans(commands.Cog):
             embed = await clash_embed(
                 ctx=ctx,
                 title="Not enough money!",
-                message=f"You need {trashCost} <:logo_ATC:971050471110377472> to trash this challenge.",
+                message=f"You need {userChallenge.trashCost:,} <:logo_ATC:971050471110377472> to trash this challenge.",
                 color="fail")
             return await ctx.send(embed=embed)
 
