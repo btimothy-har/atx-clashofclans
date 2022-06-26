@@ -34,7 +34,7 @@ superTroopVersions = {
     "Giant": "Super Giant",
     "Goblin": "Sneaky Goblin",
     "Wall Breaker": "Super Wall Breaker",
-    "Balloon": "Rocket Ballon",
+    "Balloon": "Rocket Balloon",
     "Wizard": "Super Wizard",
     "Dragon": "Super Dragon",
     "Baby Dragon": "Inferno Dragon",
