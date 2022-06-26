@@ -1116,7 +1116,7 @@ class ClashOfClans(commands.Cog):
         registered_clans = await self.config.clans()
         cg_status = await self.config.CGstatus()
 
-        if ctx.guild.id != clanserver_ID:
+        if ctx.guild.id != clanServer_ID:
             return await ctx.send(f"{ctx.author.mention} please use this command only in Ataraxy server.")
         if cg_status:
             return await ctx.send(f"{ctx.author.mention} Clan Games are already active. Use `cg close` to end the existing Clan Games.")
@@ -1318,6 +1318,42 @@ class ClashOfClans(commands.Cog):
 
         await self.config.CGstatus.set(False)
         return await clanAnnouncementChannel.send(embed=embed)
+
+    @cg.command(name="leaderboard", aliases=["lb"])
+    async def cg_leaderboard(self,ctx):
+        
+        with open(getFile('clangames'),"r") as dataFile:
+            clangames_data = json.load(dataFile)
+
+        clangames_series = await self.config.CGseries()
+        #clangames_series = "2022-06"
+        clangames_series_pt = datetime.datetime.strptime(f"{clangames_series}-01","%Y-%m-%d").strftime("%B %Y")
+
+        cg_participants = clangames_data[clangames_series]
+
+        cg_participants.sort(key=lambda p:(p['games_pts'],(p['games_pos']*-1),p['townhall']),reverse=True)
+        outputTable = []
+        
+        table_ct = 0
+        for participant in cg_participants:
+            participant_table = {}
+            if participant['status'] == 'participant' and table_ct < 10:
+                participant_table['Pos'] = participant['games_pos']
+                participant_table['TH'] = participant['townhall']
+                participant_table['Player'] = participant['player']
+                participant_table['Points'] = participant['games_pts']
+                table_ct += 1
+                outputTable.append(participant_table)
+
+        embed = await clash_embed(
+            ctx=ctx,
+            title=f"<:ClanGames:834063648494190602> **ATARAXY CLAN GAMES LEADERBOARD** <:ClanGames:834063648494190602>",
+            show_author=True)
+
+        embed.add_field(name=f"{clangames_series_pt} Series",
+                    value=f"```{tabulate(outputTable,headers='keys')}```")
+
+        return await ctx.send(embed=embed)
 
     @commands.group(name="cp")
     async def challengepass(self,ctx):
@@ -1955,8 +1991,8 @@ class ClashOfClans(commands.Cog):
                     },
                     {
                     'Dragon': 1,
-                    'Witch': 1,
-                    'Archer': 3,
+                    'Witch': 2,
+                    'Archer': 1,
                     }   ],
             8: [   {
                     'Lava Hound': 1,

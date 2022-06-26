@@ -741,27 +741,25 @@ class Member(Player):
         self.atxWarLog.append(logData)     
         await self.saveData(force=True)
 
-    async def updateClanGames(self,clan,series,action):
+    async def updateClanGames(self,series,action):
         async with clashJsonLock('clangames'):
             with open(getFile('clangames'),"r") as dataFile:
                 jsonData = json.load(dataFile)
 
             if action=="remove":
             #if departing member, disqualify from clangames
-                for participant in jsonData[series][clan.tag]:
+                for participant in jsonData[series]:
                     if participant['tag'] == self.tag:
                         participant['status'] = "disqualified"
-                        return 1
-                return 0
 
             if action=="update":
                 leaderboard = []
-                for participant in jsonData[series][clan.tag]:
+                for participant in jsonData[series]:
                     leaderboard.append(participant['games_pos'])
 
                 last_rank = max(leaderboard)
 
-                for participant in jsonData[series][clan.tag]:
+                for participant in jsonData[series]:
                     if participant['tag'] == self.tag and participant['games_pos'] == 0:
                         for achievement in self.homeVillage['achievements']:
                             if achievement['name'] == "Games Champion":
@@ -773,8 +771,6 @@ class Member(Player):
                             last_rank += 1
                         else:
                             participant['games_pts'] = new_games_pts - participant['init_pts']
-                        return 1
-                return 0
 
             with open(getFile('clangames'),"w") as dataFile:
                 return json.dump(jsonData,dataFile,indent=2)
