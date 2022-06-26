@@ -1146,7 +1146,7 @@ class Challenge():
                     self.challengeScore = 4
                 self.challengeDesc = f"Earn {self.challengeScore} stars in Clan Wars on offense."
                 self.challengeReward = {
-                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
+                    'reward': 2*(round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10),
                     'type': rewardType
                     }
                 initStat = 0
