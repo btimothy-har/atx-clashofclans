@@ -1161,7 +1161,7 @@ class Challenge():
                     }      
 
             if self.challengeTask == 'warTreasury':
-                baseScore = 500000
+                baseScore = 300000
                 availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
@@ -1480,7 +1480,7 @@ class Challenge():
                     }          
 
             if self.challengeTask == 'winMultiplayer':
-                baseScore = 5
+                baseScore = 3
                 availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
                 self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
