@@ -660,8 +660,8 @@ class ClashOfClans(commands.Cog):
                                 value=
                                     f":stopwatch: Last updated: {lastseen_text}ago"+
                                     f"\n:calendar: {int(player.atxLastSeen['timer']/86400)} days spent in Ataraxy Clans"+
-                                    #"\n**Donations**"+
-                                    #f"\n<:donated:825574412589858886> {player.atxDonations['sent']['season']}\u3000<:received:825574507045584916> {player.atxDonations['received']['season']}"+
+                                    "\n**Donations**"+
+                                    f"\n<:donated:825574412589858886> {player.atxDonations['sent']['season']}\u3000<:received:825574507045584916> {player.atxDonations['received']['season']}"+
                                     "\n**Loot**"+
                                     f"\n<:gold:825613041198039130> {lootGold}\u3000<:elixir:825612858271596554> {lootElixir}\u3000<:darkelixir:825640568973033502> {lootDarkElixir}"+
                                     "\n**Clan Capital**"+
@@ -1772,7 +1772,7 @@ class ClashOfClans(commands.Cog):
             except:
                 return await clashdata_err(self,ctx)
             if member.atxMemberStatus=='member':
-                cPass = challengePass(ctx,member)
+                cPass = challengePass(ctx,member,season)
                 allPasses.append(cPass)
 
         allPasses.sort(key=lambda x:(x.atxChaPoints),reverse=True)
