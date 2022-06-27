@@ -109,7 +109,7 @@ async def cp_accountselect(self,ctx):
             account = Member(ctx,account)
         except Clash_APIError as err:
             ctx.command.reset_cooldown(ctx)
-            await clashapi_err(self,ctx,err,clan_tag)
+            await clashapi_err(self,ctx,err,account)
             return None
         except:
             ctx.command.reset_cooldown(ctx)
@@ -519,7 +519,7 @@ class ClashOfClans(commands.Cog):
                 try:                    
                     player = Member(ctx,action_tag)
                 except Clash_APIError as err:
-                    return await clashapi_err(self,ctx,err,clan_tag)
+                    return await clashapi_err(self,ctx,err,action_tag)
                 except:
                     return await clashdata_err(self,ctx)
                 else:
@@ -721,7 +721,7 @@ class ClashOfClans(commands.Cog):
                 try:                    
                     player = Member(ctx,action_tag)
                 except Clash_APIError as err:
-                    return await clashapi_err(self,ctx,err,clan_tag)
+                    return await clashapi_err(self,ctx,err,action_tag)
                 except:
                     return await clashdata_err(self,ctx)
                 else:                 
@@ -817,7 +817,7 @@ class ClashOfClans(commands.Cog):
                     clan = Clan(ctx,clan)
                 except Clash_APIError as err:
                     await init_message.delete()
-                    return await clashapi_err(self,ctx,err,clan_tag)
+                    return await clashapi_err(self,ctx,err,clan)
                 except:
                     await init_message.delete()
                     return await clashdata_err(self,ctx)
@@ -827,7 +827,7 @@ class ClashOfClans(commands.Cog):
                         member = Member(ctx,member['tag'])
                     except Clash_APIError as err:
                         await init_message.delete()
-                        return await clashapi_err(self,ctx,err,clan_tag)
+                        return await clashapi_err(self,ctx,err,member['tag'])
                     except:
                         await init_message.delete()
                         return await clashdata_err(self,ctx)
@@ -1853,7 +1853,7 @@ class ClashOfClans(commands.Cog):
             try:                    
                 clan = Clan(ctx,clan)
             except Clash_APIError as err:
-                return await clashapi_err(self,ctx,err,clan_tag)
+                return await clashapi_err(self,ctx,err,clan)
             except:
                 return await clashdata_err(self,ctx)
             
@@ -2073,7 +2073,7 @@ class ClashOfClans(commands.Cog):
             try:
                 currentWar = clashapi_clan(clan,3)
             except Clash_APIError as err:
-                return await clashapi_err(self,ctx,err,clan_tag)
+                return await clashapi_err(self,ctx,err,clan)
             except:
                 return await clashdata_err(self,ctx)
 
