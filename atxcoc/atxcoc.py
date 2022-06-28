@@ -1213,7 +1213,7 @@ class ClashOfClans(commands.Cog):
 
         shopcog = ctx.bot.get_cog("Shop")
         shopcog_instance = await shopcog.get_instance(ctx, settings=True)
-        all_shops = await instance.Shops.all()
+        all_shops = await shopcog_instance.Shops.all()
         gp_itemdata = deepcopy(all_shops[gp_shop]["Items"][gp_item])
     
         clanServer_ID = await self.config.clanServerID()
