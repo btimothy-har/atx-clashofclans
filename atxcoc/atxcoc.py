@@ -65,9 +65,9 @@ elder_status = {
     "tie":"<:Clan:825654825509322752>"
 }
 capitalGoldElderReq = {
-    14: 150000,
-    13: 120000,
-    12: 90000
+    14: 140000,
+    13: 110000,
+    12: 80000
     }
 traDict = {'farm': 'The Farmer Track', 'war': 'The Warpath'}
 rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:971050471110377472>'}
@@ -644,11 +644,28 @@ class ClashOfClans(commands.Cog):
                             if achievement['name'] == "Heroic Heist" and achievement['value']>=2000000000:
                                 lootDarkElixir = "max"
 
+                        warStarsOffense = 0
+                        for war in player.atxWarLog:
+                            warStarsOffense += war['attackStars']
+                        
+                        with open(getFile('clangames'),"r") as dataFile:
+                            clangames_data = json.load(dataFile)
+
+                        clangames_season = list(clangames_data.keys())
+                        clangames_season = clangames_season[-1]
+                        cg_pts = 0
+                        for cg_participant in clangames_data[clangames_season]:
+                            if cg_participant['tag'] == player.tag:
+                                cg_pts = cg_participant['games_pts']
+
                         if int(player.atxLastSeen['timer']/86400)>=20:
                             elder_req1 = 'win'
                         else:
-                            elder_req1 = 'lose'                        
-                        elder_req2 = 'tie'                        
+                            elder_req1 = 'lose'
+                        if cg_pts >= 4000:                    
+                            elder_req2 = 'win'
+                        else:
+                            elder_req2 = 'lose' 
                         if (player.atxWar['warStars']+player.atxWar['cwlStars']) >= 45:
                             elder_req3 = 'win'
                         elif player.atxClanCapital['goldContributed']['season'] >= capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],60000):
@@ -661,7 +678,7 @@ class ClashOfClans(commands.Cog):
                                     f":stopwatch: Last updated: {lastseen_text}ago"+
                                     f"\n:calendar: {int(player.atxLastSeen['timer']/86400)} days spent in Ataraxy Clans"+
                                     "\n**Donations**"+
-                                    f"\n<:donated:825574412589858886> {player.atxDonations['sent']['season']}\u3000<:received:825574507045584916> {player.atxDonations['received']['season']}"+
+                                    f"\n<:donated:825574412589858886> {player.atxDonations['sent']['season']:,}\u3000<:received:825574507045584916> {player.atxDonations['received']['season']:,}"+
                                     "\n**Loot**"+
                                     f"\n<:gold:825613041198039130> {lootGold}\u3000<:elixir:825612858271596554> {lootElixir}\u3000<:darkelixir:825640568973033502> {lootDarkElixir}"+
                                     "\n**Clan Capital**"+
@@ -676,15 +693,15 @@ class ClashOfClans(commands.Cog):
                         embed.add_field(
                             name=f"**Eldership Progress (for next season)**",
                                 value=
-                                    f"You need to satisfy **1** criteria from all of the below categories."+
+                                    f"You need to satisfy **1** criteria from each of the below categories."+
                                     f"\n\u200b\n**{elder_status[elder_req1]} Membership**"+
                                     f"\n\u3000- Days in Clan(s): **{int(player.atxLastSeen['timer']/86400)} / 20 days**"+
                                     f"\n**{elder_status[elder_req2]} Clan Games**"+
-                                    f"\n\u3000*No data yet.*"+
+                                    f"\n\u3000- {clangames_season} Season: **{cg_pts}** / 4000"+
                                     f"\n**{elder_status[elder_req3]} Clan Participation**"+
-                                    f"\n\u3000- War Stars: **{player.atxWar['warStars']+player.atxWar['cwlStars']} / 45**"+
+                                    f"\n\u3000- War Stars: **{warStarsOffense} / 80**"+
                                     f"\n\u3000- Capital Gold: **{clanCapitalGold} / {numerize.numerize(capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],60000),1)}**"+
-                                    f"\n\u3000- Donations: *coming soon*",
+                                    f"\n\u3000- Donations: **{player.atxDonations['sent']['season']:,}** / 50,000",
                                 inline=False)                
                     embedpaged.append(embed)        
             
