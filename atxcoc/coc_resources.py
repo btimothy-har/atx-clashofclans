@@ -851,7 +851,7 @@ class Member(Player):
             cwlData[cwlClan][self.tag] = {
                 'tag': self.tag,
                 'player': self.player,
-                'townHall': self.homeVillage['townHall']['thLevel'],R
+                'townHall': self.homeVillage['townHall']['thLevel'],
                 'heroLevels': sum(self.homeVillage['heroes'].values()),
                 'priority': self.atxCwlPriority,
                 'totalStars': self.atxCwlTotalStars,
