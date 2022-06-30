@@ -851,7 +851,7 @@ class Member(Player):
                 'tag': self.tag,
                 'player': self.player,
                 'townHall': self.homeVillage['townHall']['thLevel'],
-                'heroLevels': sum(self.homeVillage['heroes'].values())
+                'heroLevels': sum(self.homeVillage['heroes'].values()),
                 'priority': self.atxCwlPriority,
                 'totalStars': self.atxCwlTotalStars,
                 #'warLog': self.atxCwlWarLog
