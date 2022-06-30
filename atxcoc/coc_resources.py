@@ -1028,9 +1028,9 @@ class Challenge():
 
         try:
             if self.challengeTask == 'trophies':
-                baseScore = 80
+                baseScore = 60
                 if player.homeVillage['league']['trophies'] >= 5000:
-                    baseScore = 120
+                    baseScore = 80
                     availableDurations = [1]
                 else:
                     availableDurations = [1,2,3]
