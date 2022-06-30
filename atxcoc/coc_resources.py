@@ -826,13 +826,11 @@ class Member(Player):
                 cwlData = json.load(dataFile)
             cwlPlayer = cwlData[cwlClan][self.tag]
         except:
-            self.atxCwlOrder = 0
             self.atxCwlPriority = 0
             self.atxCwlTotalStars = 0
             #self.atxCwlWars = 0
             #self.atxCwlWarLog = []
         else:
-            self.atxCwlOrder = cwlPlayer['regOrder']
             self.atxCwlPriority = cwlPlayer['priority']
             self.atxCwlTotalStars = cwlPlayer['totalStars']
             #self.atxCwlWars = len(cwlData['warLog'])
@@ -852,7 +850,8 @@ class Member(Player):
             cwlData[cwlClan][self.tag] = {
                 'tag': self.tag,
                 'player': self.player,
-                'regOrder': self.atxCwlOrder,
+                'townHall': self.homeVillage['townHall']['thLevel'],
+                'heroLevels': sum(self.homeVillage['heroes'].values())
                 'priority': self.atxCwlPriority,
                 'totalStars': self.atxCwlTotalStars,
                 #'warLog': self.atxCwlWarLog

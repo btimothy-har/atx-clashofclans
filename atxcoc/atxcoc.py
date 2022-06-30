@@ -808,8 +808,6 @@ class ClashOfClans(commands.Cog):
             message=f"Fetching data... please wait.")
         init_message = await ctx.send(embed=embed)
 
-
-
         if warRosterType == "Clan Wars":
             for clan in registered_clans:
                 war_roster = []
@@ -866,142 +864,53 @@ class ClashOfClans(commands.Cog):
                 embedpaged.append(embed)
 
         if warRosterType == "Clan War Leagues":
+            war_size = 15
             try:
                 with open(getFile('cwlroster'),"r") as dataFile:
                     cwlData = json.load(dataFile)
             except:
                 return await clashdata_err(self,ctx)
-            eligibleroster = []
-            rosterA = []
-            rosterB = []
-            rosteralt = []
 
-            for tag, data in cwlData.items():
-                member = Member(ctx,tag)
-                if member.atxMemberStatus == 'member':
-                    eligibleroster.append(data)
+            for clan in registered_clans:
+                try:
+                    clan = Clan(ctx,clan)
+                except Clash_APIError as err:
+                    await init_message.delete()
+                    return await clashapi_err(self,ctx,err,clan)
+                except:
+                    await init_message.delete()
+                    return await clashdata_err(self,ctx)
 
-            eligibleroster.sort(key=lambda x:(x['townHall'],(x['regOrder']*-1)),reverse=True)
+                clanRoster = []
+                roster = cwlData[clan.tag]
 
-            for participant in eligibleroster:
-                if tag == '#LJC8V0GCJ':
-                    rosterB.append(data)
-                else:
-                    if data['townHall'] >= 13 and len(rosterA) < 15:
-                        rosterA.append(data)
-                        rosteralt.append(data)
+                for tag, data in roster.items():
+                    clanRoster.append(data)
+
+                clanRoster.sort(key=lambda x:(x['priority'],x['townHall'],x['heroLevels']),reverse=True)
+
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title=f"CWL Roster for {clan.clan} ({clan.tag})",
+                    message=f"Current War Size: {war_size}\nCurrently registered: {len(clanRoster)}")
+
+                embed.set_thumbnail(url=clan.badges['medium'])
+
+                roster_count = 0                
+                for participant in clanRoster:
+                    if roster_count < war_size:
+                        roster_count += 1
+                        embed.add_field(
+                            name=f"{roster_count}\u3000{participant['player']} ({participant['tag']})",
+                            value=f"{th_emotes[int(participant['townHall'])]} {participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
+                            inline=False)
                     else:
-                        rosterB.append(data)
-                        rosteralt.append(data)
-
-            if len(rosterA) >= 15 and len(rosterB) >=15:
-                rosterA_count = 0
-                rosterA.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
-                rosterA_embed = await clash_embed(
-                    ctx=ctx,
-                    title=f"CWL Roster for Master League",
-                    message=f"Roster Size: {len(rosterA)}")
-                for participant in rosterA:
-                    rosterA_count += 1
-
-                    if rosterA_count <= 15:
-                        rosterA_embed.add_field(
-                            name=f"**{rosterA_count}**\u3000{participant['player']} ({participant['tag']})",
-                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
-                            inline=False)
-                    if rosterA_count > 15:
-                        rosterA_embed.add_field(
+                        embed.add_field(
                             name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
-                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
-                            inline=False)
+                            value=f"{th_emotes[int(participant['townHall'])]} {participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
+                            inline=False)      
 
-                rosterB_count = 1
-                rosterB.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
-                rosterB_embed = await clash_embed(
-                    ctx=ctx,
-                    title=f"CWL Roster for Cystal League",
-                    message=f"Roster Size: {len(rosterB)}")
-
-                rosterB_embed.add_field(
-                    name=f"**1** Reserved",
-                    value=f"*Reserved for Clan Donation Account",
-                    inline=False)
-
-                for participant in rosterB:
-                    rosterB_count += 1
-                    if rosterB_count <= 14:
-                        rosterB_embed.add_field(
-                            name=f"**{rosterA_count}**\u3000{participant['player']} ({participant['tag']})",
-                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
-                            inline=False)
-                    if rosterB_count > 14:
-                        rosterB_embed.add_field(
-                            name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
-                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
-                            inline=False)
-                embedpaged.append(rosterA_embed)
-                embedpaged.append(rosterB_embed)            
-            else:
-                rosteralt_count = 0
-                rosteralt_TH14 = 2
-                rosteralt_TH13 = 2 #4
-                rosteralt_TH12 = 3 #7
-                rosteralt_TH11 = 3 #10
-                rosteralt_TH10 = 3 #13
-                rosteralt_TH9 = 2 #15
-
-                sublist = []
-
-                rosteralt.sort(key=lambda x:(x['priority'],(x['regOrder']*-1)), reverse=True)
-
-                rosteralt_embed = await clash_embed(
-                    ctx=ctx,
-                    title=f"Combined CWL Roster",
-                    message=f"Roster Size: {len(rosteralt)}")
-
-                for participant in rosteralt:
-                    include = False
-                    if rosteralt_TH14 > 0 and participant['townHall'] == 14:
-                        rosteralt_TH14 -= 1
-                        rosteralt_count += 1
-                        include = True
-                    if rosteralt_TH13 > 0 and participant['townHall'] == 13:
-                        rosteralt_TH13 -= 1
-                        rosteralt_count += 1
-                        include = True
-                    if rosteralt_TH12 > 0 and participant['townHall'] == 12:
-                        rosteralt_TH12 -= 1
-                        rosteralt_count += 1
-                        include = True
-                    if rosteralt_TH11 > 0 and participant['townHall'] == 11:
-                        rosteralt_TH11 -= 1
-                        rosteralt_count += 1
-                        include = True
-                    if rosteralt_TH10 > 0 and participant['townHall'] == 10:
-                        rosteralt_TH10 -= 1
-                        rosteralt_count += 1
-                        include = True
-                    if rosteralt_TH9 > 0 and participant['townHall'] == 9:
-                        rosteralt_TH9 -= 1
-                        rosteralt_count += 1
-                        include = True
-
-                    if include:
-                        rosteralt_embed.add_field(
-                            name=f"**{rosteralt_count}**\u3000{participant['player']} ({participant['tag']})",
-                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
-                            inline=False)
-                    if not include:
-                        sublist.append(participant)
-
-                if len(sublist) > 0:
-                    for participant in sublist:
-                        rosteralt_embed.add_field(
-                            name=f"**SUB**\u3000{participant['player']} ({participant['tag']})",
-                            value=f"{th_emotes[int(participant['townHall'])]} TH{participant['townHall']}\u3000<:Ataraxy:828126720925499402> Priority: {participant['priority']}",
-                            inline=False)
-
-                embedpaged.append(rosteralt_embed)
+                embedpaged.append(embed)
 
         await init_message.delete()
         if len(embedpaged)>1:
@@ -1037,37 +946,33 @@ class ClashOfClans(commands.Cog):
             with open(getFile('cwlroster'),"w") as dataFile:
                 json.dump(cwlData,dataFile,indent=2)
 
-        if ctx.guild.id == clanServer.id:
-            roster_role = get(ctx.guild.roles,name="COC-CWL Roster")
-            for member in roster_role.members:
-                member.remove_roles(roster_role)
-
         await self.config.CWLregistration.set(True)
         await ctx.send(f"{ctx.author.mention} CWL is now open.")       
 
         embed = await clash_embed(
             ctx=ctx,
             title=f":trophy: **CLAN WAR LEAGUES** :trophy:",
-            message=f"The next Clan War Leagues are starting soon! Registration is now open for the next **__4 DAYS__**.\n\n**Do be sure to pay attention to the below instructions.**\n\u200b",
+            message=f"The next Clan War Leagues are starting soon! \n\n**If you want to participate, do be sure to pay attention to the below instructions.**\n\u200b",
             show_author=False)
 
         embed.set_image(url="https://i.imgur.com/RpEB4I0.jpg")
 
-        embed.add_field(name=":newspaper2: — **REQUIREMENTS**",
-            value=f"Prior to registration, your village must:"+
-                f"\n> - Be in any of our in-game clans. If you are not in our clans, please request to join."+
-                f"\n> - Linked to our <@828462461169696778> bot. Link your account by using `;help myprofile link` in <#803655289034375178>."+
-                f"\n\nYou must also meet all of the below requirements:"+
-                "\n> 1) Be <:TH9:825571026326781963> **Townhall 9** or higher.\n\u200b",
+        embed.add_field(name=":newspaper2: — **OPTING IN FOR CWL**",
+            value=f"1) Join the appropriate clan based on your Townhall level:"+
+                f"\n> - #CRYPVGQ0 SoulTakers: TH13, TH14"+
+                f"\n> - #2PCRPUPCY Ataraxy: TH12 and below"+
+                f"\n\u200b"+
+                f"2) Set your in-game War Option to **IN**."+
+                f"\n\u200b"+
+                f"*Please also ensure that you are placed in a trophy league in-game, to be included in CWL.\n\u200b",
                 inline=False
                 )
-        embed.add_field(name=":black_nib: — **REGISTRATION**",
-            value=f"Use the command `;war cwlregister` in <#805105007120744469> to register for CWL. **Note that registrations cannot be cancelled.**"+
-                f"\n\nWe will aim to fill **2** CWL rosters this season:"+
-                f"\n\u3000:one: TH13 - TH14: #CRYPVGQ0 SoulTakers (Master League)"+
-                f"\n\u3000:two: TH9 - TH12: #2PCRPUPCY Ataraxy (Crystal League)"+
-                f"\n\nIf there are insufficient participants for two rosters, we will ensure equal participation is made available in one roster."+
-                f"\n\nYou can check the current registration list with the command `;war roster`. Your Townhall level will be taken as of your registration.\n\u200b",
+        embed.add_field(name=":black_nib: — **CWL ROSTERING**",
+            value=f"- CWL rosters will be finalized when CWL opens in-game. You may check the current roster with `;war roster`.\n\u200b"+
+                f"- Rosters will be ordered in the following order:"+
+                f"> 1) CWL Priority (see below)"+
+                f"> 2) Townhall Level"+
+                f"> 3) Total Hero Levels",
                 inline=False
                 )
         embed.add_field(name=":crossed_swords: — **CWL PRIORITY SYSTEM**",
@@ -1092,12 +997,8 @@ class ClashOfClans(commands.Cog):
     @commands.is_owner()
     async def cwl_end(self,ctx):
 
-        clanServer_ID = await self.config.clanServerID()
-        clanServer = ctx.bot.get_guild(clanServer_ID)
-        clanChannel_ID = await self.config.clanChannelID()
-        clanAnnouncementChannel = discord.utils.get(clanServer.channels,id=clanChannel_ID)
         await self.config.CWLregistration.set(False)
-        return await clanAnnouncementChannel.send(content=f"CWL registration is now closed.")
+        return await ctx.send(content=f"CWL is now closed.")
 
     @commands.group(name="cg")
     async def cg(self,ctx):
@@ -1889,6 +1790,20 @@ class ClashOfClans(commands.Cog):
     @commands.is_owner()
     async def update_elders(self,ctx):
         """Updates Eldership status based on the last closed season."""
+        #gp_shop = "Admin Store"
+        #gp_item = "[R] COC Gold Pass (USD5 Gift Card)"
+
+        shopcog = ctx.bot.get_cog("Shop")
+        shopcog_instance = await shopcog.get_instance(ctx, settings=True)
+        all_shops = await shopcog_instance.Shops.all()
+        #gp_itemdata = deepcopy(all_shops[gp_shop]["Items"][gp_item])
+    
+        clanServer_ID = await self.config.clanServerID()
+        clanServer = ctx.bot.get_guild(clanServer_ID)
+
+        clanChannel_ID = await self.config.clanChannelID()
+        clanAnnouncementChannel = discord.utils.get(clanServer.channels,id=clanChannel_ID)
+
         lastSeason = None
         newelders = []
         elders_gp = []
@@ -1912,18 +1827,36 @@ class ClashOfClans(commands.Cog):
             err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving player data for {lastSeason} season.",color="fail")
             return await ctx.send(embed=err_embed)
 
+        try:
+            with open(getFile('clangames'),"r") as dataFile:
+                clanGamesJson = json.load(dataFile)
+                clanGamesData = clanGamesJson[lastSeason]
+        except:
+            err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving clan games data for {lastSeason} season.",color="fail")
+            return await ctx.send(embed=err_embed)
+
         for playerLastSeason in playerData.values():
-            promoteElder = False
+            elderReq1 = 0
+            elderReq2 = 0
+            elderReq3 = 0
             if playerLastSeason['memberStatus'] == 'member':
                 if int(playerLastSeason['lastSeen']['timer']/86400) >= 20:
-                    if (playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']) >= 45:
-                        promoteElder = True
-                    #if playerLastSeason['donations']['sent']['season'] >= 1000:
-                    #    promoteElder = True
-                    if playerLastSeason['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq[playerLastSeason['townHallLevel']]:
-                        promoteElder = True
+                    elderReq1 = 1
+                for cgMember in clanGamesData:
+                    if cgMember['tag'] == playerLastSeason['tag']:
+                        cgPts = cgMember['games_pts']
+                        if cgMember['games_pts'] >= 4000:
+                            elderReq2 = 1
+                if (playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']) >= 45:
+                    elderReq3 = 1
+                #if playerLastSeason['donations']['sent']['season'] >= 1000:
+                #    promoteElder = True
+                if playerLastSeason['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000):
+                    elderReq3 = 1
 
-                if promoteElder:
+                await ctx.send(f"{playerLastSeason['tag']}\u3000{int(playerLastSeason['lastSeen']['timer']/86400)}/20\u3000{cgPts}/4000\u3000{playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']}/45\u3000{playerLastSeason['clanCapital']['goldContributed']['season']}/{capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000)}")
+
+                if (elderReq1 + elderReq2 + elderReq3) >= 3:
                     try:                    
                         playerCurrent = Member(ctx,playerLastSeason['tag'])
                     except Clash_ClassError:
@@ -1939,6 +1872,9 @@ class ClashOfClans(commands.Cog):
                         for user, account in registered_accounts.items():
                             if playerCurrent.tag in list(account.values())[0] and user not in elders_gp:
                                 elders_gp.append(user)
+                                #shopcog_user = await shopcog.get_instance(ctx,user=user)
+                                #sm = ShopManager(ctx, None, shopcog_user)
+                                #await sm.add(gp_item,gp_itemdata,1)
                         newelders.append(playerCurrent)
 
         elder_announcement = f"Once again, a Clash season comes and goes. With that, we are pleased to announce our Ataraxy Elders for the new season! Congratulations to everyone for an amazing season.\n\u3000"
@@ -1946,15 +1882,10 @@ class ClashOfClans(commands.Cog):
         for e in newelders:
             elder_announcement += f"\n\u3000{e.tag} **{e.player}**"
 
-        gp_announcement = f"The following members are also eligible to claim a Gold Pass for the upcoming Clash season! Instructions will be provided soon.\n\u3000"
+        gp_announcement = f"The following members are also eligible to claim a Gold Pass for the upcoming Clash season!\n\u3000"
 
         for u in elders_gp:
             gp_announcement += f"\n\u3000<@{u}>"
-
-        #discord_atxserver = getServerID(atxserver)
-        #announcement_server = ctx.bot.get_guild(discord_atxserver)
-        #announcement_channel = discord.utils.get(announcement_server.channels,id=719170006230761532)
-        #announcement_ping = get(announcement_server.roles,name="COC-Clan Wars")
 
         embed = await clash_embed(
             ctx=ctx,
@@ -1969,6 +1900,72 @@ class ClashOfClans(commands.Cog):
                 inline=False)
 
         return await ctx.send(embed=embed)
+
+    @clan_admin.command(name="cwlrefresh")
+    @commands.is_owner()
+    async def refresh_cwlroster(self,ctx):
+        """Refresh the CWL Rosters."""
+
+        embed = await clash_embed(
+            ctx=ctx,
+            message=f"Refreshing data... please wait.")
+
+        init_message = await ctx.send(embed=embed)
+
+        cwlRosterDict = {}
+        registered_clans = await self.config.clans()
+
+        for clan in registered_clans:
+            clan_tag = clan
+            try:
+                clan = Clan(ctx,clan_tag)
+            except:
+                await init_message.delete()
+                return await clashdata_err(self,ctx)
+            
+            clanRoster = {}
+
+            for member in clan.members:
+                if member['league']['name'] != 'Unranked':                    
+                    try:
+                        member = Member(ctx,member['tag'])
+                    except:
+                        await init_message.delete()
+                        return await clashdata_err(self,ctx)
+
+                    if member.atxMemberStatus == 'member' and member.atxWar['registrationStatus'] == 'Yes':
+                        if clan_tag == '#CRYPVGQ0':
+                            if member.homeVillage['townHall']['thLevel'] >= 13:
+                                clanRoster[member.tag] = {
+                                    "tag": member.tag,
+                                    "player": member.player,
+                                    "townHall": member.homeVillage['townHall']['thLevel'],
+                                    "heroLevels": sum(member.homeVillage['heroes'].values()),
+                                    "priority": 0,
+                                    "totalStars": 0,
+                                    }
+                            else:
+                                pass
+                        else:
+                            clanRoster[member.tag] = {
+                                "tag": member.tag,
+                                "player": member.player,
+                                "townHall": member.homeVillage['townHall']['thLevel'],
+                                "heroLevels": sum(member.homeVillage['heroes'].values()),
+                                "priority": 0,
+                                "totalStars": 0,
+                                }
+
+            cwlRosterDict[clan_tag] = clanRoster
+
+        with open(getFile('cwlroster'),"w") as dataFile:
+            json.dump(cwlRosterDict,dataFile,indent=2)
+
+        embed = await clash_embed(
+            ctx=ctx,
+            message=f"CWL Roster refreshed.")
+
+        return await init_message.edit(embed=embed)
     
     @clan_admin.command(name="warcc")
     @commands.is_owner()
