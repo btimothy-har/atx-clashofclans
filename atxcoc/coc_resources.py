@@ -502,6 +502,7 @@ class Player():
                 "league": {
                     "trophies": api_player.get('versusTrophies',0),
                     "bestTrophies": api_player.get('bestVersusTrophies',0),
+                    "attacksWon": api_player.get('versusBattleWinCount',0),
                     },
                 "heroes": {
                     "battleMachine": battleMachine,
@@ -850,7 +851,7 @@ class Member(Player):
             cwlData[cwlClan][self.tag] = {
                 'tag': self.tag,
                 'player': self.player,
-                'townHall': self.homeVillage['townHall']['thLevel'],
+                'townHall': self.homeVillage['townHall']['thLevel'],R
                 'heroLevels': sum(self.homeVillage['heroes'].values()),
                 'priority': self.atxCwlPriority,
                 'totalStars': self.atxCwlTotalStars,
@@ -974,9 +975,9 @@ class Challenge():
         commonStreak2 = commonStreak
         player = self.member
         generateTime = time.time()
-        trackWar = ['trophies','troopBoost','warStars','warTreasury']
+        trackWar = ['trophies','troopBoost','winMultiplayer','warTreasury']
         trackFarm = ['lootResources','seasonChallenges','capitalGold','heroUpgrade']
-        trackCommon = ['donations','destroyTarget','obstacles','winMultiplayer']
+        trackCommon = ['donations','destroyTarget','obstacles','winBuilderBase']
 
         challengePointReward = range(100,300)
         atcReward = range(400,600)
@@ -1497,7 +1498,25 @@ class Challenge():
                     'completedTime': 0,
                     'currentScore': 0,
                     'initStat': initStat,
-                    }    
+                    }
+
+             if self.challengeTask == 'winBuilderBase':
+                baseScore = 3
+                availableDurations = [1,2,3]
+                self.challengeDuration = random.choice(availableDurations)
+                self.challengeScore = round(durationMultiplier[self.challengeDuration]*baseScore)
+                self.challengeDesc = f"Win {self.challengeScore} attacks in the Builder Base."
+                self.challengeReward = {
+                    'reward': round((durationMultiplier[self.challengeDuration]*rewardValue)/10)*10,
+                    'type': rewardType
+                    }
+                self.challengeProgress = {
+                    'status': 'inProgress',
+                    'startTime': generateTime,
+                    'completedTime': 0,
+                    'currentScore': 0,
+                    'initStat': player.builderBase['league']['attacksWon'],
+                    }  
 
             if self.challengeTask == 'capitalRaid':
                 baseScore = 3000
@@ -1651,7 +1670,10 @@ class Challenge():
         if self.challengeTask == 'winMultiplayer' or self.challengeTask == 'victories':
             for achievement in player.homeVillage['achievements']:
                 if achievement['name'] == 'Conqueror':
-                    newStat = achievement['value']      
+                    newStat = achievement['value']
+
+        if self.challengeTask == 'winBuilderBase':
+            newStat = player.builderBase['league']['attacksWon']
 
         if self.challengeTask == 'capitalRaid':
             newStat = player.atxClanCapital['goldLooted']['season']
