@@ -1500,7 +1500,7 @@ class Challenge():
                     'initStat': initStat,
                     }
 
-             if self.challengeTask == 'winBuilderBase':
+            if self.challengeTask == 'winBuilderBase':
                 baseScore = 3
                 availableDurations = [1,2,3]
                 self.challengeDuration = random.choice(availableDurations)
