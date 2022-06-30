@@ -961,26 +961,26 @@ class ClashOfClans(commands.Cog):
             value=f"1) Join the appropriate clan based on your Townhall level:"+
                 f"\n> - #CRYPVGQ0 SoulTakers: TH13, TH14"+
                 f"\n> - #2PCRPUPCY Ataraxy: TH12 and below"+
-                f"\n\u200b"+
+                f"\n\u200b\n\u200b"+
                 f"2) Set your in-game War Option to **IN**."+
-                f"\n\u200b"+
-                f"*Please also ensure that you are placed in a trophy league in-game, to be included in CWL.\n\u200b",
+                f"\n\u200b\n\u200b"+
+                f"*Please also ensure that you are placed in a trophy league in-game to be included in CWL.*\n\u200b",
                 inline=False
                 )
         embed.add_field(name=":black_nib: — **CWL ROSTERING**",
             value=f"- CWL rosters will be finalized when CWL opens in-game. You may check the current roster with `;war roster`.\n\u200b"+
-                f"- Rosters will be ordered in the following order:"+
-                f"> 1) CWL Priority (see below)"+
-                f"> 2) Townhall Level"+
-                f"> 3) Total Hero Levels",
+                f"- Rosters will be ordered in the following order:\n"+
+                f"> 1) CWL Priority (see below)\n"+
+                f"> 2) Townhall Level\n"+
+                f"> 3) Total Hero Levels\n\u200b",
                 inline=False
                 )
         embed.add_field(name=":crossed_swords: — **CWL PRIORITY SYSTEM**",
             value=f"CWL Priority is separate from regular War priority. CWL Priority will be used to determine bonuses and participation:"+
                 f"\n\u200b- Participate in War: `-3`"+
                 f"\n\u200b- Use your Attack: `+1`"+
-                f"\n\u200b- Earn 2 Stars: `+1`"+
-                f"\n\u200b- Earn 3 Stars: `+2`"+
+                f"\n\u200b- Earn 2 Stars (offense): `+1`"+
+                f"\n\u200b- Earn 3 Stars (offense): `+2`"+
                 f"\n\u200b\n__An additional bonus/penalty will be applied for hits up and/or down, by Townhall Level:__"+
                 f"\n\u200bBonus/Penalty: `(opponent TH level) - (your TH level)` "+
                 f"\n\u200b*only applies for hits above 2 stars. ",
@@ -989,7 +989,7 @@ class ClashOfClans(commands.Cog):
         embed.add_field(name="<:Gem:834064925243998279> — **REWARDS**",
             value=f"Bonus CWL Medals will be awarded in accordance to CWL priority.",
             inline=False
-            )        
+            )   
 
         return await clanAnnouncementChannel.send(embed=embed)
 
