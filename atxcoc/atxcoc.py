@@ -1988,6 +1988,14 @@ class ClashOfClans(commands.Cog):
     @commands.is_owner()
     async def generate_clancastle(self,ctx):
         """Generate War Clan Castle suggestions. Does not suggest Super Troops."""
+
+        embed = await clash_embed(
+            ctx=ctx,
+            message=f"Fetching data... please wait.")
+        init_message = await ctx.send(embed=embed)
+
+        cwlStatus = await self.config.CWLregistration()
+        all_troops = troops['elixir_troops'] + troops['dark_troops']
         recommendClanCastle = {
             10: [   {
                     'Lava Hound': 1,
@@ -2079,29 +2087,59 @@ class ClashOfClans(commands.Cog):
             return await clashdata_err(self,ctx)
 
         for clan in registered_clans:
-            all_troops = troops['elixir_troops'] + troops['dark_troops']
+            try:
+                clan = Clan(ctx,clan)
+            except Clash_APIError as err:
+                return await clashapi_err(self,ctx,err,clan)
+            except:
+                return await clashdata_err(self,ctx)
+
+            activeWar = False            
             troopLibrary = {}
             for troop in all_troops:
                 troopLibrary[troop] = 0
             
             try:
-                currentWar = clashapi_clan(clan,3)
+                clan.GetClassicWar()
+                currentWar = clan.warInfo['classicWar']['currentWar']
             except Clash_APIError as err:
                 return await clashapi_err(self,ctx,err,clan)
             except:
                 return await clashdata_err(self,ctx)
 
             if currentWar['state'] == 'preparation':
+                activeWar = True
+            elif cwlStatus:
+                try:
+                    clan.GetWarLeagues()
+                    for cwlRound in clan.warInfo['warLeague']['currentGroup']['rounds']:
+                        for cwlWar in cwlRound['warTags']:
+                            cwlWar = clashapi_cwl(cwlWar)
+                            if cwlWar['state']=='preparation' and isinstance(cwlWar['opponent']['tag'],str) and (cwlWar['clan']['tag'] == clan.tag or cwlWar['opponent']['tag'] == clan.tag):
+                                activeWar = True
+                                currentWar = cwlWar
+                except Clash_APIError as err:
+                    return await clashapi_err(self,ctx,err,clan)
+                except:
+                    return await clashdata_err(self,ctx)
+
+            if activeWar:
                 participantList = []
                 warTitle = f"{currentWar['clan']['name']} vs {currentWar['opponent']['name']}"
                 warCCsumm = ""
 
-                warParticipants = currentWar['clan']['members']
+                if clan.tag == currentWar['clan']['tag']:
+                    clanWarInfo = currentWar['clan']
+                    warParticipants = currentWar['clan']['members']
+                elif clan.tag == currentWar['opponent']['tag']:
+                    clanWarInfo = currentWar['opponent']
+                    warParticipants = currentWar['opponent']['members']
+
                 warParticipants.sort(key=lambda x:(x['mapPosition']))
                 
                 for participant in warParticipants:
-
-                    ccLevel = playerData[participant['tag']]['clanCastleLevel']
+                    participantData = playerData.get(participant['tag'],{})
+                    ccLevel = participantData.get('clanCastleLevel',0)
                     if ccLevel > 1:
                         if ccLevel == 9:
                             ccLevel = 10
@@ -2133,7 +2171,7 @@ class ClashOfClans(commands.Cog):
                         ctx=ctx,
                         title=warTitle,
                         show_author=True)
-                embed.set_thumbnail(url=currentWar['clan']['badgeUrls']['medium'])
+                embed.set_thumbnail(url=clan.badges['medium'])
                 for participant in participantList:
                     embed.add_field(
                         name=participant['title'],
@@ -2145,8 +2183,17 @@ class ClashOfClans(commands.Cog):
                     inline=False)
                 embedpaged.append(embed)
 
+            else:
+                embed = await clash_embed(
+                        ctx=ctx,
+                        title=clan.clan,
+                        message="Did not find a War currently in preparation.",
+                        show_author=True)
+                embed.set_thumbnail(url=clan.badges['medium'])
+
         if len(embedpaged)>1:
             paginator = BotEmbedPaginator(ctx,embedpaged)
-            return await paginator.run()
+            await paginator.run()
         elif len(embedpaged)==1:
-            return await ctx.send(embed=embedpaged[0])
+            await ctx.send(embed=embedpaged[0])
+        return await init_message.delete()
