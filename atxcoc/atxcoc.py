@@ -1297,7 +1297,10 @@ class ClashOfClans(commands.Cog):
         notstarted = 0
         notstarted_summ = "\u200b"
 
-        user_accounts = await cp_accountselect(self,ctx)
+        try:
+            user_accounts = await cp_accountselect(self,ctx)
+        except:
+            return None
         if not user_accounts:
             return None
 
