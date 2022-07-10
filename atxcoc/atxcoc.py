@@ -99,7 +99,7 @@ async def cp_accountselect(self,ctx):
         embed = await clash_embed(
             ctx=ctx,
             title="No accounts available.",
-            message="Link your Clash of Clans account using `;myaccount link` to be able to participate in the Ataraxy Challenge Pass.",
+            message="Link your Clash of Clans account using `;myaccount link` to be able to participate in the Ataraxy Challenge Pass. You need to be a member of our Clan and at least Townhall 9 or above.",
             color="fail")
         return await ctx.send(embed=embed)
 
@@ -110,11 +110,11 @@ async def cp_accountselect(self,ctx):
         except Clash_APIError as err:
             ctx.command.reset_cooldown(ctx)
             await clashapi_err(self,ctx,err,account)
-            return None
+            return []
         except:
             ctx.command.reset_cooldown(ctx)
             await clashdata_err(self,ctx)
-            return None
+            return []
         else:
             if account.atxMemberStatus == 'member' and account.homeVillage['townHall']['thLevel'] >= 9:
                 user_accounts.append(account)
@@ -128,7 +128,7 @@ async def cp_accountselect(self,ctx):
             message="You have no accounts eligible for the Ataraxy Challenge Pass. To be eligible, you need to be a member of our Clan and at least Townhall 9 or above.",
             color="fail")
         await ctx.send(embed=embed)
-        return None
+        return []
     else:
         return user_accounts
 
