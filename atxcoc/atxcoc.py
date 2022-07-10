@@ -65,9 +65,9 @@ elder_status = {
     "tie":"<:Clan:825654825509322752>"
 }
 capitalGoldElderReq = {
-    14: 140000,
-    13: 110000,
-    12: 80000
+    14: 35000,
+    13: 30000,
+    12: 20000
     }
 traDict = {'farm': 'The Farmer Track', 'war': 'The Warpath'}
 rewDict = {'challengePoints': 'Challenge Pass Points', 'atc': '<:logo_ATC:971050471110377472>'}
@@ -658,17 +658,20 @@ class ClashOfClans(commands.Cog):
                             if cg_participant['tag'] == player.tag:
                                 cg_pts = cg_participant['games_pts']
 
-                        if int(player.atxLastSeen['timer']/86400)>=20:
+                        playerLeague = player.homeVillage['league']['leagueDetails']
+                        if player.homeVillage['league']['leagueDetails'] != None:
                             elder_req1 = 'win'
                         else:
                             elder_req1 = 'lose'
-                        if cg_pts >= 4000:                    
+                        if cg_pts >= 1500:                
                             elder_req2 = 'win'
                         else:
                             elder_req2 = 'lose' 
-                        if (player.atxWar['warStars']+player.atxWar['cwlStars']) >= 45:
+                        if (player.atxWar['warStars']+player.atxWar['cwlStars']) >= 20:
                             elder_req3 = 'win'
-                        elif player.atxClanCapital['goldContributed']['season'] >= capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],60000):
+                        elif player.atxClanCapital['goldContributed']['season'] >= capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],10000):
+                            elder_req3 = 'win'
+                        elif (player.atxDonations['sent']['season'] + player.atxDonations['received']['season']) >= 3000:
                             elder_req3 = 'win'
                         else:
                             elder_req3 = 'lose'
@@ -691,17 +694,17 @@ class ClashOfClans(commands.Cog):
                                     "\n\u200b",
                                 inline=False)
                         embed.add_field(
-                            name=f"**Eldership Progress (for next season)**",
+                            name=f"**Activity Requirements**",
                                 value=
                                     f"You need to satisfy **1** criteria from each of the below categories."+
-                                    f"\n\u200b\n**{elder_status[elder_req1]} Membership**"+
-                                    f"\n\u3000- Days in Clan(s): **{int(player.atxLastSeen['timer']/86400)} / 20 days**"+
+                                    f"\n\u200b\n**{elder_status[elder_req1]} Game Activity**"+
+                                    f"\n\u3000- Placed in a Trophy League: **{playerLeague.get('name',"No League")}**"+
                                     f"\n**{elder_status[elder_req2]} Clan Games**"+
-                                    f"\n\u3000- {clangames_season} Season: **{cg_pts}** / 4000"+
+                                    f"\n\u3000- {clangames_season} Season: **{cg_pts:,}** / 1,500"+
                                     f"\n**{elder_status[elder_req3]} Clan Participation**"+
-                                    f"\n\u3000- War Stars: **{warStarsOffense} / 80**"+
-                                    f"\n\u3000- Capital Gold: **{clanCapitalGold} / {numerize.numerize(capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],60000),1)}**"+
-                                    f"\n\u3000- Donations: **{player.atxDonations['sent']['season']:,}** / 50,000",
+                                    f"\n\u3000- War Stars: **{warStarsOffense} / 20**"+
+                                    f"\n\u3000- Capital Gold: **{clanCapitalGold} / {numerize.numerize(capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],10000),1)}**"+
+                                    f"\n\u3000- Donations: **{player.atxDonations['sent']['season']:,}** / 3,000",
                                 inline=False)                
                     embedpaged.append(embed)        
             
