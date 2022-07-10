@@ -696,7 +696,7 @@ class ClashOfClans(commands.Cog):
                         embed.add_field(
                             name=f"**Activity Requirements**",
                                 value=
-                                    f"You need to satisfy **1** criteria from each of the below categories."+
+                                    f"You need to satisfy **1** criteria from each of the below categories to stay in our Clans."+
                                     f"\n\u200b\n**{elder_status[elder_req1]} Game Activity**"+
                                     f"\n\u3000- Placed in a Trophy League: **{playerLeague.get('name','No League')}**"+
                                     f"\n**{elder_status[elder_req2]} Clan Games**"+
@@ -1754,174 +1754,172 @@ class ClashOfClans(commands.Cog):
     async def clan_admin(self,ctx):
         """Clan-related functions."""
         
-    @clan_admin.command(name="info",aliases=["joinatx"])
-    async def get_clan_info(self, ctx):
-        """
-        Get information about Ataraxy Clans.
-        """
-        registered_clans = await self.config.clans()
+    # @clan_admin.command(name="info",aliases=["joinatx"])
+    # async def get_clan_info(self, ctx):
+    #     """
+    #     Get information about Ataraxy Clans.
+    #     """
+    #     registered_clans = await self.config.clans()
 
-        if len(registered_clans) == 0:
-            embed = await clash_embed(ctx=ctx,message=f"An error occurred.")
-            return await ctx.send(embed=embed)
+    #     if len(registered_clans) == 0:
+    #         embed = await clash_embed(ctx=ctx,message=f"An error occurred.")
+    #         return await ctx.send(embed=embed)
 
-        embedpaged = []
-        embed = await clash_embed(ctx=ctx,
-                                        message=f"The Ataraxy Clash family is proud to feature the below clans in our family."+
-                                                f"\nJoin any of the below clans to be an Ataraxy member! Send us a request in-game with the password `atxftw`.")            
-        for clan in registered_clans:
-            try:                    
-                clan = Clan(ctx,clan)
-            except Clash_APIError as err:
-                return await clashapi_err(self,ctx,err,clan)
-            except:
-                return await clashdata_err(self,ctx)
+    #     embedpaged = []
+    #     embed = await clash_embed(ctx=ctx,
+    #                                     message=f"The Ataraxy Clash family is proud to feature the below clans in our family."+
+    #                                             f"\nJoin any of the below clans to be an Ataraxy member! Send us a request in-game with the password `atxftw`.")            
+    #     for clan in registered_clans:
+    #         try:                    
+    #             clan = Clan(ctx,clan)
+    #         except Clash_APIError as err:
+    #             return await clashapi_err(self,ctx,err,clan)
+    #         except:
+    #             return await clashdata_err(self,ctx)
             
-            if clan.recruitment['setting'] == "closed":
-                clanStatus = 'Closed'
-            else:
-                clanStatus = 'Open'
+    #         if clan.recruitment['setting'] == "closed":
+    #             clanStatus = 'Closed'
+    #         else:
+    #             clanStatus = 'Open'
             
-            totalDonationsRcvd = 0
-            totalDonationsSent = 0
-            for member in clan.members:
-                totalDonationsRcvd += member['donationsReceived']
-                totalDonationsSent += member['donations']
-                if clan.warInfo['publicWarLog']:
-                    warStats = f"{clan.warInfo.get('warStats',{}).get('wins',0)}W/{clan.warInfo.get('warStats',{}).get('losses',0)}L/{clan.warInfo.get('warStats',{}).get('ties',0)}D (Streak: {clan.warInfo.get('warWinStreak',0)})"
-                else:
-                    warStats = f"{clan.warInfo.get('warStats',{}).get('wins',0)}W (Streak: {clan.warInfo.get('warWinStreak',0)})"
-                embed.add_field(
-                    name=f"**{clan.clan} ({clan.tag})**",
-                    value=f"**Level: {clan.level}\u3000Clan Status: {clanStatus}**"
-                        + f"\n> Members: {len(clan.members)}/50\u3000Location: {clan.locale.get('location',{}).get('name','Not specified.')} / {clan.locale.get('language',{}).get('name','Not specified.')}"
-                        + f"\n> <:ClanWarLeagues:825752759948279848> {clan.warInfo.get('warLeague',{}).get('league',{}).get('name','Not placed.')}\u3000<:ClanWars:825753092230086708> {warStats}"
-                        + f"\n> <:HomeTrophies:825589905651400704> {clan.gameStats['trophyScore']}\u3000<:BuilderTrophies:825713625586466816> {clan.gameStats['builderScore']}"
-                        + f"\n> <:DonationsSent:825574412589858886> {totalDonationsSent}\u3000<:DonationsReceived:825574507045584916> {totalDonationsRcvd}"
-                        + f"\n```{clan.description}```"
-                        + f"\n**More Stats from Clash Of Stats**\nhttps://www.clashofstats.com/clans/{clan.tag.replace('#','')}"
-                        + f"\n**Join in-game!**\n https://link.clashofclans.com/en?action=OpenClanProfile&tag={clan.tag.replace('#','')}"
-                        +f"\n\u200b",
-                    inline=False)            
-        await ctx.send(embed=embed)
+    #         totalDonationsRcvd = 0
+    #         totalDonationsSent = 0
+    #         for member in clan.members:
+    #             totalDonationsRcvd += member['donationsReceived']
+    #             totalDonationsSent += member['donations']
+    #             if clan.warInfo['publicWarLog']:
+    #                 warStats = f"{clan.warInfo.get('warStats',{}).get('wins',0)}W/{clan.warInfo.get('warStats',{}).get('losses',0)}L/{clan.warInfo.get('warStats',{}).get('ties',0)}D (Streak: {clan.warInfo.get('warWinStreak',0)})"
+    #             else:
+    #                 warStats = f"{clan.warInfo.get('warStats',{}).get('wins',0)}W (Streak: {clan.warInfo.get('warWinStreak',0)})"
+    #             embed.add_field(
+    #                 name=f"**{clan.clan} ({clan.tag})**",
+    #                 value=f"**Level: {clan.level}\u3000Clan Status: {clanStatus}**"
+    #                     + f"\n> Members: {len(clan.members)}/50\u3000Location: {clan.locale.get('location',{}).get('name','Not specified.')} / {clan.locale.get('language',{}).get('name','Not specified.')}"
+    #                     + f"\n> <:ClanWarLeagues:825752759948279848> {clan.warInfo.get('warLeague',{}).get('league',{}).get('name','Not placed.')}\u3000<:ClanWars:825753092230086708> {warStats}"
+    #                     + f"\n> <:HomeTrophies:825589905651400704> {clan.gameStats['trophyScore']}\u3000<:BuilderTrophies:825713625586466816> {clan.gameStats['builderScore']}"
+    #                     + f"\n> <:DonationsSent:825574412589858886> {totalDonationsSent}\u3000<:DonationsReceived:825574507045584916> {totalDonationsRcvd}"
+    #                     + f"\n```{clan.description}```"
+    #                     + f"\n**More Stats from Clash Of Stats**\nhttps://www.clashofstats.com/clans/{clan.tag.replace('#','')}"
+    #                     + f"\n**Join in-game!**\n https://link.clashofclans.com/en?action=OpenClanProfile&tag={clan.tag.replace('#','')}"
+    #                     +f"\n\u200b",
+    #                 inline=False)            
+    #     await ctx.send(embed=embed)
 
-    @clan_admin.command(name="newelders")
-    @commands.is_owner()
-    async def update_elders(self,ctx):
-        """Updates Eldership status based on the last closed season."""
-        #gp_shop = "Admin Store"
-        #gp_item = "[R] COC Gold Pass (USD5 Gift Card)"
+    # @clan_admin.command(name="newelders")
+    # async def update_elders(self,ctx):
+    #     """Updates Eldership status based on the last closed season."""
+    #     #gp_shop = "Admin Store"
+    #     #gp_item = "[R] COC Gold Pass (USD5 Gift Card)"
 
-        shopcog = ctx.bot.get_cog("Shop")
-        shopcog_instance = await shopcog.get_instance(ctx, settings=True)
-        all_shops = await shopcog_instance.Shops.all()
-        #gp_itemdata = deepcopy(all_shops[gp_shop]["Items"][gp_item])
+    #     shopcog = ctx.bot.get_cog("Shop")
+    #     shopcog_instance = await shopcog.get_instance(ctx, settings=True)
+    #     all_shops = await shopcog_instance.Shops.all()
+    #     #gp_itemdata = deepcopy(all_shops[gp_shop]["Items"][gp_item])
     
-        clanServer_ID = await self.config.clanServerID()
-        clanServer = ctx.bot.get_guild(clanServer_ID)
+    #     clanServer_ID = await self.config.clanServerID()
+    #     clanServer = ctx.bot.get_guild(clanServer_ID)
 
-        clanChannel_ID = await self.config.clanChannelID()
-        clanAnnouncementChannel = discord.utils.get(clanServer.channels,id=clanChannel_ID)
+    #     clanChannel_ID = await self.config.clanChannelID()
+    #     clanAnnouncementChannel = discord.utils.get(clanServer.channels,id=clanChannel_ID)
 
-        lastSeason = None
-        newelders = []
-        elders_gp = []
-        registered_accounts = await self.config.all_users()
-        try:
-            with open(getFile('seasons'),"r") as dataFile:
-                seasonJson = json.load(dataFile)
-                lastSeason = seasonJson['seasons'][-1]
-        except:
-            return await clashdata_err(self,ctx)
+    #     lastSeason = None
+    #     newelders = []
+    #     elders_gp = []
+    #     registered_accounts = await self.config.all_users()
+    #     try:
+    #         with open(getFile('seasons'),"r") as dataFile:
+    #             seasonJson = json.load(dataFile)
+    #             lastSeason = seasonJson['seasons'][-1]
+    #     except:
+    #         return await clashdata_err(self,ctx)
 
-        if not lastSeason:
-            err_embed = await clash_embed(ctx=ctx,message=f"Could not identify prior season.",color="fail")
-            return await ctx.send(embed=err_embed)
+    #     if not lastSeason:
+    #         err_embed = await clash_embed(ctx=ctx,message=f"Could not identify prior season.",color="fail")
+    #         return await ctx.send(embed=err_embed)
 
-        try:
-            with open(getFile('players'),"r") as dataFile:
-                playerJson = json.load(dataFile)
-                playerData = playerJson[lastSeason]
-        except:
-            err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving player data for {lastSeason} season.",color="fail")
-            return await ctx.send(embed=err_embed)
+    #     try:
+    #         with open(getFile('players'),"r") as dataFile:
+    #             playerJson = json.load(dataFile)
+    #             playerData = playerJson[lastSeason]
+    #     except:
+    #         err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving player data for {lastSeason} season.",color="fail")
+    #         return await ctx.send(embed=err_embed)
 
-        try:
-            with open(getFile('clangames'),"r") as dataFile:
-                clanGamesJson = json.load(dataFile)
-                clanGamesData = clanGamesJson[lastSeason]
-        except:
-            err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving clan games data for {lastSeason} season.",color="fail")
-            return await ctx.send(embed=err_embed)
+    #     try:
+    #         with open(getFile('clangames'),"r") as dataFile:
+    #             clanGamesJson = json.load(dataFile)
+    #             clanGamesData = clanGamesJson[lastSeason]
+    #     except:
+    #         err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving clan games data for {lastSeason} season.",color="fail")
+    #         return await ctx.send(embed=err_embed)
 
-        for playerLastSeason in playerData.values():
-            elderReq1 = 0
-            elderReq2 = 0
-            elderReq3 = 0
-            if playerLastSeason['memberStatus'] == 'member':
-                if int(playerLastSeason['lastSeen']['timer']/86400) >= 20:
-                    elderReq1 = 1
-                for cgMember in clanGamesData:
-                    if cgMember['tag'] == playerLastSeason['tag']:
-                        cgPts = cgMember['games_pts']
-                        if cgMember['games_pts'] >= 4000:
-                            elderReq2 = 1
-                if (playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']) >= 45:
-                    elderReq3 = 1
-                #if playerLastSeason['donations']['sent']['season'] >= 1000:
-                #    promoteElder = True
-                if playerLastSeason['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000):
-                    elderReq3 = 1
+    #     for playerLastSeason in playerData.values():
+    #         elderReq1 = 0
+    #         elderReq2 = 0
+    #         elderReq3 = 0
+    #         if playerLastSeason['memberStatus'] == 'member':
+    #             if int(playerLastSeason['lastSeen']['timer']/86400) >= 20:
+    #                 elderReq1 = 1
+    #             for cgMember in clanGamesData:
+    #                 if cgMember['tag'] == playerLastSeason['tag']:
+    #                     cgPts = cgMember['games_pts']
+    #                     if cgMember['games_pts'] >= 4000:
+    #                         elderReq2 = 1
+    #             if (playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']) >= 45:
+    #                 elderReq3 = 1
+    #             #if playerLastSeason['donations']['sent']['season'] >= 1000:
+    #             #    promoteElder = True
+    #             if playerLastSeason['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000):
+    #                 elderReq3 = 1
 
-                await ctx.send(f"{playerLastSeason['tag']}\u3000{int(playerLastSeason['lastSeen']['timer']/86400)}/20\u3000{cgPts}/4000\u3000{playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']}/45\u3000{playerLastSeason['clanCapital']['goldContributed']['season']}/{capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000)}")
+    #             await ctx.send(f"{playerLastSeason['tag']}\u3000{int(playerLastSeason['lastSeen']['timer']/86400)}/20\u3000{cgPts}/4000\u3000{playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']}/45\u3000{playerLastSeason['clanCapital']['goldContributed']['season']}/{capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000)}")
 
-                if (elderReq1 + elderReq2 + elderReq3) >= 3:
-                    try:                    
-                        playerCurrent = Member(ctx,playerLastSeason['tag'])
-                    except Clash_ClassError:
-                        embed = await clash_embed(ctx=ctx,
-                            message=f"Could not find this tag: {playerLastSeason['tag']}.")
-                        await ctx.send(embed=embed)
-                        raise Clash_ClassError
+    #             if (elderReq1 + elderReq2 + elderReq3) >= 3:
+    #                 try:                    
+    #                     playerCurrent = Member(ctx,playerLastSeason['tag'])
+    #                 except Clash_ClassError:
+    #                     embed = await clash_embed(ctx=ctx,
+    #                         message=f"Could not find this tag: {playerLastSeason['tag']}.")
+    #                     await ctx.send(embed=embed)
+    #                     raise Clash_ClassError
 
-                    if playerCurrent.atxMemberStatus=='member' and playerCurrent.atxRank!='Leader':
-                        playerCurrent.atxRank = "Elder"
-                        playerCurrent.saveData()
+    #                 if playerCurrent.atxMemberStatus=='member' and playerCurrent.atxRank!='Leader':
+    #                     playerCurrent.atxRank = "Elder"
+    #                     playerCurrent.saveData()
 
-                        for user, account in registered_accounts.items():
-                            if playerCurrent.tag in list(account.values())[0] and user not in elders_gp:
-                                elders_gp.append(user)
-                                #shopcog_user = await shopcog.get_instance(ctx,user=user)
-                                #sm = ShopManager(ctx, None, shopcog_user)
-                                #await sm.add(gp_item,gp_itemdata,1)
-                        newelders.append(playerCurrent)
+    #                     for user, account in registered_accounts.items():
+    #                         if playerCurrent.tag in list(account.values())[0] and user not in elders_gp:
+    #                             elders_gp.append(user)
+    #                             #shopcog_user = await shopcog.get_instance(ctx,user=user)
+    #                             #sm = ShopManager(ctx, None, shopcog_user)
+    #                             #await sm.add(gp_item,gp_itemdata,1)
+    #                     newelders.append(playerCurrent)
 
-        elder_announcement = f"Once again, a Clash season comes and goes. With that, we are pleased to announce our Ataraxy Elders for the new season! Congratulations to everyone for an amazing season.\n\u3000"
+    #     elder_announcement = f"Once again, a Clash season comes and goes. With that, we are pleased to announce our Ataraxy Elders for the new season! Congratulations to everyone for an amazing season.\n\u3000"
 
-        for e in newelders:
-            elder_announcement += f"\n\u3000{e.tag} **{e.player}**"
+    #     for e in newelders:
+    #         elder_announcement += f"\n\u3000{e.tag} **{e.player}**"
 
-        gp_announcement = f"The following members are also eligible to claim a Gold Pass for the upcoming Clash season!\n\u3000"
+    #     gp_announcement = f"The following members are also eligible to claim a Gold Pass for the upcoming Clash season!\n\u3000"
 
-        for u in elders_gp:
-            gp_announcement += f"\n\u3000<@{u}>"
+    #     for u in elders_gp:
+    #         gp_announcement += f"\n\u3000<@{u}>"
 
-        embed = await clash_embed(
-            ctx=ctx,
-            title=f"<:logo_ATX_circle:975063153798946917>\u3000**NEW ATARAXY ELDERS**\u3000<:logo_ATX_circle:975063153798946917>",
-            message=elder_announcement + "\n----------------------------------------",
-            show_author=False)
+    #     embed = await clash_embed(
+    #         ctx=ctx,
+    #         title=f"<:logo_ATX_circle:975063153798946917>\u3000**NEW ATARAXY ELDERS**\u3000<:logo_ATX_circle:975063153798946917>",
+    #         message=elder_announcement + "\n----------------------------------------",
+    #         show_author=False)
 
-        if len(elders_gp) > 0:
-            embed.add_field(
-                name=f"**<:GoldPass:834093287106674698> GOLD PASS REWARDS**",
-                value=gp_announcement,
-                inline=False)
+    #     if len(elders_gp) > 0:
+    #         embed.add_field(
+    #             name=f"**<:GoldPass:834093287106674698> GOLD PASS REWARDS**",
+    #             value=gp_announcement,
+    #             inline=False)
 
-        return await ctx.send(embed=embed)
+    #     return await ctx.send(embed=embed)
 
     @clan_admin.command(name="cwlrefresh")
-    @commands.is_owner()
     async def refresh_cwlroster(self,ctx):
         """Refresh the CWL Rosters."""
 
@@ -1987,7 +1985,6 @@ class ClashOfClans(commands.Cog):
         return await init_message.edit(embed=embed)
     
     @clan_admin.command(name="warcc")
-    @commands.is_owner()
     async def generate_clancastle(self,ctx):
         """Generate War Clan Castle suggestions. Does not suggest Super Troops."""
 
@@ -1997,7 +1994,7 @@ class ClashOfClans(commands.Cog):
         init_message = await ctx.send(embed=embed)
 
         cwlStatus = await self.config.CWLregistration()
-        all_troops = troops['elixir_troops'] + troops['dark_troops']
+        all_troops = troops['elixir_troops'] + troops['dark_troops'] + troops['super_troops']
         recommendClanCastle = {
             10: [   {
                     'Lava Hound': 1,
@@ -2014,14 +2011,18 @@ class ClashOfClans(commands.Cog):
                     'Ice Golem': 1,
                     },
                     {
-                    'Dragon': 1,
-                    'Witch': 2,
-                    'Archer': 1,
+                    'Super Minion': 3,
+                    'Archer': 9,
                     }   ],
             8: [   {
                     'Lava Hound': 1,
                     'Headhunter': 1,
                     'Archer': 4,
+                    },
+                    {
+                    'Super Minion':2,
+                    'Headhunter':1,
+                    'Archer':2,
                     },
                     {
                     'Dragon': 1,
