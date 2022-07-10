@@ -704,7 +704,7 @@ class ClashOfClans(commands.Cog):
                                     f"\n**{elder_status[elder_req3]} Clan Participation**"+
                                     f"\n\u3000- War Stars: **{warStarsOffense} / 20**"+
                                     f"\n\u3000- Capital Gold: **{clanCapitalGold} / {numerize.numerize(capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],10000),1)}**"+
-                                    f"\n\u3000- Donations: **{player.atxDonations['sent']['season']:,}** / 3,000",
+                                    f"\n\u3000- Donations: **{(player.atxDonations['sent']['season']+player.atxDonations['received']['season']):,}** / 3,000",
                                 inline=False)                
                     embedpaged.append(embed)        
             
@@ -746,54 +746,53 @@ class ClashOfClans(commands.Cog):
                     return await clashdata_err(self,ctx)
                 else:                 
                     if player.atxMemberStatus=="member":
-                        if len(player.atxWarLog)>0:
-                            embed = await clash_embed(ctx=ctx,
-                                title=f"{player.player} ({player.tag})",
-                                message=f"\n\u200b\u3000<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}\n\u200b\u3000<:Ataraxy:828126720925499402> Priority: {player.atxWar['warPriority']}",
-                                show_author=True)            
-                            try:
-                                embed.set_thumbnail(url=player.homeVillage['league']['leagueDetails']['iconUrls']['medium'])
-                            except:
-                                pass
+                        embed = await clash_embed(ctx=ctx,
+                            title=f"{player.player} ({player.tag})",
+                            message=f"\n\u200b\u3000<:TotalWars:827845123596746773> {len(player.atxWarLog)}\u3000<:TotalStars:825756777844178944> {player.atxWar['warStars']+player.atxWar['cwlStars']}\u3000<:MissedHits:825755234412396575> {player.atxWar['missedAttacks']}\n\u200b\u3000<:Ataraxy:828126720925499402> Priority: {player.atxWar['warPriority']}",
+                            show_author=True)            
+                        try:
+                            embed.set_thumbnail(url=player.homeVillage['league']['leagueDetails']['iconUrls']['medium'])
+                        except:
+                            pass
 
-                            for clan in player.atxLastSeen['clans']:
-                                clan = Clan(ctx,clan)
-                                war_count = 0
-                                win_count = 0
-                                lost_count = 0
-                                draw_count = 0
-                                war_log = []
-                                for war in player.atxWarLog[::-1]:
-                                    if clan.tag == war['clan']['tag']:
-                                        war_text = {}
-                                        if war['result']=="win":
-                                            win_count+=1
-                                        elif war['result']=="lose":
-                                            lost_count+=1
-                                        else:
-                                            draw_count+=1
-                                        war_text['title'] = f"> **{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
-                                        war_attacks = f"> \u200b\u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
-                                        war_defense = f"\n> \u200b\u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
-                                        war_text['text'] = war_attacks + war_defense
+                        for clan in player.atxLastSeen['clans']:
+                            clan = Clan(ctx,clan)
+                            war_count = 0
+                            win_count = 0
+                            lost_count = 0
+                            draw_count = 0
+                            war_log = []
+                            for war in player.atxWarLog[::-1]:
+                                if clan.tag == war['clan']['tag']:
+                                    war_text = {}
+                                    if war['result']=="win":
+                                        win_count+=1
+                                    elif war['result']=="lose":
+                                        lost_count+=1
+                                    else:
+                                        draw_count+=1
+                                    war_text['title'] = f"> **{war_description[war['warType']]} vs {war['opponent']['name']}**\u3000{war_result[war['result']]}"
+                                    war_attacks = f"> \u200b\u3000<:Attack:828103854814003211>\u3000<:TotalStars:825756777844178944> {war['attackStars']}\u3000:fire: {int(war['attackDestruction'])}%\u3000<:MissedHits:825755234412396575> {war['missedAttacks']}"
+                                    war_defense = f"\n> \u200b\u3000<:Defense:828103708956819467>\u3000<:TotalStars:825756777844178944> {war['defenseStars']}\u3000:fire: {int(war['defenseDestruction'])}%"
+                                    war_text['text'] = war_attacks + war_defense
 
-                                        war_log.append(war_text)
+                                    war_log.append(war_text)
 
-                                if (win_count + lost_count + draw_count) > 0:
-                                    embed.add_field(
-                                        name=f"**__{clan.clan}: War Log__**",
-                                        value=f"```Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}```\n> \u200b**Last 5 Wars**",
+                            if (win_count + lost_count + draw_count) > 0:
+                                embed.add_field(
+                                    name=f"**__{clan.clan}: War Log__**",
+                                    value=f"```Won {win_count}\u3000Lost {lost_count}\u3000Tied {draw_count}```\n> \u200b**Last 5 Wars**",
+                                        inline=False)
+
+                                for war in war_log:
+                                    war_count += 1
+                                    if war_count <= 5:
+                                        embed.add_field(
+                                            name=war['title'],
+                                            value=war['text'],
                                             inline=False)
-
-                                    for war in war_log:
-                                        war_count += 1
-                                        if war_count <= 5:
-                                            embed.add_field(
-                                                name=war['title'],
-                                                value=war['text'],
-                                                inline=False)
                                         
-                            embedpaged.append(embed)
+                        embedpaged.append(embed)
             
             if len(embedpaged)>1:
                 paginator = BotEmbedPaginator(ctx,embedpaged)
