@@ -853,7 +853,7 @@ class ClashOfClans(commands.Cog):
                 war_roster.sort(key=lambda x:(x.atxWar['warPriority'],x.homeVillage['townHall']['thLevel'],(x.atxDonations['sent']['season']+x.atxDonations['received']['season'])),reverse=True)
 
                 #determine eligible war size, capped at 15
-                war_size = min(len(war_roster) - (len(war_roster) % 5),15)
+                war_size = min(len(war_roster) - (len(war_roster) % 5),50)
 
                 embed = await clash_embed(
                     ctx=ctx,
