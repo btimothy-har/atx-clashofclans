@@ -698,7 +698,7 @@ class ClashOfClans(commands.Cog):
                                 value=
                                     f"You need to satisfy **1** criteria from each of the below categories."+
                                     f"\n\u200b\n**{elder_status[elder_req1]} Game Activity**"+
-                                    f"\n\u3000- Placed in a Trophy League: **{playerLeague.get('name',"No League")}**"+
+                                    f"\n\u3000- Placed in a Trophy League: **{playerLeague.get('name','No League')}**"+
                                     f"\n**{elder_status[elder_req2]} Clan Games**"+
                                     f"\n\u3000- {clangames_season} Season: **{cg_pts:,}** / 1,500"+
                                     f"\n**{elder_status[elder_req3]} Clan Participation**"+
