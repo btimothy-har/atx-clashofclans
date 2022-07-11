@@ -2201,7 +2201,8 @@ class ClashOfClans(commands.Cog):
                 activity3 = 'lose'
                 if player['memberStatus'] == 'member':
 
-                    playerLeague = 'Not Placed'                
+                    playerLeague = 'Not Placed'
+                    cg_pts = 0              
                     try:
                         if player['leagueInfo']['leagueDetails'] != None:
                             playerLeague = player['leagueInfo']['leagueDetails']['name']
@@ -2218,7 +2219,7 @@ class ClashOfClans(commands.Cog):
                                     activity2 = 'win'
                                     activityReq2 = 1
                     except:
-                        cg_pts = 0
+                       pass 
 
                     warStarsOffense = 0
                     for war in player['warLog']:
