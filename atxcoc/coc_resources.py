@@ -591,6 +591,7 @@ class Member(Player):
             self.atxWarLog = []
         else:
             self.atxMemberStatus = playerJsonExtract.get('memberStatus','notFound')
+            self.atxLeague = playerJsonExtract.get('leagueInfo',None)
             self.atxTownHallLevel = playerJsonExtract.get('townHallLevel',1)
             self.atxClanCastleLevel = playerJsonExtract.get('clanCastleLevel',0)
             self.atxRank = playerJsonExtract.get('rank','none')
@@ -606,6 +607,7 @@ class Member(Player):
         #only update stats for members
         if self.atxMemberStatus=='member':
             self.atxTownHallLevel = self.homeVillage['townHall']['thLevel']
+            self.atxLeague = self.homeVillage['league']['leagueDetails']
             self.atxLastSeen["currentClan"] = self.clan['clan_info']['tag']
             if self.clan['clan_info']['tag'] not in self.atxLastSeen['clans']:
                 self.atxLastSeen["clans"].append(self.clan['clan_info']['tag'])
@@ -811,6 +813,7 @@ class Member(Player):
                 "lastUpdated": self.timestamp,
                 "townHallLevel": self.atxTownHallLevel,
                 "clanCastleLevel": self.atxClanCastleLevel,
+                "leagueInfo": self.atxLeague,
                 "lastSeen": self.atxLastSeen,
                 "donations": self.atxDonations,
                 "loot": self.atxLoot,

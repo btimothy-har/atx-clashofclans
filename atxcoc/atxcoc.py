@@ -667,7 +667,7 @@ class ClashOfClans(commands.Cog):
                             elder_req2 = 'win'
                         else:
                             elder_req2 = 'lose' 
-                        if (player.atxWar['warStars']+player.atxWar['cwlStars']) >= 20:
+                        if warStarsOffense >= 20:
                             elder_req3 = 'win'
                         elif player.atxClanCapital['goldContributed']['season'] >= capitalGoldElderReq.get(player.homeVillage['townHall']['thLevel'],10000):
                             elder_req3 = 'win'
@@ -1808,120 +1808,6 @@ class ClashOfClans(commands.Cog):
     #                 inline=False)            
     #     await ctx.send(embed=embed)
 
-    # @clan_admin.command(name="newelders")
-    # async def update_elders(self,ctx):
-    #     """Updates Eldership status based on the last closed season."""
-    #     #gp_shop = "Admin Store"
-    #     #gp_item = "[R] COC Gold Pass (USD5 Gift Card)"
-
-    #     shopcog = ctx.bot.get_cog("Shop")
-    #     shopcog_instance = await shopcog.get_instance(ctx, settings=True)
-    #     all_shops = await shopcog_instance.Shops.all()
-    #     #gp_itemdata = deepcopy(all_shops[gp_shop]["Items"][gp_item])
-    
-    #     clanServer_ID = await self.config.clanServerID()
-    #     clanServer = ctx.bot.get_guild(clanServer_ID)
-
-    #     clanChannel_ID = await self.config.clanChannelID()
-    #     clanAnnouncementChannel = discord.utils.get(clanServer.channels,id=clanChannel_ID)
-
-    #     lastSeason = None
-    #     newelders = []
-    #     elders_gp = []
-    #     registered_accounts = await self.config.all_users()
-    #     try:
-    #         with open(getFile('seasons'),"r") as dataFile:
-    #             seasonJson = json.load(dataFile)
-    #             lastSeason = seasonJson['seasons'][-1]
-    #     except:
-    #         return await clashdata_err(self,ctx)
-
-    #     if not lastSeason:
-    #         err_embed = await clash_embed(ctx=ctx,message=f"Could not identify prior season.",color="fail")
-    #         return await ctx.send(embed=err_embed)
-
-    #     try:
-    #         with open(getFile('players'),"r") as dataFile:
-    #             playerJson = json.load(dataFile)
-    #             playerData = playerJson[lastSeason]
-    #     except:
-    #         err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving player data for {lastSeason} season.",color="fail")
-    #         return await ctx.send(embed=err_embed)
-
-    #     try:
-    #         with open(getFile('clangames'),"r") as dataFile:
-    #             clanGamesJson = json.load(dataFile)
-    #             clanGamesData = clanGamesJson[lastSeason]
-    #     except:
-    #         err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving clan games data for {lastSeason} season.",color="fail")
-    #         return await ctx.send(embed=err_embed)
-
-    #     for playerLastSeason in playerData.values():
-    #         elderReq1 = 0
-    #         elderReq2 = 0
-    #         elderReq3 = 0
-    #         if playerLastSeason['memberStatus'] == 'member':
-    #             if int(playerLastSeason['lastSeen']['timer']/86400) >= 20:
-    #                 elderReq1 = 1
-    #             for cgMember in clanGamesData:
-    #                 if cgMember['tag'] == playerLastSeason['tag']:
-    #                     cgPts = cgMember['games_pts']
-    #                     if cgMember['games_pts'] >= 4000:
-    #                         elderReq2 = 1
-    #             if (playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']) >= 45:
-    #                 elderReq3 = 1
-    #             #if playerLastSeason['donations']['sent']['season'] >= 1000:
-    #             #    promoteElder = True
-    #             if playerLastSeason['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000):
-    #                 elderReq3 = 1
-
-    #             await ctx.send(f"{playerLastSeason['tag']}\u3000{int(playerLastSeason['lastSeen']['timer']/86400)}/20\u3000{cgPts}/4000\u3000{playerLastSeason['war']['cwlStars'] + playerLastSeason['war']['warStars']}/45\u3000{playerLastSeason['clanCapital']['goldContributed']['season']}/{capitalGoldElderReq.get(playerLastSeason['townHallLevel'],60000)}")
-
-    #             if (elderReq1 + elderReq2 + elderReq3) >= 3:
-    #                 try:                    
-    #                     playerCurrent = Member(ctx,playerLastSeason['tag'])
-    #                 except Clash_ClassError:
-    #                     embed = await clash_embed(ctx=ctx,
-    #                         message=f"Could not find this tag: {playerLastSeason['tag']}.")
-    #                     await ctx.send(embed=embed)
-    #                     raise Clash_ClassError
-
-    #                 if playerCurrent.atxMemberStatus=='member' and playerCurrent.atxRank!='Leader':
-    #                     playerCurrent.atxRank = "Elder"
-    #                     playerCurrent.saveData()
-
-    #                     for user, account in registered_accounts.items():
-    #                         if playerCurrent.tag in list(account.values())[0] and user not in elders_gp:
-    #                             elders_gp.append(user)
-    #                             #shopcog_user = await shopcog.get_instance(ctx,user=user)
-    #                             #sm = ShopManager(ctx, None, shopcog_user)
-    #                             #await sm.add(gp_item,gp_itemdata,1)
-    #                     newelders.append(playerCurrent)
-
-    #     elder_announcement = f"Once again, a Clash season comes and goes. With that, we are pleased to announce our Ataraxy Elders for the new season! Congratulations to everyone for an amazing season.\n\u3000"
-
-    #     for e in newelders:
-    #         elder_announcement += f"\n\u3000{e.tag} **{e.player}**"
-
-    #     gp_announcement = f"The following members are also eligible to claim a Gold Pass for the upcoming Clash season!\n\u3000"
-
-    #     for u in elders_gp:
-    #         gp_announcement += f"\n\u3000<@{u}>"
-
-    #     embed = await clash_embed(
-    #         ctx=ctx,
-    #         title=f"<:logo_ATX_circle:975063153798946917>\u3000**NEW ATARAXY ELDERS**\u3000<:logo_ATX_circle:975063153798946917>",
-    #         message=elder_announcement + "\n----------------------------------------",
-    #         show_author=False)
-
-    #     if len(elders_gp) > 0:
-    #         embed.add_field(
-    #             name=f"**<:GoldPass:834093287106674698> GOLD PASS REWARDS**",
-    #             value=gp_announcement,
-    #             inline=False)
-
-    #     return await ctx.send(embed=embed)
-
     @clan_admin.command(name="cwlrefresh")
     async def refresh_cwlroster(self,ctx):
         """Refresh the CWL Rosters."""
@@ -2203,3 +2089,139 @@ class ClashOfClans(commands.Cog):
         elif len(embedpaged)==1:
             await ctx.send(embed=embedpaged[0])
         return await init_message.delete()
+
+
+    @clan_admin.group(name="members")
+    async def clan_members(self,ctx):
+        """Clan Member Management"""
+
+        # if not ctx.invoked_subcommand:
+
+        #     embed = await clash_embed(
+        #         ctx=ctx,
+        #         message=f"Fetching data... please wait.")
+        #     init_message = await ctx.send(embed=embed)
+
+        #     embedpaged = []
+
+        #     registered_clans = await self.config.clans()
+        #     try:
+        #         with open(getFile('players'),"r") as dataFile:
+        #             playerJson = json.load(dataFile)
+        #             playerData = playerJson['current']
+        #     except:
+        #         return await clashdata_err(self,ctx)          
+
+        #     for clan in registered_clans:
+
+        #         embed = await clash_embed(
+        #             ctx=ctx,
+        #             title=f"**{clan.clan} ({clan.tag})**",
+        #             message=f"**Level: {clan.level}\u3000Clan Status: {clanStatus}**"
+        #                     + f"\n> Members: {len(clan.members)}/50\u3000Location: {clan.locale.get('location',{}).get('name','Not specified.')} / {clan.locale.get('language',{}).get('name','Not specified.')}"
+        #                 )
+        #         memberlist = []
+
+        #         try:
+        #             clan = Clan(ctx,clan)
+        #         except Clash_APIError as err:
+        #             return await clashapi_err(self,ctx,err,clan)
+        #         except:
+        #             return await clashdata_err(self,ctx)
+
+        #         for member in clan.members:
+        #             memberTable = {}
+        #             try:
+        #                 memberInfo = playerData[member['tag']]
+        #             except:
+        #                 memberInfo = {}
+
+        #             embed.add_field(
+        #                 name=f"**{member['name']}** ({member['tag']})",
+        #                 value=f"{th_emotes[memberInfo.get('townHallLevel',1)]} {memberInfo.get('townHallLevel',1)}\u3000<:donated:825574412589858886> {memberInfo['donations']['sent']['season']:,}\u3000<:received:825574507045584916> {memberInfo['donations']['received']['season']:,}",
+        #                 inline=False
+        #                 )
+
+        #         embedpaged.append(embed)
+
+        #     if len(embedpaged)>1:
+        #         paginator = BotEmbedPaginator(ctx,embedpaged)
+        #         await paginator.run()
+        #     elif len(embedpaged)==1:
+        #         await ctx.send(embed=embedpaged[0])
+        #     return await init_message.delete()
+
+    @clan_members.command(name="checkactivity")
+    async def activity_check(self,ctx,season='current'):
+        """Checks for members who do not meet activity requirements."""
+        #gp_shop = "Admin Store"
+        #gp_item = "[R] COC Gold Pass (USD5 Gift Card)"        
+
+        registered_accounts = await self.config.all_users()
+
+        try:
+            with open(getFile('players'),"r") as dataFile:
+                playerJson = json.load(dataFile)
+                playerData = playerJson[season]
+        except:
+            err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving player data for {season} season.",color="fail")
+            return await ctx.send(embed=err_embed)
+
+        try:
+            with open(getFile('clangames'),"r") as dataFile:
+                clanGamesJson = json.load(dataFile)
+                clanGamesSeason = list(clanGamesJson.keys())
+                clanGamesSeason = clanGamesSeason[-1]                
+                clanGamesData = clanGamesJson[clanGamesSeason]
+        except:
+            err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving clan games data for {clanGamesSeason} season.",color="fail")
+            return await ctx.send(embed=err_embed)
+
+        embed = await clash_embed(
+                        ctx=ctx,
+                        title="Low Activity Members"
+                    )
+
+        for player in playerData.values():
+            activityReq1 = 0
+            activityReq2 = 0
+            activityReq3 = 0
+            if player['memberStatus'] == 'member':
+                
+                try:
+                    if player['leagueInfo']['leagueDetails'] != None:
+                        activityReq1 = 1
+                except:
+                    pass
+
+                try:
+                    for cg_participant in clanGamesData:
+                        if cg_participant['tag'] == player['tag']:
+                            cg_pts = cg_participant['games_pts']
+                            if cg_pts >= 1500:
+                                activityReq2 = 1
+                except:
+                    cg_pts = 0
+
+                warStarsOffense = 0
+                for war in player['warLog']:
+                    warStarsOffense += war['attackStars']
+                        
+                if warStarsOffense >= 20:
+                    activityReq3 = 1
+                elif player['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq.get(player['townHallLevel'],10000):
+                    activityReq3 = 1
+                elif (player['donations']['sent']['season'] + player['donations']['received']['season']) >= 3000:
+                    activityReq3 = 1
+
+                if (activityReq1 + activityReq2 + activityReq3) < 3:
+                    embed.add_field(
+                        name=f"**{player['player']} ({player['tag']})**",
+                        value=f"\u200b\u3000Trophy League: **Not placed**"
+                            + f"\u200b\u3000Clan Games ({clanGamesSeason}): {cg_pts:,} / 1,500"
+                            + f"\u200b\u3000War Stars: {warStarsOffense} / 20"
+                            + f"\u200b\u3000Clan Capital: {player['clanCapital']['goldContributed']['season']} / {capitalGoldElderReq.get(player['townHallLevel'],10000):,}"
+                            + f"\u200b\u3000Donations: {player['donations']['sent']['season'] + player['donations']['received']['season']} / 3,000",
+                        inline=False)
+
+        return await ctx.send(embed=embed)
