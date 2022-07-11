@@ -2236,11 +2236,12 @@ class ClashOfClans(commands.Cog):
 
                     if (activityReq1 + activityReq2 + activityReq3) < 3:
 
-                        playerStr = (f"\u200b\u3000{elder_status[activity1]} Trophy League: **{playerLeague}**"
+                        playerStr = (f"\u200b\u3000{th_emotes[player['townHallLevel']]} TH{player['townHallLevel']}"
+                                    + f"\n\u200b\u3000{elder_status[activity1]} Trophy League: **{playerLeague}**"
                                     + f"\n\u200b\u3000{elder_status[activity2]} Clan Games ({clanGamesSeason}): {cg_pts:,} / 1,500"
                                     + f"\n\u200b\u3000{elder_status[activity3]} War Stars: {warStarsOffense} / 20"
-                                    + f"\n\u200b\u3000{elder_status[activity3]} Clan Capital: {player['clanCapital']['goldContributed']['season']} / {capitalGoldElderReq.get(player['townHallLevel'],10000):,}"
-                                    + f"\n\u200b\u3000{elder_status[activity3]} Donations: {player['donations']['sent']['season'] + player['donations']['received']['season']} / 3,000\n\u200b")
+                                    + f"\n\u200b\u3000{elder_status[activity3]} Clan Capital: {player['clanCapital']['goldContributed']['season']:,} / {capitalGoldElderReq.get(player['townHallLevel'],10000):,}"
+                                    + f"\n\u200b\u3000{elder_status[activity3]} Donations: {player['donations']['sent']['season'] + player['donations']['received']['season']:,} / 3,000\n\u200b")
 
                         playerDict = {
                             'name': f"**{player['player']} ({player['tag']})**",
@@ -2259,7 +2260,8 @@ class ClashOfClans(commands.Cog):
                 if playerCount == 1:
                     embed = await clash_embed(
                         ctx=ctx,
-                        title="Low Activity Members"
+                        title="Clan Activity Report: Inactive Members",
+                        message=f"Inactive Members Found: {len(playerDict)}"
                         )
                 embed.add_field(
                     name=f"{player['name']}",
