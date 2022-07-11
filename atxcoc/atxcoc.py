@@ -2182,6 +2182,8 @@ class ClashOfClans(commands.Cog):
                         title="Low Activity Members"
                     )
 
+        count = 0
+
         for player in playerData.values():
             activityReq1 = 0
             activityReq2 = 0
@@ -2215,6 +2217,7 @@ class ClashOfClans(commands.Cog):
                     activityReq3 = 1
 
                 if (activityReq1 + activityReq2 + activityReq3) < 3:
+                    count += 1
                     embed.add_field(
                         name=f"**{player['player']} ({player['tag']})**",
                         value=f"\u200b\u3000Trophy League: **Not placed**"
