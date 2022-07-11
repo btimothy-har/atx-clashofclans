@@ -2152,10 +2152,12 @@ class ClashOfClans(commands.Cog):
         #     return await init_message.delete()
 
     @clan_members.command(name="checkactivity")
-    async def activity_check(self,ctx,season='current'):
+    async def activity_check(self,ctx,clan='#2PCRPUPCY',season='current'):
         """Checks for members who do not meet activity requirements."""
         #gp_shop = "Admin Store"
-        #gp_item = "[R] COC Gold Pass (USD5 Gift Card)"        
+        #gp_item = "[R] COC Gold Pass (USD5 Gift Card)"
+
+        embedpaged = []    
 
         registered_accounts = await self.config.all_users()
 
@@ -2177,54 +2179,101 @@ class ClashOfClans(commands.Cog):
             err_embed = await clash_embed(ctx=ctx,message=f"Error retrieving clan games data for {clanGamesSeason} season.",color="fail")
             return await ctx.send(embed=err_embed)
 
-        embed = await clash_embed(
-                        ctx=ctx,
-                        title="Low Activity Members"
-                    )
-
-        count = 0
+        playerCount = 0
+        playerList = []
 
         for player in playerData.values():
-            activityReq1 = 0
-            activityReq2 = 0
-            activityReq3 = 0
-            if player['memberStatus'] == 'member':
-                
-                try:
-                    if player['leagueInfo']['leagueDetails'] != None:
-                        activityReq1 = 1
-                except:
-                    pass
 
-                try:
-                    for cg_participant in clanGamesData:
-                        if cg_participant['tag'] == player['tag']:
-                            cg_pts = cg_participant['games_pts']
-                            if cg_pts >= 1500:
-                                activityReq2 = 1
-                except:
-                    cg_pts = 0
+            handle = True
 
-                warStarsOffense = 0
-                for war in player['warLog']:
-                    warStarsOffense += war['attackStars']
-                        
-                if warStarsOffense >= 20:
-                    activityReq3 = 1
-                elif player['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq.get(player['townHallLevel'],10000):
-                    activityReq3 = 1
-                elif (player['donations']['sent']['season'] + player['donations']['received']['season']) >= 3000:
-                    activityReq3 = 1
+            if clan:
+                if player['lastSeen']['currentClan'] != clan:
+                    handle = False
 
-                if (activityReq1 + activityReq2 + activityReq3) < 3:
-                    count += 1
-                    embed.add_field(
-                        name=f"**{player['player']} ({player['tag']})**",
-                        value=f"\u200b\u3000Trophy League: **Not placed**"
-                            + f"\u200b\u3000Clan Games ({clanGamesSeason}): {cg_pts:,} / 1,500"
-                            + f"\u200b\u3000War Stars: {warStarsOffense} / 20"
-                            + f"\u200b\u3000Clan Capital: {player['clanCapital']['goldContributed']['season']} / {capitalGoldElderReq.get(player['townHallLevel'],10000):,}"
-                            + f"\u200b\u3000Donations: {player['donations']['sent']['season'] + player['donations']['received']['season']} / 3,000",
-                        inline=False)
+            if handle:                    
+                activityReq1 = 0
+                activity1 = 'lose'
+                activityReq2 = 0
+                activity2 = 'lose'
+                activityReq3 = 0
+                activity3a = 'lose'
+                activity3b = 'lose'
+                activity3c = 'lose'
+                if player['memberStatus'] == 'member':
 
-        return await ctx.send(embed=embed)
+                    playerLeague = 'Not Placed'                
+                    try:
+                        if player['leagueInfo']['leagueDetails'] != None:
+                            playerLeague = player['leagueInfo']['leagueDetails']['name']
+                            activity1 = 'win'
+                            activityReq1 = 1
+                    except:
+                        pass
+
+                    try:
+                        for cg_participant in clanGamesData:
+                            if cg_participant['tag'] == player['tag']:
+                                cg_pts = cg_participant['games_pts']
+                                if cg_pts >= 1500:
+                                    activity2 = 'win'
+                                    activityReq2 = 1
+                    except:
+                        cg_pts = 0
+
+                    warStarsOffense = 0
+                    for war in player['warLog']:
+                        warStarsOffense += war['attackStars']
+                            
+                    if warStarsOffense >= 20:
+                        activity3 = 'win'
+                        activityReq3 = 1
+                    elif player['clanCapital']['goldContributed']['season'] >= capitalGoldElderReq.get(player['townHallLevel'],10000):
+                        activity3 = 'win'
+                        activityReq3 = 1
+                    elif (player['donations']['sent']['season'] + player['donations']['received']['season']) >= 3000:
+                        activity3 = 'win'
+                        activityReq3 = 1
+
+                    if (activityReq1 + activityReq2 + activityReq3) < 3:
+
+                        playerStr = (f"\u200b\u3000{elder_status[activity1]} Trophy League: **{playerLeague}**"
+                                    + f"\n\u200b\u3000{elder_status[activity2]} Clan Games ({clanGamesSeason}): {cg_pts:,} / 1,500"
+                                    + f"\n\u200b\u3000{elder_status[activity3]} War Stars: {warStarsOffense} / 20"
+                                    + f"\n\u200b\u3000{elder_status[activity3]} Clan Capital: {player['clanCapital']['goldContributed']['season']} / {capitalGoldElderReq.get(player['townHallLevel'],10000):,}"
+                                    + f"\n\u200b\u3000{elder_status[activity3]} Donations: {player['donations']['sent']['season'] + player['donations']['received']['season']} / 3,000\n\u200b")
+
+                        playerDict = {
+                            'name': f"**{player['player']} ({player['tag']})**",
+                            'value': playerStr,
+                            }
+                        playerList.append(playerDict)
+
+        totalPlayers = len(playerDict)
+
+        while playerCount <= 10 and totalPlayers > 0:
+
+            for player in playerList:
+                totalPlayers -= 1
+                playerCount += 1
+        
+                if playerCount == 1:
+                    embed = await clash_embed(
+                        ctx=ctx,
+                        title="Low Activity Members"
+                        )
+                embed.add_field(
+                    name=f"{player['name']}",
+                    value=f"{player['value']}",
+                    inline=False
+                    )
+
+                if playerCount == 10:
+                    embedpaged.append(embed)
+                    playerCount = 0
+
+        if len(embedpaged)>1:
+            paginator = BotEmbedPaginator(ctx,embedpaged)
+            await paginator.run()
+        elif len(embedpaged)==1:
+            await ctx.send(embed=embedpaged[0])
+        return 
