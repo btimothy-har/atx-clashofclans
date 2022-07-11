@@ -1508,70 +1508,73 @@ class ClashOfClans(commands.Cog):
         if not user_accounts:
             return None
 
-        for account in user_accounts:
-            cPass = challengePass(ctx,account)
+        try:
+            for account in user_accounts:
+                cPass = challengePass(ctx,account)
 
-            if not cPass.atxChaTrack:
-                eligible_accounts[account.tag] = {
-                    "account":account,
-                    "pass":cPass,
-                    }
-        
-        if len(eligible_accounts) == 0:
-            embed = await clash_embed(
-                ctx=ctx,
-                message=f"You don't have any accounts to start a Challenge Pass on. You need to be **Townhall 9** or higher to participate in the Challenge Pass.\n\u200b\n*Missing an account? Try adding one with `;myaccount link`.*")
-            return await ctx.send(embed=embed)
-        elif len(eligible_accounts) == 1:
-            aKey = list(eligible_accounts.keys())[0]
-            account_text = f"**{eligible_accounts[aKey]['account'].player}** ({eligible_accounts[aKey]['account'].tag})\n{th_emotes[int(eligible_accounts[aKey]['account'].homeVillage['townHall']['thLevel'])]} {eligible_accounts[aKey]['account'].homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {eligible_accounts[aKey]['account'].clan['clan_info']['name']}"
-        else:
-            select_accounts = []
-            account_index = []
-            for tag, account in eligible_accounts.items():
-                account_text = f"**{account['account'].player}** ({account['account'].tag})\n{th_emotes[int(account['account'].homeVillage['townHall']['thLevel'])]} {account['account'].homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account['account'].clan['clan_info']['name']}"
-                account_index.append(tag)
-                select_accounts.append(account_text)
-
-            account_selection = BotMultipleChoice(ctx,select_accounts,f"{ctx.author.display_name}, select an account to start your Challenge Pass.")
-            await account_selection.run()
-            if account_selection.choice == None:
-                await account_selection.quit(f"{ctx.author.mention}, request cancelled.")
-                return None
+                if not cPass.atxChaTrack:
+                    eligible_accounts[account.tag] = {
+                        "account":account,
+                        "pass":cPass,
+                        }
+            
+            if len(eligible_accounts) == 0:
+                embed = await clash_embed(
+                    ctx=ctx,
+                    message=f"You don't have any accounts to start a Challenge Pass on. You need to be **Townhall 9** or higher to participate in the Challenge Pass.\n\u200b\n*Missing an account? Try adding one with `;myaccount link`.*")
+                return await ctx.send(embed=embed)
+            elif len(eligible_accounts) == 1:
+                aKey = list(eligible_accounts.keys())[0]
+                account_text = f"**{eligible_accounts[aKey]['account'].player}** ({eligible_accounts[aKey]['account'].tag})\n{th_emotes[int(eligible_accounts[aKey]['account'].homeVillage['townHall']['thLevel'])]} {eligible_accounts[aKey]['account'].homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {eligible_accounts[aKey]['account'].clan['clan_info']['name']}"
             else:
-                ind = select_accounts.index(account_selection.choice)
-                aKey = account_index[ind]
-                account_text = account_selection.choice
-                await account_selection.quit()
+                select_accounts = []
+                account_index = []
+                for tag, account in eligible_accounts.items():
+                    account_text = f"**{account['account'].player}** ({account['account'].tag})\n{th_emotes[int(account['account'].homeVillage['townHall']['thLevel'])]} {account['account'].homeVillage['townHall']['discordText']}\u3000<:Clan:825654825509322752> {account['account'].clan['clan_info']['name']}"
+                    account_index.append(tag)
+                    select_accounts.append(account_text)
 
-        start_account = eligible_accounts[aKey]['account']
-        start_pass = eligible_accounts[aKey]['pass']
+                account_selection = BotMultipleChoice(ctx,select_accounts,f"{ctx.author.display_name}, select an account to start your Challenge Pass.")
+                await account_selection.run()
+                if account_selection.choice == None:
+                    await account_selection.quit(f"{ctx.author.mention}, request cancelled.")
+                    return None
+                else:
+                    ind = select_accounts.index(account_selection.choice)
+                    aKey = account_index[ind]
+                    account_text = account_selection.choice
+                    await account_selection.quit()
 
-        embed = await clash_embed(
-                ctx=ctx,
-                message=f"You're picking a Challenge Track for the below account.\n\u200b\n\u200b{account_text}")
-        account_msg = await ctx.send(embed=embed)
-
-        trackSelect = ['farm','war']
-        trackSelectText = ['**The Farmer Track**','**The Warpath**']
-        trackSelection = BotMultipleChoice(ctx,trackSelectText,f"{ctx.author.display_name}, pick a Challenge Track to start your challenge journey!")
-        await trackSelection.run()
-
-        if trackSelection.choice==None:
-            if wait_msg:
-                await wait_msg.delete()
-            return await trackSelection.quit(f"{ctx.author.mention}, request cancelled.")
-        else:
-            start_pass.atxChaTrack = trackSelect[trackSelectText.index(trackSelection.choice)]
-            await trackSelection.quit()
-            await start_pass.savePass()
+            start_account = eligible_accounts[aKey]['account']
+            start_pass = eligible_accounts[aKey]['pass']
 
             embed = await clash_embed(
-                ctx=ctx,
-                title=f"**Ataraxy Challenge Pass: {start_account.player}** ({start_account.tag})",
-                message=f"You've chosen the **{traDict[start_pass.atxChaTrack]}**!\n\u200b\nRun `;cp mypass` to get your first challenge!")
+                    ctx=ctx,
+                    message=f"You're picking a Challenge Track for the below account.\n\u200b\n\u200b{account_text}")
+            account_msg = await ctx.send(embed=embed)
 
-            return await account_msg.edit(embed=embed)
+            trackSelect = ['farm','war']
+            trackSelectText = ['**The Farmer Track**','**The Warpath**']
+            trackSelection = BotMultipleChoice(ctx,trackSelectText,f"{ctx.author.display_name}, pick a Challenge Track to start your challenge journey!")
+            await trackSelection.run()
+
+            if trackSelection.choice==None:
+                if wait_msg:
+                    await wait_msg.delete()
+                return await trackSelection.quit(f"{ctx.author.mention}, request cancelled.")
+            else:
+                start_pass.atxChaTrack = trackSelect[trackSelectText.index(trackSelection.choice)]
+                await trackSelection.quit()
+                await start_pass.savePass()
+
+                embed = await clash_embed(
+                    ctx=ctx,
+                    title=f"**Ataraxy Challenge Pass: {start_account.player}** ({start_account.tag})",
+                    message=f"You've chosen the **{traDict[start_pass.atxChaTrack]}**!\n\u200b\nRun `;cp mypass` to get your first challenge!")
+
+                return await account_msg.edit(embed=embed)
+        except:
+            pass
 
     @challengepass.command()
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
