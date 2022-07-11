@@ -2196,9 +2196,9 @@ class ClashOfClans(commands.Cog):
                 activityReq2 = 0
                 activity2 = 'lose'
                 activityReq3 = 0
-                activity3a = 'lose'
-                activity3b = 'lose'
-                activity3c = 'lose'
+                activity3 = 'lose'
+                activity3 = 'lose'
+                activity3 = 'lose'
                 if player['memberStatus'] == 'member':
 
                     playerLeague = 'Not Placed'                
